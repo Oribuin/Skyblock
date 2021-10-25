@@ -6,7 +6,7 @@ import java.util.*
 data class Island(val key: Int, var owner: UUID, val center: Location) {
     var settings = Settings(key)
     var upgrades = Upgrades(key)
-    var warp = Warp(key)
+    var warp = Warp(key, center)
     var members = mutableListOf<Member>()
     var trusted = mutableListOf<UUID>()
 }

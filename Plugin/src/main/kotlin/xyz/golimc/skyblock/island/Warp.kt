@@ -4,8 +4,7 @@ import org.bukkit.Location
 import org.bukkit.Material
 import java.util.*
 
-data class Warp(val key: Int) {
-    var location: Location? = null
+data class Warp(val key: Int, val location: Location) {
     var name: String = "Unknown Name" // The name of the warp
     var icon: Material = Material.GRASS_BLOCK // The icon for the warp
     var desc: MutableList<String> = mutableListOf() // The description for the warp
