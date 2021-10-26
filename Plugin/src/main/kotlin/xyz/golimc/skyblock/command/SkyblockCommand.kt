@@ -23,10 +23,10 @@ class SkyblockCommand(private val plugin: SkyblockPlugin) : Command(plugin) {
     override fun runFunction(sender: CommandSender, label: String, args: Array<String>) {
         val player = sender as Player
         val island = this.plugin.getManager(DataManager::class.java).createIsland(player.uniqueId, player.location.clone().add(0.0, 30.0, 0.0))
-        if (island == null) {
-            player.sendMessage("island is null")
-            return
-        }
+//        if (island == null) {
+//            player.sendMessage("island is null")
+//            return
+//        }
 
         island.center.block.type = Material.GLASS
         player.teleport(island.center.clone().add(0.0, 1.0, 0.0))
