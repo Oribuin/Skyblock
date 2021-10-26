@@ -9,3 +9,9 @@ mysql:
   ssl: false
   # just for some spicy extra configuration
   table-name: 'skyblock'
+
+# The names for each island.
+world-names:
+  NORMAL: 'islands_normal'
+  NETHER: 'islands_nether'
+  THE_END: 'islands_end'

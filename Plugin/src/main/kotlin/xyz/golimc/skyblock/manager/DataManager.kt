@@ -6,6 +6,7 @@ import org.bukkit.scheduler.BukkitTask
 import xyz.golimc.skyblock.SkyblockPlugin
 import xyz.golimc.skyblock.island.Island
 import xyz.golimc.skyblock.island.Member
+import xyz.golimc.skyblock.nms.BorderColor
 import xyz.oribuin.orilibrary.database.MySQLConnector
 import xyz.oribuin.orilibrary.manager.DataHandler
 import java.sql.Statement
@@ -33,8 +34,6 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "`y` DOUBLE, " +
                         "`z` DOUBLE, " +
                         "world TEXT)"
-
-                println(islandDB)
 
                 it.prepareStatement(islandDB).executeUpdate()
 
@@ -130,7 +129,6 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
         this.islandCache[island.key] = island
 
         // Get the remade connection or make a new one.
-        println("Saving rest of island data.")
         this.async { _ ->
             this.connector.connect {
 
@@ -178,6 +176,55 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 }
             }
         }
+    }
+
+    /**
+     * Save a member into the cache and the database
+     *
+     * @param member The member being saved.
+     */
+    fun saveMember(member: Member) {
+        this.userCache[member.uuid] = member
+        this.async { _ ->
+            this.connector.connect {
+                val query = "REPLACE INTO ${tableName}_members (`key`, player, `role`, border) VALUES (?, ?, ?, ?)"
+                val statement = it.prepareStatement(query)
+                statement.setInt(1, member.island)
+                statement.setString(2, member.uuid.toString())
+                statement.setString(3, member.role.name)
+                statement.setString(4, member.border.name)
+                statement.executeUpdate()
+            }
+        }
+    }
+
+    /**
+     * Get a member from the user's UUID.
+     *
+     * @param player The player's unique user id
+     * @return The island member.
+     */
+    fun getMember(player: UUID): Member {
+        val member = this.userCache[player]
+        if (member != null)
+            return member
+
+        val newMember = Member(player)
+        this.connector.connect {
+            val query = "SELECT `key`, `role`, `border` FROM ${tableName}_members WHERE player = ?"
+            val statement = it.prepareStatement(query)
+            statement.setString(1, player.toString())
+            val result = statement.executeQuery();
+
+            if (result.next()) {
+                newMember.island = result.getInt("key")
+                newMember.role = Member.Role.valueOf(result.getString("role").uppercase())
+                newMember.border = BorderColor.valueOf(result.getString("border").uppercase())
+                this.userCache[player] = newMember
+            }
+        }
+
+        return newMember
     }
 
     /**

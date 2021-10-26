@@ -13,4 +13,9 @@ data class Member(val uuid: UUID) {
         ADMIN(1),
         MEMBER(2)
     }
+
+    // Does the user have an island.
+    val hasIsland: Boolean
+        get() = island >= 1
+
 }

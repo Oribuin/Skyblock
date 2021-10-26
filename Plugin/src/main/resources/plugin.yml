@@ -4,3 +4,8 @@ version: '1.0'
 api-version: '1.13'
 authors: ['Oribuin', 'Alexersion']
 description: A custom made skyblock plugin for GoliMC.
+softdepend:
+  - PlaceholderAPI
+  - WorldEdit
+  - FastAsyncWorldEdit
+  - AsyncWorldEdit
