@@ -5,6 +5,7 @@ import org.bukkit.Location
 import org.bukkit.scheduler.BukkitTask
 import xyz.golimc.skyblock.SkyblockPlugin
 import xyz.golimc.skyblock.island.Island
+import xyz.golimc.skyblock.island.Member
 import xyz.oribuin.orilibrary.database.MySQLConnector
 import xyz.oribuin.orilibrary.manager.DataHandler
 import java.sql.Connection
@@ -15,6 +16,7 @@ import java.util.function.Consumer
 class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
 
     val islandCache = mutableMapOf<Int, Island>()
+    val userCache = mutableMapOf<UUID, Member>()
     private val gson = Gson()
 
     override fun enable() {
@@ -163,9 +165,18 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 warps.setDouble(9, island.warp.location.blockZ.toDouble())
                 warps.setString(10, island.warp.location.world?.name)
                 warps.executeUpdate()
+
+                // This could be pretty bad but who cares.
+                island.members.forEach { member ->
+                    val members = it.prepareStatement("REPLACE INTO ${tableName}_members (key, player, role, border) VALUES (?, ?, ?, ?)")
+                    members.setInt(1, island.key)
+                    members.setString(2, member.uuid.toString())
+                    members.setString(3, member.role.name)
+                    members.setString(4, member.border.name)
+                    members.executeUpdate()
+                }
             })
         }
-
     }
 
     /**
