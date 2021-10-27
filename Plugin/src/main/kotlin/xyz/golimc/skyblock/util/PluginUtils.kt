@@ -4,15 +4,25 @@ import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
+import org.bukkit.command.CommandSender
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
+import xyz.golimc.skyblock.SkyblockPlugin
+import xyz.golimc.skyblock.manager.MessageManager
 import xyz.oribuin.orilibrary.OriPlugin
 import xyz.oribuin.orilibrary.manager.Manager
+import xyz.oribuin.orilibrary.util.StringPlaceholders
 import kotlin.math.floor
 import kotlin.math.sqrt
+import kotlin.reflect.KClass
+
 
 inline fun <reified T : Manager> OriPlugin.getManager(): T = this.getManager(T::class.java)
+
+fun SkyblockPlugin.send(receiver: CommandSender, messageId: String, placeholders: StringPlaceholders = StringPlaceholders.empty()) {
+    this.getManager<MessageManager>().send(receiver, messageId, placeholders)
+}
 
 /**
  * Format a string list into a single string.
@@ -168,4 +178,19 @@ fun getNextIslandLocation(locationId: Int, world: World?): Location {
     }
 
     return Location(world, x * 350, 65.0, z * 350, 180f, 0f)
+}
+
+/**
+ * Parse an enum or error
+ * @param enum The enum
+ * @param value The name of the enum
+ *
+ * @return The enum if found.
+ */
+fun <T : Enum<T>> parseEnum(enum: KClass<T>, value: String): T {
+    try {
+        return enum.java.enumConstants.first { it.name.equals(value, true) } ?: error("")
+    } catch (ex: Exception) {
+        error("Invalid ${enum.simpleName} specified: $value")
+    }
 }

@@ -1,12 +1,18 @@
 package xyz.golimc.skyblock.manager
 
 import com.google.gson.Gson
+import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.block.Biome
 import org.bukkit.scheduler.BukkitTask
 import xyz.golimc.skyblock.SkyblockPlugin
 import xyz.golimc.skyblock.island.Island
 import xyz.golimc.skyblock.island.Member
+import xyz.golimc.skyblock.island.Settings
+import xyz.golimc.skyblock.island.Warp
 import xyz.golimc.skyblock.nms.BorderColor
+import xyz.golimc.skyblock.util.parseEnum
 import xyz.oribuin.orilibrary.database.MySQLConnector
 import xyz.oribuin.orilibrary.manager.DataHandler
 import java.sql.Statement
@@ -227,6 +233,65 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
         return newMember
     }
 
+    fun getIsland(key: Int): Island? {
+        val cachedIsland = this.islandCache[key]
+        if (cachedIsland != null)
+            return cachedIsland
+
+        this.async { _ ->
+            this.connector.connect {
+                val islandQuery = "SELECT owner, x, y, z, world FROM ${tableName}_islands WHERE key = ?"
+                val islandStatement = it.prepareStatement(islandQuery)
+                islandStatement.setInt(1, key)
+                val islandResult = islandStatement.executeQuery()
+
+                var island: Island? = null
+                if (islandResult.next()) {
+                    val owner = islandResult.getString("owner")
+                    val world = islandResult.getString("world")
+                    val x = islandResult.getDouble("x")
+                    val y = islandResult.getDouble("y")
+                    val z = islandResult.getDouble("z")
+                    island = Island(key, UUID.fromString(owner), Location(Bukkit.getWorld(world), x, y, z))
+                }
+
+                if (island == null)
+                    return@connect
+
+                val warpQuery = "SELECT name, icon, description, visits, votes, x, y, z, world FROM ${tableName}_warps WHERE key = ?"
+                val warpStatement = it.prepareStatement(warpQuery)
+                warpStatement.setInt(1, island.key)
+                val warpResult = warpStatement.executeQuery()
+                if (warpResult.next()) {
+                    val warp = Warp(island.key, Location(Bukkit.getWorld(warpResult.getString("world")), warpResult.getDouble("x"), warpResult.getDouble("y"), warpResult.getDouble("z")))
+                    warp.name = warpResult.getString("name")
+                    warp.icon = parseEnum(Material::class, warpResult.getString("icon"))
+                    warp.desc = gson.fromJson(warpResult.getString("desc"), WarpDesc::class.java).desc
+                    warp.visits = warpResult.getInt("visits")
+                    warp.votes = warpResult.getInt("votes")
+                    island.warp = warp
+                }
+
+                val settingsQuery = "SELECT name, public, mobSpawning, animalSpawning, biome FROM ${tableName}_settings WHERE key = ?"
+                val settingsState = it.prepareStatement(settingsQuery)
+                settingsState.setInt(1, island.key)
+                val settingsResult = settingsState.executeQuery()
+                if (settingsResult.next()) {
+                    val settings = Settings(key)
+                    settings.name = settingsResult.getString("name")
+                    settings.public = settingsResult.getBoolean("public")
+                    settings.mobSpawning = settingsResult.getBoolean("mobSpawning")
+                    settings.animalSpawning = settingsResult.getBoolean("animalSpawning")
+                    settings.biome = parseEnum(Biome::class, settingsResult.getString("biome"))
+                    island.settings = settings
+                }
+
+            }
+        }
+
+        return this.islandCache[key]
+    }
+
     /**
      * Run a task asynchronously.
      *
@@ -235,5 +300,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
     private fun async(callback: Consumer<BukkitTask>) {
         this.plugin.server.scheduler.runTaskAsynchronously(this.plugin, callback)
     }
+
+    private class WarpDesc(val desc: MutableList<String>)
 
 }

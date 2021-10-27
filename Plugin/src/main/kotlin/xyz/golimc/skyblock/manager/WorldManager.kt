@@ -1,13 +1,11 @@
 package xyz.golimc.skyblock.manager
 
-import org.bukkit.Bukkit
-import org.bukkit.World
-import org.bukkit.WorldCreator
-import org.bukkit.WorldType
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
+import org.bukkit.*
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
-import oshi.util.FileUtil
 import xyz.golimc.skyblock.SkyblockPlugin
+import xyz.golimc.skyblock.util.parseEnum
 import xyz.golimc.skyblock.world.IslandSchematic
 import xyz.golimc.skyblock.world.VoidGenerator
 import xyz.oribuin.orilibrary.manager.Manager
@@ -40,6 +38,7 @@ class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
         val schemFolder = File(this.plugin.dataFolder, "schematics")
         var schemFile = File(this.plugin.dataFolder, "schematics.yml")
+
         if (!schemFile.exists())
             schemFile = FileUtils.createFile(this.plugin, "schematics.yml")
 
@@ -50,9 +49,24 @@ class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
         val schemFiles = schemFolder.listFiles() ?: error("Schematics folder does not exist.")
         schemConfig.getKeys(false).forEach { key ->
-            val file = schemFiles.find { it.nameWithoutExtension.equals(key, true) }
-        }
+            val keyFile = schemFiles.find { it.nameWithoutExtension.equals(key, true) }
 
+            if (keyFile == null) {
+                this.plugin.logger.severe("Could not fine the $key schematic in the schematics folder.")
+                return@forEach
+            }
+
+            if (ClipboardFormats.findByFile(keyFile) != null) {
+                val schemSection = schemConfig.getConfigurationSection(key) ?: error(key)
+                val displayName = schemSection.getString("$key.name") ?: error("$key.name")
+                val icon = parseEnum(Material::class, schemSection.getString("$key.icon") ?: error("$key.icon"))
+                val lore = schemSection.getStringList("$key.lore")
+                this.schematics[key.lowercase()] = IslandSchematic(key, keyFile, displayName, icon, lore)
+                return@forEach
+            }
+
+            this.plugin.logger.severe("File located in the schems folder is not a valid file. $keyFile")
+        }
     }
 
     /**
