@@ -15,18 +15,18 @@ class SkyblockPlugin : OriPlugin() {
 
         val worldeditPlugins = listOf("WorldEdit", "FastAsyncWorldEdit", "AsyncWorldEdit")
         if (worldeditPlugins.map { Bukkit.getPluginManager().getPlugin(it) }.isEmpty()) {
-            this.logger.severe("You need to install WorldEdit/FastAsyncWorldEdit to use this plugin.")
+            this.logger.severe("You need to install WorldEdit or FastAsyncWorldEdit to use this plugin.")
             this.server.pluginManager.disablePlugin(this)
             return
         }
 
-        // Load Plugin Managers
+        // Load Plugin Managers.
         this.getManager<WorldManager>()
         this.getManager<DataManager>()
         this.getManager<UserManager>()
         this.getManager<IslandManager>()
 
-        // Register Plugin Command
+        // Register Plugin Command.
         SkyblockCommand(this)
 
     }
