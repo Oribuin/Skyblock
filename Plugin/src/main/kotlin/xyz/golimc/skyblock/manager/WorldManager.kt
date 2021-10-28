@@ -14,7 +14,7 @@ import java.io.File
 
 class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
-    val worlds = mutableMapOf<World.Environment, World>()
+    private val worlds = mutableMapOf<World.Environment, World>()
     val schematics = mutableMapOf<String, IslandSchematic>()
     private lateinit var schemConfig: FileConfiguration
 
@@ -56,11 +56,16 @@ class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
                 return@forEach
             }
 
+            println("Found Key: $key" )
             if (ClipboardFormats.findByFile(keyFile) != null) {
+
                 val schemSection = schemConfig.getConfigurationSection(key) ?: error(key)
-                val displayName = schemSection.getString("$key.name") ?: error("$key.name")
-                val icon = parseEnum(Material::class, schemSection.getString("$key.icon") ?: error("$key.icon"))
-                val lore = schemSection.getStringList("$key.lore")
+
+                schemSection.getKeys(false).map { it }.forEach { println(it) }
+
+                val displayName = schemSection.getString("name") ?: error("$key.name")
+                val icon = parseEnum(Material::class, schemSection.getString("icon") ?: error("$key.icon"))
+                val lore = schemSection.getStringList("lore")
                 this.schematics[key.lowercase()] = IslandSchematic(key, keyFile, displayName, icon, lore)
                 return@forEach
             }
@@ -84,5 +89,14 @@ class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
             .generator(VoidGenerator())
             .createWorld()!!
     }
+
+    val overworld: World
+        get() = this.worlds[World.Environment.NORMAL]!!
+
+    val nether: World
+        get() = this.worlds[World.Environment.NETHER]!!
+
+    val end: World
+        get() = this.worlds[World.Environment.THE_END]!!
 
 }

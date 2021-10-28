@@ -8,4 +8,5 @@ class Upgrades(val key: Int) {
     var sizeTier: Int = 0
     var chestGenTier: Int = 0
     var memberTier: Int = 0
+    var spawnerTier: Int = 0
 }

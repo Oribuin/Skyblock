@@ -1,10 +1,11 @@
 package xyz.golimc.skyblock.manager
 
-import org.bukkit.entity.Player
 import xyz.golimc.skyblock.SkyblockPlugin
 import xyz.golimc.skyblock.island.Island
 import xyz.golimc.skyblock.island.Member
+import xyz.golimc.skyblock.nms.NMSAdapter
 import xyz.golimc.skyblock.util.getManager
+import xyz.golimc.skyblock.world.IslandSchematic
 import xyz.oribuin.orilibrary.manager.Manager
 import java.util.*
 
@@ -13,8 +14,20 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
     private val data = this.plugin.getManager<DataManager>()
 
-    fun makeIsland(player: Player) {
-        TODO("Finish the make island function.")
+    fun makeIsland(member: Member, schematic: IslandSchematic): Island? {
+//        if (member.hasIsland)
+//            return null
+
+        val island = data.createIsland(member.uuid)
+        schematic.paste(plugin, island.center) {
+            val player = member.player.player ?: return@paste
+
+            // todo, add async teleportation.
+            player.teleport(island.center.clone().add(0.0, 1.0, 0.0))
+            NMSAdapter.handler.sendWorldBorder(player, member.border, 200.0, island.center)
+        }
+
+        return island
     }
 
     /**

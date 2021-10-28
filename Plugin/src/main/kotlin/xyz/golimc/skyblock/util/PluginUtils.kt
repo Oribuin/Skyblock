@@ -177,7 +177,7 @@ fun getNextIslandLocation(locationId: Int, world: World?): Location {
         }
     }
 
-    return Location(world, x * 350, 65.0, z * 350, 180f, 0f)
+    return Location(world, x * 50, 65.0, z * 50, 180f, 0f)
 }
 
 /**

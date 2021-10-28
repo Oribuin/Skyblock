@@ -1,5 +1,7 @@
 package xyz.golimc.skyblock.island
 
+import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
 import xyz.golimc.skyblock.nms.BorderColor
 import java.util.*
 
@@ -18,4 +20,7 @@ data class Member(val uuid: UUID) {
     val hasIsland: Boolean
         get() = island >= 1
 
+    // Get the member as a player.
+    val player: OfflinePlayer
+        get() = Bukkit.getOfflinePlayer(this.uuid)
 }

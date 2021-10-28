@@ -7,11 +7,10 @@ import org.bukkit.Material
 import org.bukkit.block.Biome
 import org.bukkit.scheduler.BukkitTask
 import xyz.golimc.skyblock.SkyblockPlugin
-import xyz.golimc.skyblock.island.Island
-import xyz.golimc.skyblock.island.Member
-import xyz.golimc.skyblock.island.Settings
-import xyz.golimc.skyblock.island.Warp
+import xyz.golimc.skyblock.island.*
 import xyz.golimc.skyblock.nms.BorderColor
+import xyz.golimc.skyblock.util.getManager
+import xyz.golimc.skyblock.util.getNextIslandLocation
 import xyz.golimc.skyblock.util.parseEnum
 import xyz.oribuin.orilibrary.database.MySQLConnector
 import xyz.oribuin.orilibrary.manager.DataHandler
@@ -62,6 +61,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "sizeTier INT, " +
                         "chestGenTier INT, " +
                         "memberTier INT, " +
+                        "spawnerTier INT, " +
                         "PRIMARY KEY (key))"
 
                 it.prepareStatement(upgradesDB).executeUpdate()
@@ -99,25 +99,21 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
      * The function for creating a new island in the plugin, separate from the saving item due to island key.
      *
      * @param owner The owner of the island
-     * @param loc The location of the island
      * @return The new island.
      */
-    fun createIsland(owner: UUID, loc: Location): Island {
+    fun createIsland(owner: UUID): Island {
         lateinit var island: Island
         this.connector.connect {
-            val insertGroup = "INSERT INTO ${tableName}_islands (owner, x, y, z, world) VALUES (?, ?, ?, ?, ?)"
+            val insertGroup = "INSERT INTO ${tableName}_islands (owner) VALUES (?)"
 
             val islandStatement = it.prepareStatement(insertGroup, Statement.RETURN_GENERATED_KEYS)
             islandStatement.setString(1, owner.toString())
-            islandStatement.setDouble(2, loc.blockX.toDouble())
-            islandStatement.setDouble(3, loc.blockY.toDouble())
-            islandStatement.setDouble(4, loc.blockZ.toDouble())
-            islandStatement.setString(5, loc.world?.name)
 
             islandStatement.executeUpdate()
             val keys = islandStatement.generatedKeys
             if (keys.next()) {
-                val newIsland = Island(keys.getInt(1), owner, loc)
+                val key = keys.getInt(1)
+                val newIsland = Island(key, owner, getNextIslandLocation(key, plugin.getManager<WorldManager>().overworld))
                 island = newIsland
                 this.saveIsland(newIsland) // save the new island that was created.
             }
@@ -137,6 +133,15 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
         // Get the remade connection or make a new one.
         this.async { _ ->
             this.connector.connect {
+
+                val main = it.prepareStatement("REPLACE INTO ${tableName}_islands (`key`, owner, x, y, z, world) VALUES (?, ?, ?, ?, ?, ?)")
+                main.setInt(1, island.key)
+                main.setString(2, island.owner.toString())
+                main.setDouble(3, island.center.blockX.toDouble())
+                main.setDouble(4, island.center.blockY.toDouble())
+                main.setDouble(5, island.center.blockZ.toDouble())
+                main.setString(6, island.center.world?.name)
+                main.executeUpdate()
 
                 // Save the island settings
                 val settings = it.prepareStatement("REPLACE INTO ${tableName}_settings (`key`, `name`, `public`, mobSpawning, animalSpawning, biome) VALUES (?, ?, ?, ?, ?, ?)")
@@ -262,6 +267,8 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 val warpStatement = it.prepareStatement(warpQuery)
                 warpStatement.setInt(1, island.key)
                 val warpResult = warpStatement.executeQuery()
+
+                // Get the island warp if it exists.
                 if (warpResult.next()) {
                     val warp = Warp(island.key, Location(Bukkit.getWorld(warpResult.getString("world")), warpResult.getDouble("x"), warpResult.getDouble("y"), warpResult.getDouble("z")))
                     warp.name = warpResult.getString("name")
@@ -272,10 +279,17 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                     island.warp = warp
                 }
 
+                /**
+                 * This is where we get all the island settings and assign it to the island
+                 * variable, This comment is entirely to section out everything because I feel like
+                 * im gonna die with how cluttered this is.
+                 */
                 val settingsQuery = "SELECT name, public, mobSpawning, animalSpawning, biome FROM ${tableName}_settings WHERE key = ?"
                 val settingsState = it.prepareStatement(settingsQuery)
                 settingsState.setInt(1, island.key)
                 val settingsResult = settingsState.executeQuery()
+
+                // Get any island settings if they exist.
                 if (settingsResult.next()) {
                     val settings = Settings(key)
                     settings.name = settingsResult.getString("name")
@@ -286,6 +300,39 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                     island.settings = settings
                 }
 
+                val upgradesQuery = "SELECT islandFly, sizeTier, chestGenTier, memberTier, spawnerTier FROM ${tableName}_upgrades WHERE key = ?"
+                val upgradesState = it.prepareStatement(upgradesQuery)
+                upgradesState.setInt(1, island.key)
+                val upgradesResult = upgradesState.executeQuery()
+
+                // Get any island upgrades if they don't exist
+                if (upgradesResult.next()) {
+                    val upgrades = Upgrades(island.key)
+                    upgrades.islandFly = upgradesResult.getBoolean("islandFly")
+                    upgrades.chestGenTier = upgradesResult.getInt("chestGenTier")
+                    upgrades.sizeTier = upgradesResult.getInt("sizeTier")
+                    upgrades.memberTier = upgradesResult.getInt("memberTier")
+                    upgrades.spawnerTier = upgradesResult.getInt("spawnerTier")
+                }
+
+                val memberQuery = "SELECT player, role, border FROM ${tableName}_members WHERE key = ?"
+                val members = mutableListOf<Member>()
+                val memberState = it.prepareStatement(memberQuery)
+                val result = memberState.executeQuery()
+
+                // Get all the members for that island.
+                while (result.next()) {
+                    val player = UUID.fromString(result.getString("player"))
+                    val newMember = Member(player)
+                    newMember.island = island.key
+                    newMember.role = Member.Role.valueOf(result.getString("role").uppercase())
+                    newMember.border = BorderColor.valueOf(result.getString("border").uppercase())
+                    this.userCache[player] = newMember
+                    members.add(newMember)
+                }
+
+                island.members = members
+                this.islandCache[key] = island
             }
         }
 

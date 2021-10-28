@@ -1,0 +1,5 @@
+plains:
+  name: 'Plains'
+  icon: GRASS_BLOCK
+  lore:
+    - '&7The main skyblock island.'
