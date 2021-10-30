@@ -113,7 +113,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
             val keys = islandStatement.generatedKeys
             if (keys.next()) {
                 val key = keys.getInt(1)
-                val newIsland = Island(key, owner, getNextIslandLocation(key, plugin.getManager<WorldManager>().overworld))
+                val newIsland = Island(key, owner, getNextIslandLocation(key, plugin.getManager<WorldManager>().overworld, 50))
                 island = newIsland
                 this.saveIsland(newIsland) // save the new island that was created.
             }
@@ -239,6 +239,9 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
     }
 
     fun getIsland(key: Int): Island? {
+        if (key == -1)
+            return null;
+
         val cachedIsland = this.islandCache[key]
         if (cachedIsland != null)
             return cachedIsland

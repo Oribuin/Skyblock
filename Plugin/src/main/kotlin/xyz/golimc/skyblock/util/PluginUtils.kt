@@ -145,7 +145,7 @@ fun locationAsKey(location: Location): String {
  * @author  https://stackoverflow.com/a/19287714
  * Code happily stolen from Esophose
  */
-fun getNextIslandLocation(locationId: Int, world: World?): Location {
+fun getNextIslandLocation(locationId: Int, world: World?, islandDistance: Int): Location {
     if (locationId == 0)
         return Location(world, 0.0, 65.0, 0.0)
 
@@ -177,7 +177,7 @@ fun getNextIslandLocation(locationId: Int, world: World?): Location {
         }
     }
 
-    return Location(world, x * 50, 65.0, z * 50, 180f, 0f)
+    return Location(world, x * islandDistance, 65.0, z * islandDistance, 180f, 0f)
 }
 
 /**

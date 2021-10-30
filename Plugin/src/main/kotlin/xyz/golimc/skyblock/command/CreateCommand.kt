@@ -5,8 +5,6 @@ import org.bukkit.entity.Player
 import xyz.golimc.skyblock.SkyblockPlugin
 import xyz.golimc.skyblock.manager.DataManager
 import xyz.golimc.skyblock.manager.IslandManager
-import xyz.golimc.skyblock.manager.MessageManager
-import xyz.golimc.skyblock.manager.WorldManager
 import xyz.golimc.skyblock.util.getManager
 import xyz.golimc.skyblock.util.send
 import xyz.oribuin.orilibrary.command.SubCommand
@@ -30,27 +28,6 @@ class CreateCommand(private val plugin: SkyblockPlugin) : SubCommand() {
             return
         }
 
-        val member = this.islandManager.getMember(sender.uniqueId)
-
-//        if (member.hasIsland) {
-//            this.plugin.send(sender, "own-island")
-//            return
-//        }
-
-        if (args.size != 2) {
-            this.plugin.send(sender, "invalid-args")
-            return
-        }
-
-        val schematic = this.plugin.getManager<WorldManager>().schematics
-            .getOrDefault(args[1], null)
-
-        if (schematic == null) {
-            this.plugin.getManager<MessageManager>().sendRaw(sender, "&cschematic dont exist noob")
-            return
-        }
-
-        this.islandManager.makeIsland(member, schematic)
-        this.plugin.getManager<MessageManager>().sendRaw(sender, "#99ff99You made an island.")
+        this.plugin.createIslandGUI.create(sender)
     }
 }

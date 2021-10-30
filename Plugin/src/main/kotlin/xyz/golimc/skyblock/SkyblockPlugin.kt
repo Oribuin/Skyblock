@@ -2,14 +2,15 @@ package xyz.golimc.skyblock
 
 import org.bukkit.Bukkit
 import xyz.golimc.skyblock.command.SkyblockCommand
-import xyz.golimc.skyblock.manager.DataManager
-import xyz.golimc.skyblock.manager.IslandManager
-import xyz.golimc.skyblock.manager.UserManager
-import xyz.golimc.skyblock.manager.WorldManager
+import xyz.golimc.skyblock.gui.CreateIslandGUI
+import xyz.golimc.skyblock.listener.PlayerListeners
+import xyz.golimc.skyblock.manager.*
 import xyz.golimc.skyblock.util.getManager
 import xyz.oribuin.orilibrary.OriPlugin
 
 class SkyblockPlugin : OriPlugin() {
+
+    lateinit var createIslandGUI: CreateIslandGUI
 
     override fun enablePlugin() {
 
@@ -21,6 +22,8 @@ class SkyblockPlugin : OriPlugin() {
         }
 
         // Load Plugin Managers.
+        this.getManager<ConfigManager>()
+        this.getManager<MessageManager>()
         this.getManager<WorldManager>()
         this.getManager<DataManager>()
         this.getManager<UserManager>()
@@ -28,6 +31,12 @@ class SkyblockPlugin : OriPlugin() {
 
         // Register Plugin Command.
         SkyblockCommand(this)
+
+        // Register Plugin Listeners
+        PlayerListeners(this)
+
+        // Load the plugin GUIs.
+        this.createIslandGUI = CreateIslandGUI(this)
 
     }
 
