@@ -1,10 +1,12 @@
 package xyz.golimc.skyblock.manager
 
+import org.bukkit.event.player.PlayerTeleportEvent
 import xyz.golimc.skyblock.SkyblockPlugin
 import xyz.golimc.skyblock.island.Island
 import xyz.golimc.skyblock.island.Member
 import xyz.golimc.skyblock.nms.NMSAdapter
 import xyz.golimc.skyblock.util.getManager
+import xyz.golimc.skyblock.util.usingPaper
 import xyz.golimc.skyblock.world.IslandSchematic
 import xyz.oribuin.orilibrary.manager.Manager
 import java.util.*
@@ -14,20 +16,53 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
     private val data = this.plugin.getManager<DataManager>()
 
-    fun makeIsland(member: Member, schematic: IslandSchematic): Island? {
-//        if (member.hasIsland)
-//            return null
+    /**
+     * Create an island for the member.
+     *
+     * @param member The owner of the island.
+     * @param schematic The island design.
+     */
+    fun makeIsland(member: Member, schematic: IslandSchematic): Island {
+        val memberIsland = data.getIsland(member.island)
 
-        val island = data.createIsland(member.uuid)
+        if (memberIsland != null)
+            return memberIsland
+
+        val island = data.createIsland(member.uuid, )
         schematic.paste(plugin, island.center) {
-            val player = member.player.player ?: return@paste
+            this.teleportToIsland(member, island)
+        }
+        return island
+    }
 
-            // todo, add async teleportation.
-            player.teleport(island.center.clone().add(0.0, 1.0, 0.0))
-            NMSAdapter.handler.sendWorldBorder(player, member.border, 200.0, island.center)
+    /**
+     * Teleport the member to an island
+     *
+     * @param member The member being teleported.
+     * @param island The island
+     */
+    fun teleportToIsland(member: Member, island: Island) {
+        val player = member.offlinePlayer.player ?: return
+
+        if (usingPaper) {
+            player.teleportAsync(island.home, PlayerTeleportEvent.TeleportCause.PLUGIN)
+        } else {
+            player.teleport(island.home, PlayerTeleportEvent.TeleportCause.PLUGIN)
         }
 
-        return island
+        this.createBorder(member, island)
+    }
+
+    /**
+     * Create the island border for the player
+     *
+     * @param member The member who is viewing the border
+     * @param island The island with the border surrounding it.
+     */
+    fun createBorder(member: Member, island: Island) {
+        val player = member.offlinePlayer.player ?: return
+
+        NMSAdapter.handler.sendWorldBorder(player, member.border, 200.0, island.center)
     }
 
     /**

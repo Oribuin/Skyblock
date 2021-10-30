@@ -9,12 +9,11 @@ dependencies {
     // Other modules
     implementation project(':NMS:Wrapper')
 
-    compileOnly 'org.spigotmc:spigot:1.17'
-
-    // Plugin APIS
-    compileOnly 'me.clip:placeholderapi:2.10.9'
+    shadow 'org.spigotmc:spigot:1.17.1'
+    compileOnly 'io.papermc.paper:paper-api:1.17-R0.1-SNAPSHOT'
 
     // Plugin Dependencies
+    compileOnly 'me.clip:placeholderapi:2.10.9'
     compileOnly 'com.sk89q.worldedit:worldedit-bukkit:7.2.6-SNAPSHOT'
 
     // Frameworks & MySQL APIs

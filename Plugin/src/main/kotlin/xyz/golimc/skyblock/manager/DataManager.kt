@@ -91,6 +91,16 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "PRIMARY KEY(key))"
 
                 it.prepareStatement(warpsDB).executeUpdate();
+
+                val homesDB = "CREATE TABLE IF NOT EXISTS ${tableName}_homes (" +
+                        "key INT, " +
+                        "x DOUBLE, " +
+                        "y DOUBLE, " +
+                        "z DOUBLE, " +
+                        "world TEXT, " +
+                        "PRIMARY KEY(key))"
+
+                it.prepareStatement(homesDB).executeUpdate()
             }
         }
     }
@@ -175,6 +185,18 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 warps.setDouble(9, island.warp.location.blockZ.toDouble())
                 warps.setString(10, island.warp.location.world?.name)
                 warps.executeUpdate()
+
+                if (island.home != island.center) {
+                    val homes = it.prepareStatement("REPLACE INTO ${tableName}_homes (`key`, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?)")
+                    homes.setInt(1, island.key)
+                    homes.setDouble(2, island.home.x)
+                    homes.setDouble(3, island.home.y)
+                    homes.setDouble(4, island.home.z)
+                    homes.setFloat(5, island.home.yaw)
+                    homes.setFloat(6, island.home.pitch)
+                    homes.setString(7, island.home.world?.name)
+                    homes.executeUpdate()
+                }
 
                 // This could be pretty bad but who cares.
                 island.members.forEach { member ->
@@ -276,7 +298,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                     val warp = Warp(island.key, Location(Bukkit.getWorld(warpResult.getString("world")), warpResult.getDouble("x"), warpResult.getDouble("y"), warpResult.getDouble("z")))
                     warp.name = warpResult.getString("name")
                     warp.icon = parseEnum(Material::class, warpResult.getString("icon"))
-                    warp.desc = gson.fromJson(warpResult.getString("desc"), WarpDesc::class.java).desc
+                    warp.desc = gson.fromJson(warpResult.getString("description"), WarpDesc::class.java).desc
                     warp.visits = warpResult.getInt("visits")
                     warp.votes = warpResult.getInt("votes")
                     island.warp = warp
@@ -335,6 +357,21 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 }
 
                 island.members = members
+
+                val homesQuery = "SELECT x, y, z, world, yaw, pitch FROM ${tableName}_homes WHERE key = ?"
+                val homesState = it.prepareStatement(homesQuery)
+                homesState.setInt(1, key)
+                val homesResult = homesState.executeQuery()
+                if (homesResult.next()) {
+                    val world = Bukkit.getWorld(homesResult.getString("world"))
+                    val x = homesResult.getDouble("x")
+                    val y = homesResult.getDouble("y")
+                    val z = homesResult.getDouble("z")
+                    val yaw = homesResult.getFloat("yaw")
+                    val pitch = homesResult.getFloat("pitch")
+                    island.home = Location(world, x, y, z, yaw, pitch)
+                }
+
                 this.islandCache[key] = island
             }
         }

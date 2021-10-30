@@ -10,12 +10,12 @@ import xyz.golimc.skyblock.util.send
 import xyz.oribuin.orilibrary.command.SubCommand
 
 @SubCommand.Info(
-    names = ["create"],
-    permission = "skyblock.create",
-    usage = "/island create"
+    names = ["border"],
+    permission = "skyblock.border",
+    usage = "/island border"
 
 )
-class CreateCommand(private val plugin: SkyblockPlugin) : SubCommand() {
+class BorderCommand(private val plugin: SkyblockPlugin) : SubCommand() {
 
     private val data = this.plugin.getManager<DataManager>()
     private val islandManager = this.plugin.getManager<IslandManager>()
@@ -28,6 +28,6 @@ class CreateCommand(private val plugin: SkyblockPlugin) : SubCommand() {
             return
         }
 
-        this.plugin.createIslandGUI.create(sender)
+        this.plugin.borderGUI.create(sender)
     }
 }

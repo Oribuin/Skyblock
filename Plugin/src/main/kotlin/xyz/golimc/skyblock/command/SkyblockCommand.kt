@@ -11,7 +11,11 @@ import xyz.oribuin.orilibrary.command.Command
     usage = "/island",
     description = "The main island command for the plugin.",
     playerOnly = false,
-    subCommands = [CreateCommand::class],
+    subCommands = [
+        BorderCommand::class,
+        CreateCommand::class,
+        TeleportCommand::class
+    ],
     permission = "skyblock.use"
 )
 class SkyblockCommand(private val plugin: SkyblockPlugin) : Command(plugin) {

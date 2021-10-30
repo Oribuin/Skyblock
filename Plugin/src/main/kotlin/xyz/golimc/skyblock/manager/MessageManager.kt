@@ -76,8 +76,9 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
     }
 
     enum class Messages(val value: String) {
-        PREFIX("#99ff99&lSkyblock &8| &f"),
+        PREFIX("#a6b2fc&lSkyblock &8| &f"),
         OWN_ISLAND("You already own an island! (/island go)"),
+        NO_ISLAND("You do not have an island, Create one using /island create"),
 
         RELOAD("You have reloaded Skyblock!"),
         DISABLED_WORLD("You cannot do this in this world."),

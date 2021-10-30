@@ -12,6 +12,7 @@ data class Island(val key: Int, var owner: UUID, val center: Location) {
         this.ownerMember.island = this.key
     }
 
+    var home: Location = center
     var settings = Settings(key)
     var upgrades = Upgrades(key)
     var warp = Warp(key, center)

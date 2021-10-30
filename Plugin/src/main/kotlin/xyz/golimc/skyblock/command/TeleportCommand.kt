@@ -10,12 +10,11 @@ import xyz.golimc.skyblock.util.send
 import xyz.oribuin.orilibrary.command.SubCommand
 
 @SubCommand.Info(
-    names = ["create"],
-    permission = "skyblock.create",
-    usage = "/island create"
-
+    names = ["teleport", "go"],
+    usage = "/island teleport [player]",
+    permission = "skyblock.teleport"
 )
-class CreateCommand(private val plugin: SkyblockPlugin) : SubCommand() {
+class TeleportCommand(private val plugin: SkyblockPlugin) : SubCommand() {
 
     private val data = this.plugin.getManager<DataManager>()
     private val islandManager = this.plugin.getManager<IslandManager>()
@@ -28,6 +27,14 @@ class CreateCommand(private val plugin: SkyblockPlugin) : SubCommand() {
             return
         }
 
-        this.plugin.createIslandGUI.create(sender)
+        val member = this.data.getMember(sender.uniqueId)
+        val island = data.getIsland(member.island)
+
+        if (island == null) {
+            this.plugin.send(sender, "no-island")
+            return
+        }
+
+        this.islandManager.teleportToIsland(member, island)
     }
 }

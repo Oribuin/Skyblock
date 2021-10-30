@@ -1,5 +1,7 @@
 package xyz.golimc.skyblock.island
 
+import net.minecraft.world.entity.ai.behavior.BehaviorHome
+import org.bukkit.Location
 import org.bukkit.block.Biome
 
 class Settings(val key: Int) {

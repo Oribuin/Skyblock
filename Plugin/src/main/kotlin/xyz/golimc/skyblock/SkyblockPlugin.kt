@@ -2,6 +2,7 @@ package xyz.golimc.skyblock
 
 import org.bukkit.Bukkit
 import xyz.golimc.skyblock.command.SkyblockCommand
+import xyz.golimc.skyblock.gui.BorderGUI
 import xyz.golimc.skyblock.gui.CreateIslandGUI
 import xyz.golimc.skyblock.listener.PlayerListeners
 import xyz.golimc.skyblock.manager.*
@@ -11,6 +12,7 @@ import xyz.oribuin.orilibrary.OriPlugin
 class SkyblockPlugin : OriPlugin() {
 
     lateinit var createIslandGUI: CreateIslandGUI
+    lateinit var borderGUI: BorderGUI
 
     override fun enablePlugin() {
 
@@ -37,6 +39,7 @@ class SkyblockPlugin : OriPlugin() {
 
         // Load the plugin GUIs.
         this.createIslandGUI = CreateIslandGUI(this)
+        this.borderGUI = BorderGUI(this)
 
     }
 

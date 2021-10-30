@@ -21,6 +21,6 @@ data class Member(val uuid: UUID) {
         get() = island >= 1
 
     // Get the member as a player.
-    val player: OfflinePlayer
+    val offlinePlayer: OfflinePlayer
         get() = Bukkit.getOfflinePlayer(this.uuid)
 }

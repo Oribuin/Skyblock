@@ -193,4 +193,18 @@ fun <T : Enum<T>> parseEnum(enum: KClass<T>, value: String): T {
     } catch (ex: Exception) {
         error("Invalid ${enum.simpleName} specified: $value")
     }
+
 }
+
+/**
+ * Check if the server is using Paper
+ *
+ * @return True if the server can find paper.
+ */
+val usingPaper: Boolean
+    get() = try {
+        Class.forName("com.destroystokyo.paper.util.VersionFetcher")
+        true
+    } catch (ex: ClassNotFoundException) {
+        false
+    }
