@@ -4,6 +4,7 @@ import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.event.player.PlayerTeleportEvent
+import xyz.oribuin.orilibrary.manager.Manager
 import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.island.Member
@@ -11,7 +12,6 @@ import xyz.oribuin.skyblock.nms.NMSAdapter
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.usingPaper
 import xyz.oribuin.skyblock.world.IslandSchematic
-import xyz.oribuin.orilibrary.manager.Manager
 
 
 class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
@@ -52,7 +52,7 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
             player.teleport(island.home, PlayerTeleportEvent.TeleportCause.PLUGIN)
         }
 
-        this.createBorder(member, island)
+        this.plugin.server.scheduler.runTaskLater(this.plugin, Runnable { this.createBorder(member, island) }, 1)
     }
 
     /**

@@ -34,15 +34,15 @@ class BorderGUI(private val plugin: SkyblockPlugin) {
         // Stop people from putting stuff in the gui.
         gui.setPersonalClickAction { gui.defaultClickFunction.accept(it) }
 
-
-
         gui.setCloseAction {
             if (activeColor != member.border) {
                 member.border = activeColor
                 data.saveMember(member)
             }
 
-            plugin.getManager<IslandManager>().createBorder(member, island = data.getIsland(member.island) ?: return@setCloseAction)
+            val islandManager = this.plugin.getManager<IslandManager>()
+            val island = islandManager.getIslandFromLoc(it.player.location) ?: return@setCloseAction
+            islandManager.createBorder(member, island)
         }
 
         for (i in 0..26)
