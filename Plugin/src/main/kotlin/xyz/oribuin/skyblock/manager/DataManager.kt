@@ -156,18 +156,18 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 val settings = it.prepareStatement("REPLACE INTO ${tableName}_settings (`key`, `name`, `public`, mobSpawning, animalSpawning, biome) VALUES (?, ?, ?, ?, ?, ?)")
                 settings.setInt(1, island.key)
                 settings.setString(2, island.settings.name)
-                settings.setBoolean(2, island.settings.public)
-                settings.setBoolean(2, island.settings.mobSpawning)
-                settings.setBoolean(2, island.settings.animalSpawning)
-                settings.setString(2, island.settings.biome.name)
+                settings.setBoolean(3, island.settings.public)
+                settings.setBoolean(4, island.settings.mobSpawning)
+                settings.setBoolean(5, island.settings.animalSpawning)
+                settings.setString(6, island.settings.biome.name)
                 settings.executeUpdate()
 
                 // Save the island upgrades.
                 val upgrades = it.prepareStatement("REPLACE INTO ${tableName}_upgrades (`key`, islandFly, sizeTier, chestGenTier) VALUES (?, ?, ?, ?)")
                 upgrades.setInt(1, island.key)
                 upgrades.setBoolean(2, island.upgrade.islandFly)
-                upgrades.setInt(2, island.upgrade.sizeTier)
-                upgrades.setInt(2, island.upgrade.chestGenTier)
+                upgrades.setInt(3, island.upgrade.sizeTier)
+                upgrades.setInt(4, island.upgrade.chestGenTier)
                 upgrades.executeUpdate()
 
                 // Save the island warps
@@ -319,7 +319,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                     settings.public = settingsResult.getBoolean("public")
                     settings.mobSpawning = settingsResult.getBoolean("mobSpawning")
                     settings.animalSpawning = settingsResult.getBoolean("animalSpawning")
-                    settings.biome = parseEnum(Biome::class, settingsResult.getString("biome"))
+                    settings.biome = parseEnum(Biome::class, settingsResult.getString("biome") ?: "PLAINS")
                     island.settings = settings
                 }
 
