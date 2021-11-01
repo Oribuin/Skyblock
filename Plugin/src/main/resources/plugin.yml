@@ -1,5 +1,5 @@
 name: Skyblock
-main: xyz.golimc.skyblock.SkyblockPlugin
+main: xyz.oribuin.skyblock.SkyblockPlugin
 version: '1.0'
 api-version: '1.13'
 authors: ['Oribuin', 'Alexersion']

@@ -8,7 +8,7 @@ allprojects {
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'org.jetbrains.kotlin.jvm'
 
-    group 'xyz.golimc.skyblock'
+    group 'xyz.oribuin.skyblock'
     version '1.0'
 
     targetCompatibility = JavaVersion.VERSION_16
