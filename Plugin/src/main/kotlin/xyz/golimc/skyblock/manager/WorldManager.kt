@@ -56,7 +56,7 @@ class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
                 return@forEach
             }
 
-            println("Found Key: $key" )
+            println("Found Key: $key")
             if (ClipboardFormats.findByFile(keyFile) != null) {
 
                 val schemSection = schemConfig.getConfigurationSection(key) ?: error(key)
@@ -88,6 +88,16 @@ class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
             .generateStructures(false)
             .generator(VoidGenerator())
             .createWorld()!!
+    }
+
+    /**
+     * Check if the world is an island world
+     *
+     * @param world The world being checked
+     * @return if it is an island world.
+     */
+    fun isIslandWorld(world: World): Boolean {
+        return this.worlds.values.map { it.name }.contains(world.name)
     }
 
     val overworld: World

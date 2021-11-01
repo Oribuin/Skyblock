@@ -22,6 +22,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
 
     val islandCache = mutableMapOf<Int, Island>()
     val userCache = mutableMapOf<UUID, Member>()
+
     private val gson = Gson()
 
     override fun enable() {
@@ -60,8 +61,6 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "islandFly BOOLEAN DEFAULT false, " +
                         "sizeTier INT, " +
                         "chestGenTier INT, " +
-                        "memberTier INT, " +
-                        "spawnerTier INT, " +
                         "PRIMARY KEY (key))"
 
                 it.prepareStatement(upgradesDB).executeUpdate()
@@ -81,7 +80,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "key INT, " +
                         "name TEXT, " +
                         "icon TEXT, " +
-                        "description LONGTEXT," + // Will likely have to convert this into a string.
+                        "description TEXT," + // Will likely have to convert this into a string.
                         "visits INT DEFAULT 0, " +
                         "`votes` INT DEFAULT 0, " +
                         "`x` DOUBLE, " + // Location of the warp.
@@ -123,7 +122,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
             val keys = islandStatement.generatedKeys
             if (keys.next()) {
                 val key = keys.getInt(1)
-                val newIsland = Island(key, owner, getNextIslandLocation(key, plugin.getManager<WorldManager>().overworld, 50))
+                val newIsland = Island(key, owner, getNextIslandLocation(key, plugin.getManager<WorldManager>().overworld, 350))
                 island = newIsland
                 this.saveIsland(newIsland) // save the new island that was created.
             }
@@ -164,12 +163,11 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 settings.executeUpdate()
 
                 // Save the island upgrades.
-                val upgrades = it.prepareStatement("REPLACE INTO ${tableName}_upgrades (`key`, islandFly, sizeTier, chestGenTier, memberTier) VALUES (?, ?, ?, ?, ?)")
+                val upgrades = it.prepareStatement("REPLACE INTO ${tableName}_upgrades (`key`, islandFly, sizeTier, chestGenTier) VALUES (?, ?, ?, ?)")
                 upgrades.setInt(1, island.key)
-                upgrades.setBoolean(2, island.upgrades.islandFly)
-                upgrades.setInt(2, island.upgrades.sizeTier)
-                upgrades.setInt(2, island.upgrades.chestGenTier)
-                upgrades.setInt(2, island.upgrades.memberTier)
+                upgrades.setBoolean(2, island.upgrade.islandFly)
+                upgrades.setInt(2, island.upgrade.sizeTier)
+                upgrades.setInt(2, island.upgrade.chestGenTier)
                 upgrades.executeUpdate()
 
                 // Save the island warps
@@ -177,7 +175,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 warps.setInt(1, island.key)
                 warps.setString(2, island.warp.name)
                 warps.setString(3, island.warp.icon.name)
-                warps.setString(4, gson.toJson(island.warp.desc))
+                warps.setString(4, gson.toJson(island.warp.desc).toString())
                 warps.setInt(5, island.warp.visits)
                 warps.setInt(6, island.warp.votes)
                 warps.setDouble(7, island.warp.location.blockX.toDouble())
@@ -298,7 +296,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                     val warp = Warp(island.key, Location(Bukkit.getWorld(warpResult.getString("world")), warpResult.getDouble("x"), warpResult.getDouble("y"), warpResult.getDouble("z")))
                     warp.name = warpResult.getString("name")
                     warp.icon = parseEnum(Material::class, warpResult.getString("icon"))
-                    warp.desc = gson.fromJson(warpResult.getString("description"), WarpDesc::class.java).desc
+                    warp.desc = gson.fromJson(warpResult.getString("description"), Warp.Desc::class.java)
                     warp.visits = warpResult.getInt("visits")
                     warp.votes = warpResult.getInt("votes")
                     island.warp = warp
@@ -325,19 +323,17 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                     island.settings = settings
                 }
 
-                val upgradesQuery = "SELECT islandFly, sizeTier, chestGenTier, memberTier, spawnerTier FROM ${tableName}_upgrades WHERE key = ?"
+                val upgradesQuery = "SELECT islandFly, sizeTier, chestGenTier FROM ${tableName}_upgrades WHERE key = ?"
                 val upgradesState = it.prepareStatement(upgradesQuery)
                 upgradesState.setInt(1, island.key)
                 val upgradesResult = upgradesState.executeQuery()
 
                 // Get any island upgrades if they don't exist
                 if (upgradesResult.next()) {
-                    val upgrades = Upgrades(island.key)
-                    upgrades.islandFly = upgradesResult.getBoolean("islandFly")
-                    upgrades.chestGenTier = upgradesResult.getInt("chestGenTier")
-                    upgrades.sizeTier = upgradesResult.getInt("sizeTier")
-                    upgrades.memberTier = upgradesResult.getInt("memberTier")
-                    upgrades.spawnerTier = upgradesResult.getInt("spawnerTier")
+                    val upgrade = Upgrade(island.key)
+                    upgrade.islandFly = upgradesResult.getBoolean("islandFly")
+                    upgrade.chestGenTier = upgradesResult.getInt("chestGenTier")
+                    upgrade.sizeTier = upgradesResult.getInt("sizeTier")
                 }
 
                 val memberQuery = "SELECT player, role, border FROM ${tableName}_members WHERE key = ?"
@@ -387,7 +383,5 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
     private fun async(callback: Consumer<BukkitTask>) {
         this.plugin.server.scheduler.runTaskAsynchronously(this.plugin, callback)
     }
-
-    private class WarpDesc(val desc: MutableList<String>)
 
 }

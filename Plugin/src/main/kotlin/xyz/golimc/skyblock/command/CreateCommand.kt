@@ -28,6 +28,13 @@ class CreateCommand(private val plugin: SkyblockPlugin) : SubCommand() {
             return
         }
 
+        // Check if the player has an island.
+        val member = data.getMember(sender.uniqueId)
+        if (member.hasIsland) {
+            this.plugin.send(sender, "own-island")
+            return
+        }
+
         this.plugin.createIslandGUI.create(sender)
     }
 }

@@ -1,5 +1,8 @@
 package xyz.golimc.skyblock.manager
 
+import org.bukkit.Chunk
+import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.event.player.PlayerTeleportEvent
 import xyz.golimc.skyblock.SkyblockPlugin
 import xyz.golimc.skyblock.island.Island
@@ -9,7 +12,6 @@ import xyz.golimc.skyblock.util.getManager
 import xyz.golimc.skyblock.util.usingPaper
 import xyz.golimc.skyblock.world.IslandSchematic
 import xyz.oribuin.orilibrary.manager.Manager
-import java.util.*
 
 
 class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
@@ -28,7 +30,7 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
         if (memberIsland != null)
             return memberIsland
 
-        val island = data.createIsland(member.uuid, )
+        val island = data.createIsland(member.uuid)
         schematic.paste(plugin, island.center) {
             this.teleportToIsland(member, island)
         }
@@ -76,17 +78,89 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
     }
 
     /**
-     * Get a member from the island.
+     * Get the island from the location.
      *
-     * @param player The player's UUID
-     * @return The member
+     * @param location The location of the island
+     * @return The island with the location in range.
      */
-    fun getMember(player: UUID): Member {
-        return data.islandCache.values.stream()
-            .map<List<Member>>(Island::members)
-            .flatMap { it.stream() }
-            .filter { (uuid): Member -> uuid == player }
-            .findFirst()
-            .orElse(Member(player))
+    fun getIslandFromLoc(location: Location): Island? {
+        return this.data.islandCache.values.find { it.isInside(location.x, location.z) }
     }
+
+    /**
+     * Check if the x and z coords are inside the island
+     *
+     * @param x The X Axis
+     * @param z The Z Axis
+     * @return true if it's inside the island.
+     */
+    private fun Island.isInside(x: Double, z: Double): Boolean {
+        val pos1 = getPos1(this, null)
+        val pos2 = getPos2(this, null)
+
+        return pos1.x <= x && pos1.z <= z && pos2.x >= x && pos2.z >= z
+    }
+
+    /**
+     * Get the all the chunks in the island
+     *
+     * @param island The island.
+     * @param world The world the chunks are in
+     * @return the island chunks.
+     */
+    fun getIslandChunks(island: Island, world: World): List<Chunk> {
+        val chunks = mutableListOf<Chunk>()
+
+        val pos1 = this.getPos1(island, world)
+        val pos2 = this.getPos2(island, world)
+
+        val minX = pos1.blockX shr 4
+        val minZ = pos1.blockZ shr 4
+
+        val maxX = pos2.blockX shr 4
+        val maxZ = pos2.blockZ shr 4
+
+        for (x in minX..maxX)
+            for (z in minZ..maxZ)
+                chunks.add(world.getChunkAt(x, z))
+
+        return chunks
+    }
+
+    /**
+     * Get the first position of the island
+     *
+     * @param world The world the island is in.
+     */
+    fun getPos1(island: Island, world: World?): Location {
+        val size = plugin.getManager<UpgradeManager>().getIslandSize(island)
+        val centerInWorld = Location(world, island.center.x, island.center.y, island.center.z)
+        return centerInWorld.clone().subtract(Location(world, size / 2.0, 0.0, size / 2.0))
+    }
+
+    /**
+     * Get the second position of the island
+     *
+     * @param world The world the island is in.
+     */
+    fun getPos2(island: Island, world: World?): Location {
+        val size = plugin.getManager<UpgradeManager>().getIslandSize(island)
+        val centerInWorld = Location(world, island.center.x, island.center.y, island.center.z)
+        return centerInWorld.clone().add(Location(world, size / 2.0, 0.0, size / 2.0))
+    }
+
+    //    /**
+    //     * Get a member from the island.
+    //     *
+    //     * @param player The player's UUID
+    //     * @return The member
+    //     */
+    //    fun getMember(player: UUID): Member {
+    //        return data.islandCache.values.stream()
+    //            .map<List<Member>>(Island::members)
+    //            .flatMap { it.stream() }
+    //            .filter { (uuid): Member -> uuid == player }
+    //            .findFirst()
+    //            .orElse(Member(player))
+    //    }
 }

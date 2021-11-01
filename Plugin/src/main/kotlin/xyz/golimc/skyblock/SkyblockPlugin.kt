@@ -4,6 +4,7 @@ import org.bukkit.Bukkit
 import xyz.golimc.skyblock.command.SkyblockCommand
 import xyz.golimc.skyblock.gui.BorderGUI
 import xyz.golimc.skyblock.gui.CreateIslandGUI
+import xyz.golimc.skyblock.listener.BlockListeners
 import xyz.golimc.skyblock.listener.PlayerListeners
 import xyz.golimc.skyblock.manager.*
 import xyz.golimc.skyblock.util.getManager
@@ -28,13 +29,15 @@ class SkyblockPlugin : OriPlugin() {
         this.getManager<MessageManager>()
         this.getManager<WorldManager>()
         this.getManager<DataManager>()
-        this.getManager<UserManager>()
         this.getManager<IslandManager>()
+        this.getManager<UserManager>()
+        this.getManager<UpgradeManager>()
 
         // Register Plugin Command.
         SkyblockCommand(this)
 
         // Register Plugin Listeners
+        BlockListeners(this)
         PlayerListeners(this)
 
         // Load the plugin GUIs.

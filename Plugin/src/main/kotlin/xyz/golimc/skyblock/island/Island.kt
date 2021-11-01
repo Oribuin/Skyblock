@@ -14,7 +14,7 @@ data class Island(val key: Int, var owner: UUID, val center: Location) {
 
     var home: Location = center
     var settings = Settings(key)
-    var upgrades = Upgrades(key)
+    var upgrade = Upgrade(key)
     var warp = Warp(key, center)
     var members = mutableListOf(ownerMember)
     var trusted = mutableListOf<UUID>()

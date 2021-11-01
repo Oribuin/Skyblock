@@ -17,9 +17,6 @@ import xyz.oribuin.orilibrary.command.SubCommand
 )
 class BorderCommand(private val plugin: SkyblockPlugin) : SubCommand() {
 
-    private val data = this.plugin.getManager<DataManager>()
-    private val islandManager = this.plugin.getManager<IslandManager>()
-
     override fun executeArgument(sender: CommandSender, args: Array<String>) {
 
         // Check if the sender is a player.
@@ -30,4 +27,5 @@ class BorderCommand(private val plugin: SkyblockPlugin) : SubCommand() {
 
         this.plugin.borderGUI.create(sender)
     }
+
 }
