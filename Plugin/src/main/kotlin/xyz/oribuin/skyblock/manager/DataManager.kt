@@ -6,14 +6,14 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Biome
 import org.bukkit.scheduler.BukkitTask
+import xyz.oribuin.orilibrary.database.MySQLConnector
+import xyz.oribuin.orilibrary.manager.DataHandler
 import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.island.*
 import xyz.oribuin.skyblock.nms.BorderColor
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.getNextIslandLocation
 import xyz.oribuin.skyblock.util.parseEnum
-import xyz.oribuin.orilibrary.database.MySQLConnector
-import xyz.oribuin.orilibrary.manager.DataHandler
 import java.sql.Statement
 import java.util.*
 import java.util.function.Consumer
@@ -97,6 +97,8 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "y DOUBLE, " +
                         "z DOUBLE, " +
                         "world TEXT, " +
+                        "yaw FLOAT, " +
+                        "pitch FLOAT, " +
                         "PRIMARY KEY(key))"
 
                 it.prepareStatement(homesDB).executeUpdate()
