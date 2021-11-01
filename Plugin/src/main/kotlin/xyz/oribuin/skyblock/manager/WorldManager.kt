@@ -55,13 +55,9 @@ class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
                 this.plugin.logger.severe("Could not fine the $key schematic in the schematics folder.")
                 return@forEach
             }
-
-            println("Found Key: $key")
             if (ClipboardFormats.findByFile(keyFile) != null) {
 
                 val schemSection = schemConfig.getConfigurationSection(key) ?: error(key)
-
-                schemSection.getKeys(false).map { it }.forEach { println(it) }
 
                 val displayName = schemSection.getString("name") ?: error("$key.name")
                 val icon = parseEnum(Material::class, schemSection.getString("icon") ?: error("$key.icon"))
