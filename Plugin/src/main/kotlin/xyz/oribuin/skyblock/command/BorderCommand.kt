@@ -8,6 +8,7 @@ import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.send
 import xyz.oribuin.orilibrary.command.SubCommand
+import xyz.oribuin.skyblock.gui.BorderGUI
 
 @SubCommand.Info(
     names = ["border"],
@@ -25,7 +26,7 @@ class BorderCommand(private val plugin: SkyblockPlugin) : SubCommand() {
             return
         }
 
-        this.plugin.borderGUI.create(sender)
+        BorderGUI(plugin).create(sender)
     }
 
 }

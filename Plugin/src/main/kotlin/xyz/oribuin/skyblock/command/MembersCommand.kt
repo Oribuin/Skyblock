@@ -8,15 +8,14 @@ import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.send
 import xyz.oribuin.orilibrary.command.SubCommand
-import xyz.oribuin.skyblock.gui.CreateIslandGUI
+import xyz.oribuin.skyblock.gui.MembersGUI
 
 @SubCommand.Info(
-    names = ["create"],
-    permission = "skyblock.create",
-    usage = "/island create"
-
+    names = ["members"],
+    usage = "/island members",
+    permission = "skyblock.members"
 )
-class CreateCommand(private val plugin: SkyblockPlugin) : SubCommand() {
+class MembersCommand(private val plugin: SkyblockPlugin) : SubCommand() {
 
     private val data = this.plugin.getManager<DataManager>()
     private val islandManager = this.plugin.getManager<IslandManager>()
@@ -29,13 +28,14 @@ class CreateCommand(private val plugin: SkyblockPlugin) : SubCommand() {
             return
         }
 
-        // Check if the player has an island.
-        val member = data.getMember(sender.uniqueId)
-        if (member.hasIsland) {
-            this.plugin.send(sender, "own-island")
+        val member = this.data.getMember(sender.uniqueId)
+        val island = data.getIsland(member.island)
+
+        if (island == null) {
+            this.plugin.send(sender, "no-island")
             return
         }
 
-        CreateIslandGUI(plugin).create(sender)
+        MembersGUI(plugin).create(sender, island)
     }
 }

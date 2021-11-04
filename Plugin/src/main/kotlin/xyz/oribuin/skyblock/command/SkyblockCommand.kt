@@ -14,6 +14,7 @@ import xyz.oribuin.orilibrary.command.Command
     subCommands = [
         BorderCommand::class,
         CreateCommand::class,
+        MembersCommand::class,
         TeleportCommand::class
     ],
     permission = "skyblock.use"

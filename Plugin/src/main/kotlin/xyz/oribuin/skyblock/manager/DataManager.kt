@@ -341,6 +341,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 val memberQuery = "SELECT player, role, border FROM ${tableName}_members WHERE key = ?"
                 val members = mutableListOf<Member>()
                 val memberState = it.prepareStatement(memberQuery)
+                memberState.setInt(1, island.key)
                 val result = memberState.executeQuery()
 
                 // Get all the members for that island.

@@ -12,8 +12,8 @@ import xyz.oribuin.orilibrary.OriPlugin
 
 class SkyblockPlugin : OriPlugin() {
 
-    lateinit var createIslandGUI: CreateIslandGUI
-    lateinit var borderGUI: BorderGUI
+    private lateinit var createIslandGUI: CreateIslandGUI
+    private lateinit var borderGUI: BorderGUI
 
     override fun enablePlugin() {
 

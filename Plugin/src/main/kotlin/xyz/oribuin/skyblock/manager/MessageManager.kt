@@ -2,6 +2,7 @@ package xyz.oribuin.skyblock.manager
 
 import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
@@ -96,6 +97,13 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
     companion object {
         fun applyPapi(sender: CommandSender?, text: String): String {
             return if (!Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) text else PlaceholderAPI.setPlaceholders(if (sender is Player) sender else null, text)
+        }
+
+        fun apply(sender: OfflinePlayer, text: String): String{
+            return if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
+                PlaceholderAPI.setPlaceholders(sender, text)
+            else
+                text;
         }
     }
 }
