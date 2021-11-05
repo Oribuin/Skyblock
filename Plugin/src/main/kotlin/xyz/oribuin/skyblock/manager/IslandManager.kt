@@ -1,15 +1,17 @@
 package xyz.oribuin.skyblock.manager
 
-import org.bukkit.Chunk
-import org.bukkit.Location
-import org.bukkit.World
+import org.bukkit.*
+import org.bukkit.block.Biome
+import org.bukkit.block.Block
 import org.bukkit.event.player.PlayerTeleportEvent
 import xyz.oribuin.orilibrary.manager.Manager
 import xyz.oribuin.skyblock.SkyblockPlugin
+import xyz.oribuin.skyblock.island.BiomeOption
 import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.nms.NMSAdapter
 import xyz.oribuin.skyblock.util.getManager
+import xyz.oribuin.skyblock.util.parseEnum
 import xyz.oribuin.skyblock.util.usingPaper
 import xyz.oribuin.skyblock.world.IslandSchematic
 
@@ -17,6 +19,21 @@ import xyz.oribuin.skyblock.world.IslandSchematic
 class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
     private val data = this.plugin.getManager<DataManager>()
+    val biomeMap = mutableMapOf<Biome, BiomeOption>()
+
+    override fun enable() {
+        val section = this.plugin.config.getConfigurationSection("biomes") ?: return
+
+        // Add all the biomes into the cache.
+        section.getKeys(false).forEach {
+            val biome = parseEnum(Biome::class, it.uppercase())
+            val option = BiomeOption(biome)
+            option.cost = section.getDouble("$it.cost")
+            option.icon = parseEnum(Material::class, section.getString("$it.icon") ?: "GRASS_BLOCK")
+
+            this.biomeMap[biome] = option
+        }
+    }
 
     /**
      * Create an island for the member.
@@ -45,6 +62,7 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      */
     fun teleportToIsland(member: Member, island: Island) {
         val player = member.offlinePlayer.player ?: return
+        player.fallDistance = 0f
 
         if (usingPaper) {
             player.teleportAsync(island.home, PlayerTeleportEvent.TeleportCause.PLUGIN)
@@ -63,8 +81,8 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      */
     fun createBorder(member: Member, island: Island) {
         val player = member.offlinePlayer.player ?: return
-
-        NMSAdapter.handler.sendWorldBorder(player, member.border, 200.0, island.center)
+        val size = this.plugin.getManager<UpgradeManager>().getIslandSize(island)
+        NMSAdapter.handler.sendWorldBorder(player, member.border, size.toDouble(), island.center)
     }
 
     /**
@@ -108,7 +126,7 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @param world The world the chunks are in
      * @return the island chunks.
      */
-    fun getIslandChunks(island: Island, world: World): List<Chunk> {
+    private fun getIslandChunks(island: Island, world: World): List<Chunk> {
         val chunks = mutableListOf<Chunk>()
 
         val pos1 = this.getPos1(island, world)
@@ -128,11 +146,23 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
     }
 
     /**
+     * Sets the island's chunks to the current biome.
+     *
+     * @param island The island.
+     */
+    fun setIslandBiome(island: Island) {
+        val chunks = this.getIslandChunks(island, world = this.plugin.getManager<WorldManager>().overworld)
+        chunks.forEach { chunk -> chunk.blocks.forEach { it.biome = island.settings.biome } }
+
+        this.plugin.server.scheduler.runTaskLater(this.plugin, Runnable { NMSAdapter.handler.sendChunks(chunks, Bukkit.getOnlinePlayers().toList()) }, 2)
+    }
+
+    /**
      * Get the first position of the island
      *
      * @param world The world the island is in.
      */
-    fun getPos1(island: Island, world: World?): Location {
+    private fun getPos1(island: Island, world: World?): Location {
         val size = plugin.getManager<UpgradeManager>().getIslandSize(island)
         val centerInWorld = Location(world, island.center.x, island.center.y, island.center.z)
         return centerInWorld.clone().subtract(Location(world, size / 2.0, 0.0, size / 2.0))
@@ -143,11 +173,31 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      *
      * @param world The world the island is in.
      */
-    fun getPos2(island: Island, world: World?): Location {
+    private fun getPos2(island: Island, world: World?): Location {
         val size = plugin.getManager<UpgradeManager>().getIslandSize(island)
         val centerInWorld = Location(world, island.center.x, island.center.y, island.center.z)
         return centerInWorld.clone().add(Location(world, size / 2.0, 0.0, size / 2.0))
     }
+
+    /**
+     * Get all the blocks in a chunk
+     *
+     * @return the chunk blocks.
+     */
+    private val Chunk.blocks: List<Block>
+        get() {
+            val blocks = mutableListOf<Block>()
+
+            val baseLocation = Location(this.world, this.x * 16.0, 0.0, this.z * 16.0)
+
+            for (x in 0..15)
+                for (z in 0..15)
+                    for (y in 0 until this.world.maxHeight)
+                        blocks.add(baseLocation.clone().add(x.toDouble(), y.toDouble(), z.toDouble()).block)
+
+            return blocks
+        }
+
 
     //    /**
     //     * Get a member from the island.

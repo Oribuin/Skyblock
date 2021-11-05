@@ -8,16 +8,17 @@ import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.send
 import xyz.oribuin.orilibrary.command.SubCommand
+import xyz.oribuin.skyblock.gui.BiomesGUI
+import xyz.oribuin.skyblock.gui.MembersGUI
 
 @SubCommand.Info(
-    names = ["teleport", "go", "home"],
-    usage = "/island teleport [player]",
-    permission = "skyblock.teleport"
+    names = ["biome"],
+    usage = "/island biome",
+    permission = "skyblock.biome"
 )
-class TeleportCommand(private val plugin: SkyblockPlugin) : SubCommand() {
+class BiomesCommand(private val plugin: SkyblockPlugin) : SubCommand() {
 
     private val data = this.plugin.getManager<DataManager>()
-    private val islandManager = this.plugin.getManager<IslandManager>()
 
     override fun executeArgument(sender: CommandSender, args: Array<String>) {
 
@@ -35,6 +36,6 @@ class TeleportCommand(private val plugin: SkyblockPlugin) : SubCommand() {
             return
         }
 
-        this.islandManager.teleportToIsland(member, island)
+        BiomesGUI(plugin).create(sender, island)
     }
 }

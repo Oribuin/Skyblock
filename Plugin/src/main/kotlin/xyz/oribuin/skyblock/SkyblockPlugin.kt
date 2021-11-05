@@ -1,25 +1,30 @@
 package xyz.oribuin.skyblock
 
-import org.bukkit.Bukkit
+import net.milkbowl.vault.economy.Economy
+import xyz.oribuin.orilibrary.OriPlugin
 import xyz.oribuin.skyblock.command.SkyblockCommand
-import xyz.oribuin.skyblock.gui.BorderGUI
-import xyz.oribuin.skyblock.gui.CreateIslandGUI
 import xyz.oribuin.skyblock.listener.BlockListeners
 import xyz.oribuin.skyblock.listener.PlayerListeners
 import xyz.oribuin.skyblock.manager.*
 import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.orilibrary.OriPlugin
 
 class SkyblockPlugin : OriPlugin() {
 
-    private lateinit var createIslandGUI: CreateIslandGUI
-    private lateinit var borderGUI: BorderGUI
+    lateinit var vault: Economy
 
     override fun enablePlugin() {
 
+        // Check for worldedit.
         val worldeditPlugins = listOf("WorldEdit", "FastAsyncWorldEdit", "AsyncWorldEdit")
-        if (worldeditPlugins.map { Bukkit.getPluginManager().getPlugin(it) }.isEmpty()) {
+        if (worldeditPlugins.map { this.server.pluginManager.getPlugin(it) }.isEmpty()) {
             this.logger.severe("You need to install WorldEdit or FastAsyncWorldEdit to use this plugin.")
+            this.server.pluginManager.disablePlugin(this)
+            return
+        }
+
+        // Check for vault
+        if (!this.server.pluginManager.isPluginEnabled("Vault")) {
+            this.logger.severe("You need to install Vault to use this plugin.")
             this.server.pluginManager.disablePlugin(this)
             return
         }
@@ -40,10 +45,8 @@ class SkyblockPlugin : OriPlugin() {
         BlockListeners(this)
         PlayerListeners(this)
 
-        // Load the plugin GUIs.
-        this.createIslandGUI = CreateIslandGUI(this)
-        this.borderGUI = BorderGUI(this)
-
+        // Load Vault Eco
+        this.vault = this.server.servicesManager.getRegistration(Economy::class.java)?.provider!! // this cant be null so im happy to use !!
     }
 
     override fun disablePlugin() {

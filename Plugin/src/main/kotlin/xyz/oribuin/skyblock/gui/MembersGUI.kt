@@ -39,6 +39,14 @@ class MembersGUI(private val plugin: SkyblockPlugin) {
         for (i in 27..35)
             gui.setItem(i, Item.filler(Material.GRAY_STAINED_GLASS_PANE))
 
+        if (gui.page - 1 == gui.prevPage) {
+            gui.setItem(29, Item.Builder(Material.PAPER).setName(colorify("#a6b2fc&lPrevious Page")).create()) { gui.previous(it.whoClicked as Player) }
+        }
+
+        if (gui.page + 1 == gui.nextPage) {
+            gui.setItem(33, Item.Builder(Material.PAPER).setName(colorify("#a6b2fc&lNext Page")).create()) { gui.next(it.whoClicked as Player) }
+        }
+
         island.members.sortedBy { x -> x.role.priority }.forEach { gui.addPageItem(getPlayer(it)) {} }
         gui.open(player)
     }

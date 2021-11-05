@@ -6,16 +6,7 @@ import xyz.oribuin.skyblock.SkyblockPlugin
 class ConfigManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
     override fun enable() {
-
-        var comments = 0
-
         this.defaultValues().forEach { t, u ->
-            if (t.startsWith("#")) {
-                comments++
-                this.plugin.config.set("_COMMENT_$comments", u.toString())
-                return@forEach
-            }
-
             if (this.plugin.config.get(t) == null) {
                 this.plugin.config.set(t, u)
             }
@@ -51,6 +42,25 @@ class ConfigManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
             this["server-spawn.yaw"] = 180f
             this["server-spawn.pitch"] = 0f
             this["server-spawn.world"] = "world"
+
+            // Biome Configurations
+            // Plains Biome
+//            this["#1"] = "This is where you configure the options available in /island biomes"
+            this["biomes.PLAINS.cost"] = 1000.0
+            this["biomes.PLAINS.icon"] = "GRASS_BLOCK"
+            // Beach Biome
+            this["biomes.BEACH.cost"] = 1000.0
+            this["biomes.BEACH.icon"] = "SAND"
+            // Flower Forest Biome
+            this["biomes.FLOWER_FOREST.cost"] = 1000.0
+            this["biomes.FLOWER_FOREST.icon"] = "CORNFLOWER"
+            // Jungle Biome
+            this["biomes.JUNGLE.cost"] = 1000.0
+            this["biomes.JUNGLE.icon"] = "JUNGLE_LEAVES"
+            // Swamp Biome
+            this["biomes.SWAMP.cost"] = 1000.0
+            this["biomes.SWAMP.icon"] = "SLIME_BLOCK"
+
         }
     }
 }

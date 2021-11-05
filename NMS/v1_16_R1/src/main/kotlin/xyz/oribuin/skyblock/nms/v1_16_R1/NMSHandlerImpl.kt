@@ -1,8 +1,11 @@
 package xyz.oribuin.skyblock.nms.v1_16_R1
 
+import net.minecraft.server.v1_16_R1.PacketPlayOutMapChunk
 import net.minecraft.server.v1_16_R1.PacketPlayOutWorldBorder
 import net.minecraft.server.v1_16_R1.WorldBorder
+import org.bukkit.Chunk
 import org.bukkit.Location
+import org.bukkit.craftbukkit.v1_16_R1.CraftChunk
 import org.bukkit.craftbukkit.v1_16_R1.CraftWorld
 import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer
 import org.bukkit.entity.Player
@@ -31,4 +34,10 @@ class NMSHandlerImpl : NMSHandler {
         ((player as CraftPlayer).handle.playerConnection.sendPacket(PacketPlayOutWorldBorder(border, PacketPlayOutWorldBorder.EnumWorldBorderAction.INITIALIZE)))
     }
 
+    override fun sendChunks(chunks: List<Chunk>, players: List<Player>) {
+        chunks.forEach { chunk ->
+            val packet = PacketPlayOutMapChunk((chunk as CraftChunk).handle, 65535, true)
+            players.map { (it as CraftPlayer).handle }.forEach { it.playerConnection.sendPacket(packet) }
+        }
+    }
 }

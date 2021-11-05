@@ -7,12 +7,12 @@ import org.bukkit.command.CommandSender
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
-import xyz.oribuin.skyblock.SkyblockPlugin
-import xyz.oribuin.skyblock.util.parseEnum
 import xyz.oribuin.orilibrary.manager.Manager
 import xyz.oribuin.orilibrary.util.FileUtils
 import xyz.oribuin.orilibrary.util.HexUtils
 import xyz.oribuin.orilibrary.util.StringPlaceholders
+import xyz.oribuin.skyblock.SkyblockPlugin
+import xyz.oribuin.skyblock.util.parseEnum
 
 class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
@@ -78,10 +78,12 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
     enum class Messages(val value: String) {
         PREFIX("#a6b2fc&lSkyblock &8| &f"),
-        OWN_ISLAND("You already own an island! (/island go)"),
-        NO_ISLAND("You do not have an island, Create one using /island create"),
+        OWN_ISLAND("You already own an island! (#a6b2fc/island go&f)"),
+        NO_ISLAND("You do not have an island, Create one using #a6b2fc/island create&f!"),
+        CHANGED_BIOME("Your island biome has been changed to #a6b2fc%biome%&f!"),
 
         RELOAD("You have reloaded Skyblock!"),
+        NOT_ENOUGH_MONEY("You do not have enough money to purchase this!"),
         DISABLED_WORLD("You cannot do this in this world."),
         NO_PERM("You do not have permission to do this."),
         INVALID_PLAYER("Please provide a correct player name."),
@@ -99,7 +101,7 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
             return if (!Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) text else PlaceholderAPI.setPlaceholders(if (sender is Player) sender else null, text)
         }
 
-        fun apply(sender: OfflinePlayer, text: String): String{
+        fun apply(sender: OfflinePlayer, text: String): String {
             return if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
                 PlaceholderAPI.setPlaceholders(sender, text)
             else
