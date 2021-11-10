@@ -1,5 +1,6 @@
 package xyz.oribuin.skyblock.gui
 
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
@@ -10,6 +11,7 @@ import xyz.oribuin.orilibrary.util.HexUtils.colorify
 import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.island.Member
+import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.MessageManager
 import xyz.oribuin.skyblock.util.getManager
 
@@ -22,7 +24,7 @@ class MembersGUI(private val plugin: SkyblockPlugin) {
         for (i in 9..26)
             pageSlots.add(i)
 
-        val gui = PaginatedGui(36, "Island Members", pageSlots)
+        val gui = PaginatedGui(27, "Island Members", pageSlots)
         // Stop people from yoinking items out the gui.
         gui.setDefaultClickFunction {
             it.isCancelled = true
@@ -33,34 +35,58 @@ class MembersGUI(private val plugin: SkyblockPlugin) {
         // Stop people from putting stuff in the gui.
         gui.setPersonalClickAction { gui.defaultClickFunction.accept(it) }
 
+        // Save the island when the gui is closed
+        gui.setCloseAction { plugin.getManager<DataManager>().saveIsland(island) }
+
         for (i in 0..8)
             gui.setItem(i, Item.filler(Material.GRAY_STAINED_GLASS_PANE))
 
-        for (i in 27..35)
+        for (i in 18..26)
             gui.setItem(i, Item.filler(Material.GRAY_STAINED_GLASS_PANE))
 
         if (gui.page - 1 == gui.prevPage) {
-            gui.setItem(29, Item.Builder(Material.PAPER).setName(colorify("#a6b2fc&lPrevious Page")).create()) { gui.previous(it.whoClicked as Player) }
+            gui.setItem(20, Item.Builder(Material.PAPER).setName(colorify("#a6b2fc&lPrevious Page")).create()) { gui.previous(it.whoClicked as Player) }
         }
 
         if (gui.page + 1 == gui.nextPage) {
-            gui.setItem(33, Item.Builder(Material.PAPER).setName(colorify("#a6b2fc&lNext Page")).create()) { gui.next(it.whoClicked as Player) }
+            gui.setItem(24, Item.Builder(Material.PAPER).setName(colorify("#a6b2fc&lNext Page")).create()) { gui.next(it.whoClicked as Player) }
         }
 
-        island.members.sortedBy { x -> x.role.priority }.forEach { gui.addPageItem(getPlayer(it)) {} }
+        val viewer = plugin.getManager<DataManager>().getMember(player.uniqueId)
+
+        addMembers(viewer, gui, island)
+        //        this.addMembers(viewer, gui, island)
+
         gui.open(player)
     }
 
-    private fun getPlayer(member: Member): ItemStack {
+    private fun addMembers(viewer: Member, gui: PaginatedGui, island: Island) {
+        gui.pageItems.clear()
+        island.members.sortedBy { x -> x.role.priority }.forEach { member ->
+            gui.addPageItem(getPlayer(viewer, member)) {
+                if (it.isLeftClick && member.role == Member.Role.MEMBER) {
+                    member.role = Member.Role.ADMIN
+                } else if (it.isRightClick && member.role == Member.Role.ADMIN)
+                    member.role = Member.Role.MEMBER
+
+                this.addMembers(viewer, gui, island)
+                // run async or else the vault plugin will screech
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable { gui.update() })
+            }
+        }
+    }
+
+    private fun getPlayer(viewer: Member, member: Member): ItemStack {
 
         val lore = mutableListOf(
             colorify(" &f| &7Rank: #a6b2fc${MessageManager.apply(member.offlinePlayer, "%vault_rank_capital%")}"),
             colorify(" &f| &7Role: #a6b2fc${member.role.name.lowercase().replaceFirstChar { it.uppercase() }}"),
         )
 
-        if (member.role == Member.Role.OWNER) {
+        if (viewer.role == Member.Role.OWNER && member.uuid != viewer.uuid) {
             lore.add(colorify(" &f| "))
-            lore.add(colorify(" &f| #a6b2fcLeft-Click &7to change their role."))
+            lore.add(colorify(" &f| #a6b2fcLeft-Click &7to promote."))
+            lore.add(colorify(" &f| #a6b2fcRight-Click &7to demote."))
         }
 
         return Item.Builder(Material.PLAYER_HEAD)

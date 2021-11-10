@@ -27,7 +27,6 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
 
     override fun enable() {
         super.enable()
-
         this.async { _ ->
             val increment = if (connector is MySQLConnector) " AUTO_INCREMENT" else ""
             this.connector.connect {
@@ -260,6 +259,12 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
         return newMember
     }
 
+    /**
+     * Get an island from the island key.
+     *
+     * @param key The island key
+     * @return The island with the matching key or no island.
+     */
     fun getIsland(key: Int): Island? {
         if (key == -1)
             return null;

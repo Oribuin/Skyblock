@@ -64,12 +64,24 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
         receiver.sendMessage(HexUtils.colorify(apply(receiver as? Player, placeholders.apply(message))))
     }
 
+    /**
+     * Get a message from the messages.yml that are coloured
+     *
+     * @param message The message id
+     * @return The returned message.
+     */
     operator fun get(message: String): String {
-        return HexUtils.colorify(config.getString(message) ?: parseEnum(Messages::class, message.replace("-", "-")).value)
+        return HexUtils.colorify(config.getString(message) ?: parseEnum(Messages::class, message.replace("-", "_")).value)
     }
 
-    override fun disable() {
-
+    /**
+     * Get a message from the messages.yml in raw text.
+     *
+     * @param message The message id
+     * @return The returned message.
+     */
+    fun getRaw(message: String): String {
+        return config.getString(message) ?: parseEnum(Messages::class, message.replace("-", "_")).value
     }
 
     private fun apply(sender: CommandSender?, text: String): String {
@@ -78,9 +90,20 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
     enum class Messages(val value: String) {
         PREFIX("#a6b2fc&lSkyblock &8| &f"),
+        CREATED_ISLAND("You have created your own island!"),
         OWN_ISLAND("You already own an island! (#a6b2fc/island go&f)"),
         NO_ISLAND("You do not have an island, Create one using #a6b2fc/island create&f!"),
         CHANGED_BIOME("Your island biome has been changed to #a6b2fc%biome%&f!"),
+        ACCEPTED_INVITE("You have accepted the invite to join an island!"),
+        DENIED_INVITE("You have denied the invite to join an island."),
+        NO_INVITE("You have not been invited to an island!"),
+        JOINED_ISLAND("You have joined an island!"),
+        MAX_MEMBERS("You have already reached a maximum of 8 island members."),
+        PLAYER_HAS_ISLAND("This player already has an island"),
+        CANT_INVITE_SELF("You cannot invite yourself to your island."),
+        INVITE_MESSAGE("You have been invited to %player%'s island! (#a6b2fcClick to accept&f)"),
+        SENT_INVITE("You have sent an invite to %player%"),
+        NEW_MEMBER("#a6b2fc%player% &fhas joined your island!"),
 
         RELOAD("You have reloaded Skyblock!"),
         NOT_ENOUGH_MONEY("You do not have enough money to purchase this!"),

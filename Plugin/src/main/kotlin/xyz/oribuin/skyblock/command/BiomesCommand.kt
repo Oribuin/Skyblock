@@ -4,12 +4,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.manager.DataManager
-import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.send
 import xyz.oribuin.orilibrary.command.SubCommand
 import xyz.oribuin.skyblock.gui.BiomesGUI
-import xyz.oribuin.skyblock.gui.MembersGUI
 
 @SubCommand.Info(
     names = ["biome"],

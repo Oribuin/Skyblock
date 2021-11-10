@@ -17,6 +17,7 @@ import xyz.oribuin.skyblock.gui.IslandGUI
         BiomesCommand::class,
         BorderCommand::class,
         CreateCommand::class,
+        InviteCommand::class,
         MembersCommand::class,
         TeleportCommand::class
     ],
