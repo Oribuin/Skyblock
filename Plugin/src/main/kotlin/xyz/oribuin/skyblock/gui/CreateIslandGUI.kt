@@ -11,15 +11,12 @@ import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.gui.Item
 import xyz.oribuin.gui.PaginatedGui
 import xyz.oribuin.orilibrary.util.HexUtils.colorify
+import xyz.oribuin.skyblock.util.numRange
 
 class CreateIslandGUI(private val plugin: SkyblockPlugin) {
 
     fun create(player: Player) {
-        val pageSlots = mutableListOf<Int>()
-        for (i in 9..26)
-            pageSlots.add(i)
-
-        val gui = PaginatedGui(36, "Choose an island.", pageSlots)
+        val gui = PaginatedGui(36, "Choose an island.", numRange(9, 26))
 
         // Stop people from yoinking items out the gui.
         gui.setDefaultClickFunction {

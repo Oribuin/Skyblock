@@ -14,6 +14,7 @@ import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.MessageManager
 import xyz.oribuin.skyblock.util.getManager
+import xyz.oribuin.skyblock.util.numRange
 
 class MembersGUI(private val plugin: SkyblockPlugin) {
 
@@ -21,10 +22,7 @@ class MembersGUI(private val plugin: SkyblockPlugin) {
 
     fun create(player: Player, island: Island) {
         val pageSlots = mutableListOf<Int>()
-        for (i in 9..26)
-            pageSlots.add(i)
-
-        val gui = PaginatedGui(27, "Island Members", pageSlots)
+        val gui = PaginatedGui(27, "Island Members", numRange(9, 26))
         // Stop people from yoinking items out the gui.
         gui.setDefaultClickFunction {
             it.isCancelled = true

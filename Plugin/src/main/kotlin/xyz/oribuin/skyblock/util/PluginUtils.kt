@@ -1,5 +1,6 @@
 package xyz.oribuin.skyblock.util
 
+import net.minecraft.advancements.critereon.CriterionConditionValue
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
@@ -8,11 +9,11 @@ import org.bukkit.command.CommandSender
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
-import xyz.oribuin.skyblock.SkyblockPlugin
-import xyz.oribuin.skyblock.manager.MessageManager
 import xyz.oribuin.orilibrary.OriPlugin
 import xyz.oribuin.orilibrary.manager.Manager
 import xyz.oribuin.orilibrary.util.StringPlaceholders
+import xyz.oribuin.skyblock.SkyblockPlugin
+import xyz.oribuin.skyblock.manager.MessageManager
 import kotlin.math.floor
 import kotlin.math.sqrt
 import kotlin.reflect.KClass
@@ -208,3 +209,12 @@ val usingPaper: Boolean
     } catch (ex: ClassNotFoundException) {
         false
     }
+
+
+fun numRange(start: Int, end: Int): List<Int> {
+    val list = mutableListOf<Int>()
+    for (i in start..end)
+        list.add(i)
+
+    return list
+}

@@ -49,7 +49,7 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
         val island = data.createIsland(member.uuid)
         schematic.paste(plugin, island.center) {
-            this.teleportToIsland(member, island)
+            this.teleport(member, island.home)
         }
         return island
     }
@@ -57,19 +57,19 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
     /**
      * Teleport the member to an island
      *
-     * @param member The member being teleported.
+     * @param player The member being teleported.
      * @param island The island
      */
-    fun teleportToIsland(member: Member, island: Island) {
+    fun teleport(member: Member, location: Location) {
         val player = member.offlinePlayer.player ?: return
         player.fallDistance = 0f
 
-        if (usingPaper) {
-            player.teleportAsync(island.home, PlayerTeleportEvent.TeleportCause.PLUGIN)
-        } else {
-            player.teleport(island.home, PlayerTeleportEvent.TeleportCause.PLUGIN)
+        when (usingPaper) {
+            true -> player.teleportAsync(location, PlayerTeleportEvent.TeleportCause.PLUGIN)
+            false -> player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN)
         }
 
+        val island = this.getIslandFromLoc(location) ?: return
         this.plugin.server.scheduler.runTaskLater(this.plugin, Runnable { this.createBorder(member, island) }, 1)
     }
 

@@ -14,6 +14,7 @@ import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.util.getManager
+import xyz.oribuin.skyblock.util.numRange
 import xyz.oribuin.skyblock.util.send
 
 class BiomesGUI(private val plugin: SkyblockPlugin) {
@@ -22,11 +23,7 @@ class BiomesGUI(private val plugin: SkyblockPlugin) {
     private val islandManager = this.plugin.getManager<IslandManager>()
 
     fun create(player: Player, island: Island) {
-        val pageSlots = mutableListOf<Int>()
-        for (i in 9..26)
-            pageSlots.add(i)
-
-        val gui = PaginatedGui(36, "Island Biomes", pageSlots)
+        val gui = PaginatedGui(36, "Island Biomes", numRange(9, 26))
         // Stop people from yoinking items out the gui.
         gui.setDefaultClickFunction {
             it.isCancelled = true

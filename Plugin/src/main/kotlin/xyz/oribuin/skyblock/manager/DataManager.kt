@@ -82,6 +82,8 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "description TEXT," + // Will likely have to convert this into a string.
                         "visits INT DEFAULT 0, " +
                         "`votes` INT DEFAULT 0, " +
+                        "`public` BOOLEAN DEFAULT false, " +
+                        "category TEXT, " +
                         "`x` DOUBLE, " + // Location of the warp.
                         "`y` DOUBLE, " +
                         "`z` DOUBLE, " +
@@ -101,6 +103,12 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "PRIMARY KEY(key))"
 
                 it.prepareStatement(homesDB).executeUpdate()
+
+                val bansDB = "CREATE TABLE IF NOT EXISTS ${tableName}_bans (" +
+                        "user VARCHAR(36), " +
+                        "island INT)"
+
+                it.prepareStatement(bansDB).executeUpdate()
             }
         }
     }
@@ -172,17 +180,19 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 upgrades.executeUpdate()
 
                 // Save the island warps
-                val warps = it.prepareStatement("REPLACE INTO ${tableName}_warps (`key`, `name`, icon, description, visits, votes, x, y, z, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                val warps = it.prepareStatement("REPLACE INTO ${tableName}_warps (`key`, `name`, icon, description, visits, votes, `public`, category, x, y, z, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
                 warps.setInt(1, island.key)
                 warps.setString(2, island.warp.name)
                 warps.setString(3, island.warp.icon.name)
                 warps.setString(4, gson.toJson(island.warp.desc).toString())
                 warps.setInt(5, island.warp.visits)
                 warps.setInt(6, island.warp.votes)
-                warps.setDouble(7, island.warp.location.blockX.toDouble())
-                warps.setDouble(8, island.warp.location.blockY.toDouble())
-                warps.setDouble(9, island.warp.location.blockZ.toDouble())
-                warps.setString(10, island.warp.location.world?.name)
+                warps.setBoolean(7, island.warp.public)
+                warps.setString(8, island.warp.category.name)
+                warps.setDouble(9, island.warp.location.blockX.toDouble())
+                warps.setDouble(10, island.warp.location.blockY.toDouble())
+                warps.setDouble(11, island.warp.location.blockZ.toDouble())
+                warps.setString(12, island.warp.location.world?.name)
                 warps.executeUpdate()
 
                 if (island.home != island.center) {
@@ -306,6 +316,8 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                     warp.desc = gson.fromJson(warpResult.getString("description"), Warp.Desc::class.java)
                     warp.visits = warpResult.getInt("visits")
                     warp.votes = warpResult.getInt("votes")
+                    warp.public = warpResult.getBoolean("public")
+                    warp.category = parseEnum(Warp.Category::class, warpResult.getString("category"))
                     island.warp = warp
                 }
 

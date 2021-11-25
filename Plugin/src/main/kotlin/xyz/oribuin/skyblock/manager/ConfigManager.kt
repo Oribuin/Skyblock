@@ -35,7 +35,7 @@ class ConfigManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
             this["world-names.NETHER"] = "islands_nether"
             this["world-names.THE_END"] = "islands_end"
 
-            // Server spawn because fuck you thats why.
+            // Server spawn because fuck you that's why.
             this["server-spawn.x"] = 0.0
             this["server-spawn.y"] = 64.0
             this["server-spawn.z"] = 0.0
