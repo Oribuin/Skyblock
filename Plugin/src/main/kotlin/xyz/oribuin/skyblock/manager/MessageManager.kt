@@ -36,24 +36,24 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
             this["prefix"] = "#a6b2fc&lSkyblock &8| &f"
 
             // Island Creation
-            this["created_island"] = "You have created your own island!"
-            this["own_island"] = "You already own an island! (#a6b2fc/island go&f)"
-            this["no_island"] = "You do not have an island, Create one using #a6b2fc/island create&f!"
+            this["created-island"] = "You have created your own island!"
+            this["own-island"] = "You already own an island! (#a6b2fc/island go&f)"
+            this["no-island"] = "You do not have an island, Create one using #a6b2fc/island create&f!"
 
             // General Island Stuff
-            this["changed_biome"] = "Your island biome has been changed to #a6b2fc%biome%&f!"
+            this["changed-biome"] = "Your island biome has been changed to #a6b2fc%biome%&f!"
 
             // Island Invite
-            this["accepted_invite"] = "You have accepted the invite to join an island!"
-            this["denied_invite"] = "You have denied the invite to join an island."
-            this["no_invite"] = "You have not been invited to an island!"
-            this["joined_island"] = "You have joined an island!"
-            this["max_members"] = "You have already reached a maximum of 8 island members."
-            this["player_has_island"] = "This player already has an island"
-            this["cant_invite_self"] = "You cannot invite yourself to your island."
-            this["invite_message"] = "You have been invited to %player%'s island! (#a6b2fcClick to accept&f)"
-            this["sent_invite"] = "You have sent an invite to %player%"
-            this["new_member"] = "#a6b2fc%player% &fhas joined your island!"
+            this["accepted-invite"] = "You have accepted the invite to join an island!"
+            this["denied-invite"] = "You have denied the invite to join an island."
+            this["no-invite"] = "You have not been invited to an island!"
+            this["joined-island"] = "You have joined an island!"
+            this["max-members"] = "You have already reached a maximum of 8 island members."
+            this["player-has-island"] = "This player already has an island"
+            this["cant-invite-self"] = "You cannot invite yourself to your island."
+            this["invite-message"] = "You have been invited to %player%'s island! (#a6b2fcClick to accept&f)"
+            this["sent-invite"] = "You have sent an invite to %player%"
+            this["new-member"] = "#a6b2fc%player% &fhas joined your island!"
 
             // Island Warp
             this["warp-private"] = "This warp is currently private."
@@ -68,14 +68,14 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
             this["reload"] = "You have reloaded Skyblock!"
 
             // Vague error messages
-            this["not_enough_money"] = "You do not have enough money to purchase this!"
-            this["no_perm"] = "You do not have permission to do this."
-            this["invalid_player"] = "Please provide a correct player name."
-            this["invalid_args"] = "Please use the correct command usage, %usage%"
-            this["unknown_cmd"] = "&fPlease include a valid command."
-            this["invalid_block"] = "Please look at a valid block"
-            this["player_only"] = "&fOnly a player can execute this command."
-            this["console_only"] = "&fOnly console can execute this command."
+            this["not-enough-money"] = "You do not have enough money to purchase this!"
+            this["no-perm"] = "You do not have permission to do this."
+            this["invalid-player"] = "Please provide a correct player name."
+            this["invalid-args"] = "Please use the correct command usage, %usage%"
+            this["unknown-cmd"] = "&fPlease include a valid command."
+            this["invalid-block"] = "Please look at a valid block"
+            this["player-only"] = "&fOnly a player can execute this command."
+            this["console-only"] = "&fOnly console can execute this command."
         }
     }
 
