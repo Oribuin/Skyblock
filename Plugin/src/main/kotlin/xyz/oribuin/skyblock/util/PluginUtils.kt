@@ -1,6 +1,5 @@
 package xyz.oribuin.skyblock.util
 
-import net.minecraft.advancements.critereon.CriterionConditionValue
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
@@ -28,61 +27,40 @@ fun SkyblockPlugin.send(receiver: CommandSender, messageId: String, placeholders
 /**
  * Format a string list into a single string.
  *
- * @param stringList The strings being converted
  * @return the converted string.
  */
-fun formatList(stringList: List<String>): String {
+fun List<String>.format(): String {
     val builder = StringBuilder()
-    stringList.forEach { s -> builder.append(s).append("\n") }
+    this.forEach { s -> builder.append("$s\n") }
     return builder.toString()
 }
 
 /**
  * Format a location into a readable String.
  *
- * @param loc The location
  * @return The formatted Location.
  */
-fun formatLocation(loc: Location?): String {
-    return if (loc == null) "None" else loc.blockX.toString() + ", " + loc.blockY + ", " + loc.blockZ
+fun Location.format(): String {
+    return this.blockX.toString() + ", " + this.blockY + ", " + this.blockZ
 }
 
 /**
  * Get the block location of the location.;
  *
- * @param loc The location;
  * @return The block location
  */
-fun getBlockLoc(loc: Location): Location {
-    val location = loc.clone()
-    return Location(location.world, location.blockX.toDouble(), loc.blockY.toDouble(), loc.blockZ.toDouble())
-}
-
-/**
- * Center a location to the center of the block.
- *
- * @param location The location to be centered.
- * @return The centered location.
- */
-fun centerLocation(location: Location): Location? {
-    val loc = location.clone()
-    loc.add(0.5, 0.5, 0.5)
-    loc.yaw = 180f
-    loc.pitch = 0f
-    return loc
+fun Location.block(): Location {
+    return Location(this.world, this.blockX.toDouble(), this.blockY.toDouble(), this.blockZ.toDouble())
 }
 
 /**
  * Get a bukkit color from a hex code
  *
- * @param hex The hex code
  * @return The bukkit color
  */
-fun fromHex(hex: String?): Color {
-
-    if (hex == null) return Color.BLACK
+fun String.toColor(): Color {
     val color: java.awt.Color = try {
-        java.awt.Color.decode(hex)
+        java.awt.Color.decode(this)
     } catch (ex: NumberFormatException) {
         return Color.BLACK
     }
@@ -122,10 +100,7 @@ fun <T> get(section: ConfigurationSection, path: String, def: T): T {
  * @return The amount of empty slots.
  */
 fun getSpareSlots(player: Player): Int {
-
-    val slots = mutableListOf<Int>()
-    for (i in 0..35) slots.add(i)
-    return slots.stream().map { player.inventory.getItem(it) }
+    return numRange(0, 35).stream().map { player.inventory.getItem(it) }
         .filter { itemStack -> itemStack == null || itemStack.type == Material.AIR }
         .count()
         .toInt()
@@ -134,12 +109,11 @@ fun getSpareSlots(player: Player): Int {
 /**
  * Gets a location as a string key
  *
- * @param location The location
  * @return the location as a string key
  * @author Esophose
  */
-fun locationAsKey(location: Location): String {
-    return String.format("%s-%.2f-%.2f-%.2f", location.world!!.name, location.x, location.y, location.z)
+fun Location.asKey(): String {
+    return String.format("%s-%.2f-%.2f-%.2f", this.world?.name, this.x, this.y, this.z)
 }
 
 /**
@@ -218,3 +192,5 @@ fun numRange(start: Int, end: Int): List<Int> {
 
     return list
 }
+
+fun Location.center() = Location(this.world, this.blockX + 0.5, this.blockY + 0.0, this.blockZ + 0.5)
