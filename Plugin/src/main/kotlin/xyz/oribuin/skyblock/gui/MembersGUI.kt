@@ -21,7 +21,6 @@ class MembersGUI(private val plugin: SkyblockPlugin) {
     private val msg = this.plugin.getManager<MessageManager>()
 
     fun create(player: Player, island: Island) {
-        val pageSlots = mutableListOf<Int>()
         val gui = PaginatedGui(27, "Island Members", numRange(9, 26))
         // Stop people from yoinking items out the gui.
         gui.setDefaultClickFunction {
@@ -36,11 +35,8 @@ class MembersGUI(private val plugin: SkyblockPlugin) {
         // Save the island when the gui is closed
         gui.setCloseAction { plugin.getManager<DataManager>().saveIsland(island) }
 
-        for (i in 0..8)
-            gui.setItem(i, Item.filler(Material.GRAY_STAINED_GLASS_PANE))
-
-        for (i in 18..26)
-            gui.setItem(i, Item.filler(Material.GRAY_STAINED_GLASS_PANE))
+        gui.setItems(numRange(0, 8), Item.filler(Material.GRAY_STAINED_GLASS_PANE))
+        gui.setItems(numRange(18, 26), Item.filler(Material.GRAY_STAINED_GLASS_PANE))
 
         if (gui.page - 1 == gui.prevPage) {
             gui.setItem(20, Item.Builder(Material.PAPER).setName(colorify("#a6b2fc&lPrevious Page")).create()) { gui.previous(it.whoClicked as Player) }
@@ -52,8 +48,7 @@ class MembersGUI(private val plugin: SkyblockPlugin) {
 
         val viewer = plugin.getManager<DataManager>().getMember(player.uniqueId)
 
-        addMembers(viewer, gui, island)
-        //        this.addMembers(viewer, gui, island)
+        this.addMembers(viewer, gui, island)
 
         gui.open(player)
     }

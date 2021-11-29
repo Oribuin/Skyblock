@@ -12,7 +12,7 @@ data class Warp(val key: Int, var location: Location) {
     var category: Category = Category.GENERAL // The island category
     var public: Boolean = false // Whether the island is open to the public or not.
 
-    data class Desc(val desc: MutableList<String> = mutableListOf())
+    data class Desc(val text: MutableList<String> = mutableListOf("This warp doesn't have a description."))
 
     enum class Category(val icon: Material, val desc: Array<String>) {
         GENERAL(Material.NAME_TAG, arrayOf("Miscellaneous island with multiple purposes!")), // A vague island category

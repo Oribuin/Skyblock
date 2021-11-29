@@ -50,6 +50,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "mobSpawning BOOLEAN DEFAULT true, " +
                         "animalSpawning BOOLEAN DEFAULT true, " +
                         "biome TEXT, " +
+                        "bans TEXT, " +
                         "PRIMARY KEY(key))"
 
                 it.prepareStatement(settingsDB).executeUpdate()
@@ -69,7 +70,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "`key` INT, " +
                         "player VARCHAR(36), " +
                         "role VARCHAR(36), " +
-                        "border TEXT , " +
+                        "border TEXT, " +
                         "PRIMARY KEY(player))"
 
                 it.prepareStatement(membersDB).executeUpdate()
@@ -103,12 +104,6 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "PRIMARY KEY(key))"
 
                 it.prepareStatement(homesDB).executeUpdate()
-
-                val bansDB = "CREATE TABLE IF NOT EXISTS ${tableName}_bans (" +
-                        "user VARCHAR(36), " +
-                        "island INT)"
-
-                it.prepareStatement(bansDB).executeUpdate()
             }
         }
     }
@@ -162,13 +157,14 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 main.executeUpdate()
 
                 // Save the island settings
-                val settings = it.prepareStatement("REPLACE INTO ${tableName}_settings (`key`, `name`, `public`, mobSpawning, animalSpawning, biome) VALUES (?, ?, ?, ?, ?, ?)")
+                val settings = it.prepareStatement("REPLACE INTO ${tableName}_settings (`key`, `name`, `public`, mobSpawning, animalSpawning, biome, bans) VALUES (?, ?, ?, ?, ?, ?, ?)")
                 settings.setInt(1, island.key)
                 settings.setString(2, island.settings.name)
                 settings.setBoolean(3, island.settings.public)
                 settings.setBoolean(4, island.settings.mobSpawning)
                 settings.setBoolean(5, island.settings.animalSpawning)
                 settings.setString(6, island.settings.biome.name)
+                settings.setString(7, gson.toJson(island.settings.banned))
                 settings.executeUpdate()
 
                 // Save the island upgrades.
@@ -180,11 +176,11 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 upgrades.executeUpdate()
 
                 // Save the island warps
-                val warps = it.prepareStatement("REPLACE INTO ${tableName}_warps (`key`, `name`, icon, description, visits, votes, `public`, category, x, y, z, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                val warps = it.prepareStatement("REPLACE INTO ${tableName}_warps (`key`, `name`, icon, description, visits, votes, `public`, category, x, y, z, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
                 warps.setInt(1, island.key)
                 warps.setString(2, island.warp.name)
                 warps.setString(3, island.warp.icon.name)
-                warps.setString(4, gson.toJson(island.warp.desc).toString())
+                warps.setString(4, gson.toJson(island.warp.desc))
                 warps.setInt(5, island.warp.visits)
                 warps.setInt(6, island.warp.votes)
                 warps.setBoolean(7, island.warp.public)
@@ -303,7 +299,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 if (island == null)
                     return@connect
 
-                val warpQuery = "SELECT name, icon, description, visits, votes, x, y, z, world FROM ${tableName}_warps WHERE key = ?"
+                val warpQuery = "SELECT name, icon, description, visits, votes, x, y, z, world, `public`, category FROM ${tableName}_warps WHERE key = ?"
                 val warpStatement = it.prepareStatement(warpQuery)
                 warpStatement.setInt(1, island.key)
                 val warpResult = warpStatement.executeQuery()
@@ -326,7 +322,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                  * variable, This comment is entirely to section out everything because I feel like
                  * im gonna die with how cluttered this is.
                  */
-                val settingsQuery = "SELECT name, public, mobSpawning, animalSpawning, biome FROM ${tableName}_settings WHERE key = ?"
+                val settingsQuery = "SELECT name, public, mobSpawning, animalSpawning, biome, bans FROM ${tableName}_settings WHERE key = ?"
                 val settingsState = it.prepareStatement(settingsQuery)
                 settingsState.setInt(1, island.key)
                 val settingsResult = settingsState.executeQuery()
@@ -339,6 +335,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                     settings.mobSpawning = settingsResult.getBoolean("mobSpawning")
                     settings.animalSpawning = settingsResult.getBoolean("animalSpawning")
                     settings.biome = parseEnum(Biome::class, settingsResult.getString("biome") ?: "PLAINS")
+                    settings.banned = gson.fromJson(settingsResult.getString("bans"), Settings.Banned::class.java)
                     island.settings = settings
                 }
 

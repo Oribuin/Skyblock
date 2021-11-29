@@ -57,8 +57,8 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
     /**
      * Teleport the member to an island
      *
-     * @param player The member being teleported.
-     * @param island The island
+     * @param member The member being teleported.
+     * @param location The location the player is being teleported to
      */
     fun teleport(member: Member, location: Location) {
         val player = member.offlinePlayer.player ?: return
@@ -102,7 +102,7 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @return The island with the location in range.
      */
     fun getIslandFromLoc(location: Location): Island? {
-        return this.data.islandCache.values.find { it.isInside(location.x, location.z) }
+        return this.data.islandCache.values.find { this.isInside(it, location.x, location.z) }
     }
 
     /**
@@ -112,9 +112,9 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @param z The Z Axis
      * @return true if it's inside the island.
      */
-    private fun Island.isInside(x: Double, z: Double): Boolean {
-        val pos1 = getPos1(this, null)
-        val pos2 = getPos2(this, null)
+    private fun isInside(island: Island, x: Double, z: Double): Boolean {
+        val pos1 = getPos1(island, null)
+        val pos2 = getPos2(island, null)
 
         return pos1.x <= x && pos1.z <= z && pos2.x >= x && pos2.z >= z
     }

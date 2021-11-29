@@ -8,6 +8,7 @@ import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.send
 import xyz.oribuin.orilibrary.command.SubCommand
+import xyz.oribuin.skyblock.util.center
 
 @SubCommand.Info(
     names = ["teleport", "go", "home"],
@@ -35,6 +36,6 @@ class TeleportCommand(private val plugin: SkyblockPlugin) : SubCommand() {
             return
         }
 
-        this.islandManager.teleportToIsland(member, island)
+        this.islandManager.teleport(member, island.home.center())
     }
 }

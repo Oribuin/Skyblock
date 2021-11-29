@@ -102,6 +102,7 @@ class InviteCommand(private val plugin: SkyblockPlugin) : SubCommand() {
                     }
 
                 this.inviteMap[sender.uniqueId] = target.uniqueId
+                @Suppress("deprecation")
                 target.spigot().sendMessage(*legacyText.toTypedArray())
                 msg.send(sender, "sent-invite", StringPlaceholders.single("player", target.name))
             }
@@ -137,10 +138,6 @@ class InviteCommand(private val plugin: SkyblockPlugin) : SubCommand() {
         }
 
         // check if the user has a request
-
-        println(this.inviteMap)
-        //        println(this.inviteMap.filter { it.value == sender.uniqueId }.size)
-        //        println(this.inviteMap.filter { Bukkit.getOfflinePlayer(it.key).uniqueId == player.uniqueId }.size)
         val request = this.inviteMap.filter { it.value == sender.uniqueId && Bukkit.getOfflinePlayer(it.key).uniqueId == player.uniqueId }
             .keys.firstOrNull()
 

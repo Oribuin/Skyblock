@@ -18,6 +18,5 @@ data class Island(val key: Int, var owner: UUID, val center: Location) {
     var warp = Warp(key, center)
     var members = mutableListOf(ownerMember)
     var trusted = mutableListOf<UUID>()
-    var banned = mutableListOf<UUID>()
 
 }

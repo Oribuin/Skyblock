@@ -44,8 +44,10 @@ class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
         this.schemConfig = YamlConfiguration.loadConfiguration(schemFile)
 
-        if (!schemFolder.exists())
+        if (!schemFolder.exists()) {
             schemFolder.mkdir()
+            FileUtils.createFile(plugin, "schematics", "plains.schem")
+        }
 
         val schemFiles = schemFolder.listFiles() ?: error("Schematics folder does not exist.")
         schemConfig.getKeys(false).forEach { key ->
