@@ -9,6 +9,7 @@ import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.island.BiomeOption
 import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.island.Member
+import xyz.oribuin.skyblock.island.Warp
 import xyz.oribuin.skyblock.nms.NMSAdapter
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.parseEnum
@@ -197,6 +198,29 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
             return blocks
         }
+
+    /**
+     * Teleport a player to the island warp
+     *
+     * @param warp The island warp
+     * @param member The member being teleported.
+     */
+    fun warpTeleport(warp: Warp, member: Member) {
+        // Check if the user has already visited and if the user teleported is part of the island
+        if (!warp.visitUsers.contains(member.uuid) && member.island != warp.key) {
+            warp.visits++
+            warp.visitUsers.add(member.uuid)
+
+            val island = this.islandFromID(warp.key)
+            if (island != null) {
+                island.warp = warp
+                this.data.islandCache[island.key] = island
+            }
+        }
+
+
+        this.teleport(member, warp.location)
+    }
 
 
     //    /**

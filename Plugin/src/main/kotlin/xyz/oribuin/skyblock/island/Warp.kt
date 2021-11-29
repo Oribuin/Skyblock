@@ -2,6 +2,7 @@ package xyz.oribuin.skyblock.island
 
 import org.bukkit.Location
 import org.bukkit.Material
+import java.util.*
 
 data class Warp(val key: Int, var location: Location) {
     var name: String = "Unknown Name" // The name of the warp
@@ -11,6 +12,10 @@ data class Warp(val key: Int, var location: Location) {
     var votes: Int = 0 //The amount of votes that an island has.
     var category: Category = Category.GENERAL // The island category
     var public: Boolean = false // Whether the island is open to the public or not.
+
+    // A way to prevent people insta farming votes & visits constantly without requiring a database.
+    val votedUsers = mutableListOf<UUID>() // Cache users who have upvoted the island
+    val visitUsers = mutableListOf<UUID>() // Cache the users who have tp'd to the island already
 
     data class Desc(val text: MutableList<String> = mutableListOf("This warp doesn't have a description."))
 

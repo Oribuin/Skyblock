@@ -37,10 +37,14 @@ dependencies {
 
 shadowJar {
     archiveClassifier.set(null)
+    relocate "com.zaxxer.hikari", "${project.group}.libs.hikari"
+    relocate "io.github.bananapuncher714.nbteditor", "${project.group}.libs.nbteditor"
+    relocate "kotlin", "${project.group}.libs.kotlin"
+    relocate "org.intellij", "${project.group}.libs.intellij"
+    relocate "org.slf4j", "${project.group}.libs.slf4j"
     relocate "xyz.oribuin.orilibrary", "${project.group}.libs.cmdlib"
     relocate "xyz.oribuin.gui", "${project.group}.libs.gui"
-    relocate "com.zaxxer.hikaricp", "${project.group}.libs.hikaricp"
-    relocate "org.jetbrains", "${project.group}.libs.jetbrains"
+    relocate "net.wesjd.anvilgui", "${project.group}.libs.anvilgui"
 }
 
 tasks.getByName("build").dependsOn("shadowJar")

@@ -72,7 +72,7 @@ class MembersGUI(private val plugin: SkyblockPlugin) {
     private fun getPlayer(viewer: Member, member: Member): ItemStack {
 
         val lore = mutableListOf(
-            colorify(" &f| &7Rank: #a6b2fc${MessageManager.apply(member.offlinePlayer, "%vault_rank_capital%")}"),
+            colorify(" &f| &7Rank: #a6b2fc${xyz.oribuin.skyblock.manager.apply(member.offlinePlayer, "%vault_rank_capital%")}"),
             colorify(" &f| &7Role: #a6b2fc${member.role.name.lowercase().replaceFirstChar { it.uppercase() }}"),
         )
 

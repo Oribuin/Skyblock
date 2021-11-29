@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.*
 import org.bukkit.inventory.Merchant
 import xyz.oribuin.skyblock.SkyblockPlugin
@@ -121,7 +122,27 @@ class PlayerListeners(private val plugin: SkyblockPlugin) : Listener {
             if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
                 this.isCancelled = false
         }
+    }
 
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    fun PlayerDeathEvent.onDeath() {
+        if (!worldManager.isIslandWorld(this.entity.world))
+            return
+
+        this.keepInventory = true
+        this.keepLevel = true
+        @Suppress("deprecation")
+        this.deathMessage = null
+
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    fun PlayerRespawnEvent.onRespawn() {
+        if (!worldManager.isIslandWorld(this.player.location.world))
+            return
+
+        val island = islandManager.getIslandFromLoc(this.player.location) ?: return
+        this.respawnLocation = island.home
     }
 
     init {

@@ -12,25 +12,71 @@ import xyz.oribuin.orilibrary.util.FileUtils
 import xyz.oribuin.orilibrary.util.HexUtils
 import xyz.oribuin.orilibrary.util.StringPlaceholders
 import xyz.oribuin.skyblock.SkyblockPlugin
-import xyz.oribuin.skyblock.util.parseEnum
 
 class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
-    lateinit var config: FileConfiguration
+    private lateinit var config: FileConfiguration
 
     override fun enable() {
-        val file = FileUtils.createFile(plugin, "messages.yml")
+        val file = FileUtils.createFile(this.plugin, "messages.yml")
         config = YamlConfiguration.loadConfiguration(file)
 
-        // Set any values that don't exist
-        Messages.values().forEach {
-            val key = it.name.lowercase().replace("_", "-")
-            if (config.get(key) == null)
-                config.set(key, it.value)
+        var shouldSave = false
+        this.defaultValues().filter { config.getString(it.key) == null }.forEach { config.set(it.key, it.value); shouldSave = true }
 
+        // Don't change the config if there's no values missing.
+        if (shouldSave)
+            config.save(file)
+
+    }
+
+    private fun defaultValues() = object : HashMap<String, String>() {
+        init {
+            // Plugin Prefix
+            this["prefix"] = "#a6b2fc&lSkyblock &8| &f"
+
+            // Island Creation
+            this["created_island"] = "You have created your own island!"
+            this["own_island"] = "You already own an island! (#a6b2fc/island go&f)"
+            this["no_island"] = "You do not have an island, Create one using #a6b2fc/island create&f!"
+
+            // General Island Stuff
+            this["changed_biome"] = "Your island biome has been changed to #a6b2fc%biome%&f!"
+
+            // Island Invite
+            this["accepted_invite"] = "You have accepted the invite to join an island!"
+            this["denied_invite"] = "You have denied the invite to join an island."
+            this["no_invite"] = "You have not been invited to an island!"
+            this["joined_island"] = "You have joined an island!"
+            this["max_members"] = "You have already reached a maximum of 8 island members."
+            this["player_has_island"] = "This player already has an island"
+            this["cant_invite_self"] = "You cannot invite yourself to your island."
+            this["invite_message"] = "You have been invited to %player%'s island! (#a6b2fcClick to accept&f)"
+            this["sent_invite"] = "You have sent an invite to %player%"
+            this["new_member"] = "#a6b2fc%player% &fhas joined your island!"
+
+            // Island Warp
+            this["warp-private"] = "This warp is currently private."
+
+            // Island Bans
+            this["is-banned"] = "You are banned from this island."
+
+            // General Island error Messages
+            this["invalid-island-role"] = "You do you not have the correct role to do this."
+
+            // Other Stuff?
+            this["reload"] = "You have reloaded Skyblock!"
+
+            // Vague error messages
+            this["not_enough_money"] = "You do not have enough money to purchase this!"
+            this["no_perm"] = "You do not have permission to do this."
+            this["invalid_player"] = "Please provide a correct player name."
+            this["invalid_args"] = "Please use the correct command usage, %usage%"
+            this["unknown_cmd"] = "&fPlease include a valid command."
+            this["invalid_block"] = "Please look at a valid block"
+            this["player_only"] = "&fOnly a player can execute this command."
+            this["console_only"] = "&fOnly console can execute this command."
         }
-
-        config.save(file)
     }
 
     /**
@@ -43,13 +89,13 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
     fun send(receiver: CommandSender, messageId: String, placeholders: StringPlaceholders = StringPlaceholders.empty()) {
         val msg = config.getString(messageId)
 
-        if (msg == null) {
+        if (msg == null || msg.isEmpty()) {
             receiver.sendMessage(HexUtils.colorify("&c&lError &7| &fThis is a missing message in the messages file, Please contact the server owner about this issue. (Id: $messageId)"))
             return
         }
 
-        val prefix = config.getString("prefix") ?: Messages.PREFIX.value
-        receiver.sendMessage(HexUtils.colorify(prefix + apply(receiver as? Player, placeholders.apply(msg))))
+        val prefix = config.getString("prefix") ?: this.defaultValues()["prefix"]!!
+        receiver.sendMessage(HexUtils.colorify(prefix + apply(receiver as Player, placeholders.apply(msg))))
     }
 
     /**
@@ -61,7 +107,7 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @param placeholders Message Placeholders.
      */
     fun sendRaw(receiver: CommandSender, message: String, placeholders: StringPlaceholders = StringPlaceholders.empty()) {
-        receiver.sendMessage(HexUtils.colorify(apply(receiver as? Player, placeholders.apply(message))))
+        receiver.sendMessage(HexUtils.colorify(apply(receiver as Player, placeholders.apply(message))))
     }
 
     /**
@@ -71,7 +117,7 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @return The returned message.
      */
     operator fun get(message: String): String {
-        return HexUtils.colorify(config.getString(message) ?: parseEnum(Messages::class, message.replace("-", "_")).value)
+        return HexUtils.colorify(this.getRaw(message))
     }
 
     /**
@@ -81,54 +127,24 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @return The returned message.
      */
     fun getRaw(message: String): String {
-        return config.getString(message) ?: parseEnum(Messages::class, message.replace("-", "_")).value
+        return config.getString(message) ?: this.defaultValues()[message] ?: "Unknown Value: $message"
     }
 
     private fun apply(sender: CommandSender?, text: String): String {
         return applyPapi(sender, text)
     }
+}
 
-    enum class Messages(val value: String) {
-        PREFIX("#a6b2fc&lSkyblock &8| &f"),
-        CREATED_ISLAND("You have created your own island!"),
-        OWN_ISLAND("You already own an island! (#a6b2fc/island go&f)"),
-        NO_ISLAND("You do not have an island, Create one using #a6b2fc/island create&f!"),
-        CHANGED_BIOME("Your island biome has been changed to #a6b2fc%biome%&f!"),
-        ACCEPTED_INVITE("You have accepted the invite to join an island!"),
-        DENIED_INVITE("You have denied the invite to join an island."),
-        NO_INVITE("You have not been invited to an island!"),
-        JOINED_ISLAND("You have joined an island!"),
-        MAX_MEMBERS("You have already reached a maximum of 8 island members."),
-        PLAYER_HAS_ISLAND("This player already has an island"),
-        CANT_INVITE_SELF("You cannot invite yourself to your island."),
-        INVITE_MESSAGE("You have been invited to %player%'s island! (#a6b2fcClick to accept&f)"),
-        SENT_INVITE("You have sent an invite to %player%"),
-        NEW_MEMBER("#a6b2fc%player% &fhas joined your island!"),
+fun applyPapi(sender: CommandSender?, text: String): String {
+    return if (!Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
+        text
+    else
+        PlaceholderAPI.setPlaceholders(if (sender is Player) sender else null, text)
+}
 
-        RELOAD("You have reloaded Skyblock!"),
-        NOT_ENOUGH_MONEY("You do not have enough money to purchase this!"),
-        DISABLED_WORLD("You cannot do this in this world."),
-        NO_PERM("You do not have permission to do this."),
-        INVALID_PLAYER("Please provide a correct player name."),
-        INVALID_ARGS("Please use the correct command usage, %usage%"),
-        INVALID_AMOUNT("&fPlease provide a valid number."),
-        UNKNOWN_CMD("&fPlease include a valid command."),
-        INVALID_CRATE("Please provide a valid crate name."),
-        INVALID_BLOCK("Please look at a valid block"),
-        PLAYER_ONLY("&fOnly a player can execute this command."),
-        CONSOLE_ONLY("&fOnly console can execute this command.");
-    }
-
-    companion object {
-        fun applyPapi(sender: CommandSender?, text: String): String {
-            return if (!Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) text else PlaceholderAPI.setPlaceholders(if (sender is Player) sender else null, text)
-        }
-
-        fun apply(sender: OfflinePlayer, text: String): String {
-            return if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
-                PlaceholderAPI.setPlaceholders(sender, text)
-            else
-                text;
-        }
-    }
+fun apply(sender: OfflinePlayer, text: String): String {
+    return if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
+        PlaceholderAPI.setPlaceholders(sender, text)
+    else
+        text;
 }
