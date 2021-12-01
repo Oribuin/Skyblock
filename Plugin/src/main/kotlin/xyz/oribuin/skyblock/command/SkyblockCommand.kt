@@ -22,6 +22,7 @@ import xyz.oribuin.skyblock.util.getManager
         CreateCommand::class,
         InviteCommand::class,
         MembersCommand::class,
+        SettingsCommand::class,
         TeleportCommand::class,
         WarpCommand::class
     ],

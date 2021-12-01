@@ -4,12 +4,12 @@ import org.apache.commons.lang.WordUtils
 import org.bukkit.Material
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
+import xyz.oribuin.orilibrary.manager.Manager
+import xyz.oribuin.orilibrary.util.FileUtils
 import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.upgrade.IslandUpgrade
 import xyz.oribuin.skyblock.util.parseEnum
-import xyz.oribuin.orilibrary.manager.Manager
-import xyz.oribuin.orilibrary.util.FileUtils
 import kotlin.math.max
 
 class UpgradeManager(private val plugin: SkyblockPlugin) : Manager(plugin) {

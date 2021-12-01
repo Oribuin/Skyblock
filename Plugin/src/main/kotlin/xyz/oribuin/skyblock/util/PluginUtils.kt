@@ -10,6 +10,7 @@ import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import xyz.oribuin.orilibrary.OriPlugin
 import xyz.oribuin.orilibrary.manager.Manager
+import xyz.oribuin.orilibrary.util.HexUtils
 import xyz.oribuin.orilibrary.util.StringPlaceholders
 import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.manager.MessageManager
@@ -23,6 +24,8 @@ inline fun <reified T : Manager> OriPlugin.getManager(): T = this.getManager(T::
 fun SkyblockPlugin.send(receiver: CommandSender, messageId: String, placeholders: StringPlaceholders = StringPlaceholders.empty()) {
     this.getManager<MessageManager>().send(receiver, messageId, placeholders)
 }
+
+fun String.color(): String = HexUtils.colorify(this)
 
 /**
  * Format a string list into a single string.

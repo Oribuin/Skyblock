@@ -4,12 +4,12 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import org.bukkit.*
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
+import xyz.oribuin.orilibrary.manager.Manager
+import xyz.oribuin.orilibrary.util.FileUtils
 import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.util.parseEnum
 import xyz.oribuin.skyblock.world.IslandSchematic
 import xyz.oribuin.skyblock.world.VoidGenerator
-import xyz.oribuin.orilibrary.manager.Manager
-import xyz.oribuin.orilibrary.util.FileUtils
 import java.io.File
 
 class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {

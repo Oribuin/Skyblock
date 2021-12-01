@@ -45,7 +45,7 @@ class ConfigManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
             // Biome Configurations
             // Plains Biome
-//            this["#1"] = "This is where you configure the options available in /island biomes"
+            //            this["#1"] = "This is where you configure the options available in /island biomes"
             this["biomes.PLAINS.cost"] = 1000.0
             this["biomes.PLAINS.icon"] = "GRASS_BLOCK"
             // Beach Biome

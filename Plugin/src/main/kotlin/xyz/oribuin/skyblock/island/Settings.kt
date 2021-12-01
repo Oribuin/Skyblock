@@ -1,7 +1,5 @@
 package xyz.oribuin.skyblock.island
 
-import net.minecraft.world.entity.ai.behavior.BehaviorHome
-import org.bukkit.Location
 import org.bukkit.block.Biome
 import java.util.*
 

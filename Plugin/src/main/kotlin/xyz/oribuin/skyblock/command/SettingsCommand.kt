@@ -2,17 +2,17 @@ package xyz.oribuin.skyblock.command
 
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import xyz.oribuin.orilibrary.command.SubCommand
 import xyz.oribuin.skyblock.SkyblockPlugin
+import xyz.oribuin.skyblock.gui.SettingsGUI
 import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.send
-import xyz.oribuin.orilibrary.command.SubCommand
-import xyz.oribuin.skyblock.gui.BiomesGUI
 
 @SubCommand.Info(
-    names = ["biome"],
-    usage = "/island biome",
-    permission = "skyblock.biome"
+    names = ["settings"],
+    usage = "/island settings",
+    permission = "skyblock.settings"
 )
 class SettingsCommand(private val plugin: SkyblockPlugin) : SubCommand() {
 
@@ -34,6 +34,6 @@ class SettingsCommand(private val plugin: SkyblockPlugin) : SubCommand() {
             return
         }
 
-        BiomesGUI(plugin).create(sender, island)
+        SettingsGUI(plugin, island).create(member)
     }
 }
