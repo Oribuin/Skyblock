@@ -8,7 +8,7 @@ compileJava {
 dependencies {
     implementation project(':NMS:Wrapper')
 
-    compileOnly 'org.spigotmc:spigot:1.17'
+    shadow 'org.spigotmc:spigot:1.17'
     compileOnly 'io.papermc.paper:paper-api:1.17-R0.1-SNAPSHOT'
 
     // Plugin Dependencies
@@ -19,8 +19,9 @@ dependencies {
     // Frameworks
     implementation 'xyz.oribuin:orilib:1.3.7'
     implementation 'xyz.oribuin:ori-gui:1.0.6'
-    implementation 'io.github.bananapuncher714:nbteditor:7.17.0'
-    implementation fileTree(dir: 'libs', includes: ['*.jar']) // https://github.com/WesJD/AnvilGUI
+    // Compiled the 1.18 support in here since they weren't official releases at the time of adding this
+    implementation name: 'nbteditor-7.18.0' // https://github.com/BananaPuncher714/NBTEditor
+    implementation name: 'anvilgui-1.5.4-SNAPSHOT'// https://github.com/WesJD/AnvilGUI
 
     // Frameworks & MySQL APIs
     implementation 'com.zaxxer:HikariCP:5.0.0'
