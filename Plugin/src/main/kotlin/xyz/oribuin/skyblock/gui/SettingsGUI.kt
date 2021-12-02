@@ -101,14 +101,14 @@ class SettingsGUI(private val plugin: SkyblockPlugin, private val island: Island
             this.sendSettingMessage(placeholders)
         }
 
-        val mobLore = listOf(
+        val animalLore = listOf(
             " &f| &7Click to turn animal spawning",
             " &f| &7on/off on your island.",
             " &f| ",
             " &f| &7Requires #a6b2fcAdmin &7role!"
         )
 
-        gui.setItem(15, Item.Builder(Material.WHEAT).setName("#a6b2fc&lAnimals &f| ${if (settings.animalSpawning) "#77dd77&lOn" else "#ff6961&lOff"}".color()).setLore(mobLore.map { it.color() }).create()) {
+        gui.setItem(15, Item.Builder(Material.WHEAT).setName("#a6b2fc&lAnimals &f| ${if (settings.animalSpawning) "#77dd77&lOn" else "#ff6961&lOff"}".color()).setLore(animalLore.map { it.color() }).create()) {
             if (member.role == Member.Role.MEMBER) {
                 this.plugin.send(it.whoClicked, "invalid-island-role")
                 return@setItem
@@ -129,6 +129,13 @@ class SettingsGUI(private val plugin: SkyblockPlugin, private val island: Island
             this.setSettings(gui, member)
             this.sendSettingMessage(placeholders)
         }
+
+        val mobLore = listOf(
+            " &f| &7Click to turn mob spawning",
+            " &f| &7on/off on your island.",
+            " &f| ",
+            " &f| &7Requires #a6b2fcAdmin &7role!"
+        )
 
         gui.setItem(16, Item.Builder(Material.BONE).setName("#a6b2fc&lMobs &f| ${if (settings.mobSpawning) "#77dd77&lOn" else "#ff6961&lOff"}".color()).setLore(mobLore.map { it.color() }).create()) {
             if (member.role == Member.Role.MEMBER) {
