@@ -12,10 +12,7 @@ import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.IslandManager
-import xyz.oribuin.skyblock.util.center
-import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.skyblock.util.numRange
-import xyz.oribuin.skyblock.util.send
+import xyz.oribuin.skyblock.util.*
 
 class WarpsGUI(private val plugin: SkyblockPlugin) {
 
@@ -64,7 +61,8 @@ class WarpsGUI(private val plugin: SkyblockPlugin) {
 
             val item = Item.Builder(warp.icon)
                 .setName(colorify("#a6b2fc&l${warp.name}"))
-                .setLore(lore.map { s -> colorify(placeholders.apply(s)) })
+                .setLore(lore.map { s ->
+                    placeholders.apply(s).color() })
                 .setOwner(Bukkit.getOfflinePlayer(it.value.owner))
                 .create()
 
