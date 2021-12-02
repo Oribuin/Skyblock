@@ -127,6 +127,9 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
             if (keys.next()) {
                 val key = keys.getInt(1)
                 val newIsland = Island(key, owner, getNextIslandLocation(key, plugin.getManager<WorldManager>().overworld, 350))
+                val username = Bukkit.getPlayer(owner)?.name ?: "Unknown"
+                newIsland.settings.name = "$username's Island"
+                newIsland.warp.name = "$username's Warp"
                 island = newIsland
                 this.saveIsland(newIsland) // save the new island that was created.
             }

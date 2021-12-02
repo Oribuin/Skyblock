@@ -61,8 +61,7 @@ class WarpsGUI(private val plugin: SkyblockPlugin) {
 
             val item = Item.Builder(warp.icon)
                 .setName(colorify("#a6b2fc&l${warp.name}"))
-                .setLore(lore.map { s ->
-                    placeholders.apply(s).color() })
+                .setLore(lore.map { s -> placeholders.apply(s).color() })
                 .setOwner(Bukkit.getOfflinePlayer(it.value.owner))
                 .create()
 
