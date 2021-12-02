@@ -11,8 +11,8 @@ allprojects {
     group 'xyz.oribuin.skyblock'
     version '1.0'
 
-    targetCompatibility = JavaVersion.VERSION_16
-    sourceCompatibility = JavaVersion.VERSION_16
+    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_17
 
     repositories {
         mavenCentral()
@@ -23,6 +23,9 @@ allprojects {
         maven { url "https://repo.extendedclip.com/content/repositories/placeholderapi/" }
         maven { url "https://repo.codemc.org/repository/maven-public/" }
         maven { url "https://maven.enginehub.org/repo/" }
+        maven { url 'https://jitpack.io' }
+
+        flatDir { dirs 'libs' }
     }
 }
 
@@ -33,6 +36,7 @@ dependencies {
     implementation project(':NMS:v1_16_R2')
     implementation project(':NMS:v1_16_R3')
     implementation project(path: ':NMS:v1_17_R1', configuration: 'remapped')
+    implementation project(path: ':NMS:v1_18_R1', configuration: 'remapped')
 }
 
 shadowJar {
