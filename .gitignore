@@ -27,5 +27,5 @@ build/
 target/
 *.iml
 /bin/
-/libs/
+/Plugin/libs/
 .idea
