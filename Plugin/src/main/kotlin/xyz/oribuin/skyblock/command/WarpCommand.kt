@@ -12,7 +12,7 @@ import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.send
 
 @SubCommand.Info(
-    names = ["warp"],
+    names = ["warp", "warps"],
     usage = "/island warp",
     permission = "skyblock.warp"
 )
@@ -36,13 +36,13 @@ class WarpCommand(private val plugin: SkyblockPlugin) : SubCommand() {
             return
         }
 
-        when (args[0]) {
-            "editor" -> this.openEditor(member, args)
-        }
+//        when (args[0]) {
+//            "editor" -> this.openEditor(member, args)
+//        }
     }
 
-    private fun openEditor(member: Member, args: Array<String>) {
-        TODO("Add the function for editing the island warp.")
-    }
+//    private fun openEditor(member: Member, args: Array<String>) {
+//        TODO("Add the function for editing the island warp.")
+//    }
 
 }
