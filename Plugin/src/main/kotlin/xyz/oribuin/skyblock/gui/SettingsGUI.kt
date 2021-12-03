@@ -60,7 +60,7 @@ class SettingsGUI(private val plugin: SkyblockPlugin, private val island: Island
             " &f| &7Requires #a6b2fcAdmin &7role!"
         )
 
-        gui.setItem(13, Item.Builder(Material.NAME_TAG).setName("#a6b2fc&lIsland Name".color()).setLore(nameLore.map { it.color() }).create()) {
+        gui.setItem(13, Item.Builder(Material.NAME_TAG).setName("#a6b2fc&lIsland Name &7| &f${island.settings.name}".color()).setLore(nameLore.map { it.color() }).create()) {
             if (member.role == Member.Role.MEMBER) {
                 this.plugin.send(it.whoClicked, "invalid-island-role")
                 return@setItem
@@ -79,7 +79,7 @@ class SettingsGUI(private val plugin: SkyblockPlugin, private val island: Island
             " &f| &7Requires #a6b2fcAdmin &7role!"
         )
 
-        gui.setItem(14, Item.Builder(Material.OAK_FENCE_GATE).setName("#a6b2fc&lPrivacy &f| ${if (settings.public) "#77dd77&lOpen" else "#ff6961&lClosed"}".color()).setLore(publicLore.map { it.color() }).create()) {
+        gui.setItem(14, Item.Builder(Material.OAK_FENCE_GATE).setName("#a6b2fc&lPrivacy &7| &f${if (settings.public) "#77dd77&lPublic" else "#ff6961&lPrivate"}".color()).setLore(publicLore.map { it.color() }).create()) {
             if (member.role == Member.Role.MEMBER) {
                 this.plugin.send(it.whoClicked, "invalid-island-role")
                 return@setItem
@@ -94,7 +94,7 @@ class SettingsGUI(private val plugin: SkyblockPlugin, private val island: Island
 
             val placeholders = StringPlaceholders.builder("setting", "Privacy")
                 .add("player", it.whoClicked.name)
-                .add("value", if (settings.public) "Open" else "Closed")
+                .add("value", if (settings.public) "Public" else "Private")
                 .build()
 
             this.setSettings(gui, member)
@@ -108,7 +108,7 @@ class SettingsGUI(private val plugin: SkyblockPlugin, private val island: Island
             " &f| &7Requires #a6b2fcAdmin &7role!"
         )
 
-        gui.setItem(15, Item.Builder(Material.WHEAT).setName("#a6b2fc&lAnimals &f| ${if (settings.animalSpawning) "#77dd77&lOn" else "#ff6961&lOff"}".color()).setLore(animalLore.map { it.color() }).create()) {
+        gui.setItem(15, Item.Builder(Material.WHEAT).setName("#a6b2fc&lAnimals &7| &f${if (settings.animalSpawning) "#77dd77&lOn" else "#ff6961&lOff"}".color()).setLore(animalLore.map { it.color() }).create()) {
             if (member.role == Member.Role.MEMBER) {
                 this.plugin.send(it.whoClicked, "invalid-island-role")
                 return@setItem
@@ -137,7 +137,7 @@ class SettingsGUI(private val plugin: SkyblockPlugin, private val island: Island
             " &f| &7Requires #a6b2fcAdmin &7role!"
         )
 
-        gui.setItem(16, Item.Builder(Material.BONE).setName("#a6b2fc&lMobs &f| ${if (settings.mobSpawning) "#77dd77&lOn" else "#ff6961&lOff"}".color()).setLore(mobLore.map { it.color() }).create()) {
+        gui.setItem(16, Item.Builder(Material.BONE).setName("#a6b2fc&lMobs &7| &f${if (settings.mobSpawning) "#77dd77&lOn" else "#ff6961&lOff"}".color()).setLore(mobLore.map { it.color() }).create()) {
             if (member.role == Member.Role.MEMBER) {
                 this.plugin.send(it.whoClicked, "invalid-island-role")
                 return@setItem
@@ -175,7 +175,6 @@ class SettingsGUI(private val plugin: SkyblockPlugin, private val island: Island
             .title("Island Name")
             .title(island.settings.name)
             .itemLeft(Item.filler(Material.NAME_TAG).item)
-            .onClose { gui.open(it.player) }
             .onComplete { user, text ->
 
                 if (text.equals(island.settings.name, ignoreCase = true))
@@ -204,7 +203,7 @@ class SettingsGUI(private val plugin: SkyblockPlugin, private val island: Island
             .forEach { this.plugin.send(it, "changed-settings", placeholders) }
     }
 
-    private fun UUID.onCooldown(): Boolean = System.currentTimeMillis() <= (cooldown[this] ?: 0) + 3000
+    private fun UUID.onCooldown(): Boolean = System.currentTimeMillis() <= (cooldown[this] ?: 0) + 500
 
 
 }

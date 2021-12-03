@@ -218,7 +218,6 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
             }
         }
 
-
         this.teleport(member, warp.location)
     }
 

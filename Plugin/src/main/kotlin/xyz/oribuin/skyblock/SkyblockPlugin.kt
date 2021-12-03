@@ -4,6 +4,7 @@ import net.milkbowl.vault.economy.Economy
 import xyz.oribuin.orilibrary.OriPlugin
 import xyz.oribuin.skyblock.command.SkyblockCommand
 import xyz.oribuin.skyblock.listener.BlockListeners
+import xyz.oribuin.skyblock.listener.EntityListeners
 import xyz.oribuin.skyblock.listener.PlayerListeners
 import xyz.oribuin.skyblock.manager.*
 import xyz.oribuin.skyblock.util.getManager
@@ -43,6 +44,7 @@ class SkyblockPlugin : OriPlugin() {
 
         // Register Plugin Listeners
         BlockListeners(this)
+        EntityListeners(this)
         PlayerListeners(this)
 
         // Load Vault Eco

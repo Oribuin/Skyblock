@@ -45,8 +45,8 @@ class BorderGUI(private val plugin: SkyblockPlugin) {
             val island = islandManager.getIslandFromLoc(it.player.location) ?: return@setCloseAction
             islandManager.createBorder(member, island)
         }
-        
-            gui.setItems(numRange(0, 26), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
+
+        gui.setItems(numRange(0, 26), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
 
         gui.setItem(10, Item.Builder(Material.SPRUCE_SIGN).setName(colorify("#a6b2fc&lBorder Color")).setLore(infoLore).create()) {}
         this.setBorderItems(gui)

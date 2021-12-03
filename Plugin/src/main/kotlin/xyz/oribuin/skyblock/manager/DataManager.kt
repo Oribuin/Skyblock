@@ -104,6 +104,12 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "PRIMARY KEY(key))"
 
                 it.prepareStatement(homesDB).executeUpdate()
+
+                val islandQuery = "SELECT key FROM ${tableName}_islands"
+                val result = it.prepareStatement(islandQuery).executeQuery()
+                while (result.next()) {
+                    this.getIsland(result.getInt(1))
+                }
             }
         }
     }

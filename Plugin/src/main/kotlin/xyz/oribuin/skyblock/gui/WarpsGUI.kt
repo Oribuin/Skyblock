@@ -52,6 +52,10 @@ class WarpsGUI(private val plugin: SkyblockPlugin) {
         gui.setItems(numRange(0, 8), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
         gui.setItems(numRange(36, 44), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
 
+        gui.setItem(40, Item.Builder(Material.PLAYER_HEAD).setName("#a6b2fc&lGo Back".color()).setLore(" &f| &7Click to go back".color(), " &f| &7to the main page.".color()).setTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==").create()) {
+            (it.whoClicked as Player).chat("/island")
+        }
+
         this.sortGUI(sortType.value)
         this.setSortItems(gui, member)
         this.loadWarps(gui, member)
@@ -87,14 +91,13 @@ class WarpsGUI(private val plugin: SkyblockPlugin) {
                 .create()
 
             gui.addPageItem(item) { event ->
-//                if (!warp.public) {
-//                    this.plugin.send(event.whoClicked, "warp-private")
-//                    return@addPageItem
-//                }
+                //                if (!warp.public) {
+                //                    this.plugin.send(event.whoClicked, "warp-private")
+                //                    return@addPageItem
+                //                }
 
                 // Check if the user is banned from the warp.
-                val island = this.islandManager.islandFromID(warp.key) ?: return@addPageItem
-                if (island.settings.banned.uuids.contains(event.whoClicked.uniqueId)) {
+                if (it.settings.banned.uuids.contains(event.whoClicked.uniqueId)) {
                     this.plugin.send(event.whoClicked, "is-banned")
                     return@addPageItem
                 }
@@ -143,7 +146,6 @@ class WarpsGUI(private val plugin: SkyblockPlugin) {
                 )
                 .create()
         ) {
-
             if (it.whoClicked.uniqueId.onCooldown)
                 return@setItem
 
@@ -225,6 +227,6 @@ class WarpsGUI(private val plugin: SkyblockPlugin) {
     }
 
     private val UUID.onCooldown: Boolean
-        get() = System.currentTimeMillis() <= (cooldown[this] ?: 0) + 1000
+        get() = System.currentTimeMillis() <= (cooldown[this] ?: 0) + 500
 
 }

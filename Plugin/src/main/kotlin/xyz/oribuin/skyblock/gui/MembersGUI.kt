@@ -13,6 +13,7 @@ import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.MessageManager
+import xyz.oribuin.skyblock.util.color
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.numRange
 
@@ -44,6 +45,10 @@ class MembersGUI(private val plugin: SkyblockPlugin) {
 
         if (gui.page + 1 == gui.nextPage) {
             gui.setItem(24, Item.Builder(Material.PAPER).setName(colorify("#a6b2fc&lNext Page")).create()) { gui.next(it.whoClicked as Player) }
+        }
+
+        gui.setItem(22, Item.Builder(Material.PLAYER_HEAD).setName("#a6b2fc&lGo Back".color()).setLore(" &f| &7Click to go back".color(), " &f| &7to the main page.".color()).setTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==").create()) {
+            (it.whoClicked as Player).chat("/island")
         }
 
         val viewer = plugin.getManager<DataManager>().getMember(player.uniqueId)

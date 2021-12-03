@@ -43,6 +43,7 @@ class MessageManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
             // General Island Stuff
             this["changed-biome"] = "Your island biome has been changed to #a6b2fc%biome%&f!"
             this["changed-settings"] = "#a6b2fc%player% &fhas changed your Island #a6b2fc%setting%&f to #a6b2fc%value%&f!"
+            this["changed-warp"] = "#a6b2fc%player% &fhas changed your Island Warp #a6b2fc%setting%&f to #a6b2fc%value%&f!"
 
             // Island Invite
             this["accepted-invite"] = "You have accepted the invite to join an island!"
