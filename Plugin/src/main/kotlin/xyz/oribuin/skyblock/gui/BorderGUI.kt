@@ -11,6 +11,7 @@ import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.nms.BorderColor
 import xyz.oribuin.skyblock.util.getManager
+import xyz.oribuin.skyblock.util.numRange
 
 class BorderGUI(private val plugin: SkyblockPlugin) {
 
@@ -44,9 +45,8 @@ class BorderGUI(private val plugin: SkyblockPlugin) {
             val island = islandManager.getIslandFromLoc(it.player.location) ?: return@setCloseAction
             islandManager.createBorder(member, island)
         }
-
-        for (i in 0..26)
-            gui.setItem(i, Item.filler(Material.GRAY_STAINED_GLASS_PANE))
+        
+            gui.setItems(numRange(0, 26), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
 
         gui.setItem(10, Item.Builder(Material.SPRUCE_SIGN).setName(colorify("#a6b2fc&lBorder Color")).setLore(infoLore).create()) {}
         this.setBorderItems(gui)

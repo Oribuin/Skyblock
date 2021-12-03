@@ -24,7 +24,7 @@ class IslandGUI(private val plugin: SkyblockPlugin) {
         gui.setPersonalClickAction { gui.defaultClickFunction.accept(it) }
 
         for (i in 0..26)
-            gui.setItem(i, Item.filler(Material.GRAY_STAINED_GLASS_PANE))
+            gui.setItem(i, Item.filler(Material.BLACK_STAINED_GLASS_PANE))
 
         val homeLore = listOf(colorify(" &f| &7Click to teleport to"), colorify(" &f| &7your island home!"))
         gui.setItem(10, Item.Builder(Material.CYAN_BED).setName(colorify("#a6b2fc&lTeleport Home")).setLore(homeLore).create()) {

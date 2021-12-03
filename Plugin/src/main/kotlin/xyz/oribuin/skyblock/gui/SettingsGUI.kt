@@ -38,7 +38,7 @@ class SettingsGUI(private val plugin: SkyblockPlugin, private val island: Island
         }
         // Stop people from putting stuff in the gui.
         gui.setPersonalClickAction { gui.defaultClickFunction.accept(it) }
-        gui.setItems(numRange(0, 26), Item.filler(Material.GRAY_STAINED_GLASS_PANE))
+        gui.setItems(numRange(0, 26), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
 
         gui.setItem(10, Item.Builder(Material.PLAYER_HEAD).setName("#a6b2fc&lGo Back".color()).setLore(" &f| &7Click to go back".color(), " &f| &7to the main page.".color()).setTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==").create()) {
             (it.whoClicked as Player).chat("/island")

@@ -34,11 +34,8 @@ class BiomesGUI(private val plugin: SkyblockPlugin) {
         // Stop people from putting stuff in the gui.
         gui.setPersonalClickAction { gui.defaultClickFunction.accept(it) }
 
-        for (i in 0..8)
-            gui.setItem(i, Item.filler(Material.GRAY_STAINED_GLASS_PANE))
-
-        for (i in 27..35)
-            gui.setItem(i, Item.filler(Material.GRAY_STAINED_GLASS_PANE))
+        gui.setItems(numRange(0, 8), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
+        gui.setItems(numRange(27, 35), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
 
         if (gui.page - 1 == gui.prevPage) {
             gui.setItem(29, Item.Builder(Material.PAPER).setName(colorify("#a6b2fc&lPrevious Page")).create()) { gui.previous(it.whoClicked as Player) }

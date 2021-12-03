@@ -35,8 +35,8 @@ class MembersGUI(private val plugin: SkyblockPlugin) {
         // Save the island when the gui is closed
         gui.setCloseAction { plugin.getManager<DataManager>().saveIsland(island) }
 
-        gui.setItems(numRange(0, 8), Item.filler(Material.GRAY_STAINED_GLASS_PANE))
-        gui.setItems(numRange(18, 26), Item.filler(Material.GRAY_STAINED_GLASS_PANE))
+        gui.setItems(numRange(0, 8), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
+        gui.setItems(numRange(18, 26), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
 
         if (gui.page - 1 == gui.prevPage) {
             gui.setItem(20, Item.Builder(Material.PAPER).setName(colorify("#a6b2fc&lPrevious Page")).create()) { gui.previous(it.whoClicked as Player) }
