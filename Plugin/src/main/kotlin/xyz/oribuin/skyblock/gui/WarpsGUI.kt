@@ -56,6 +56,16 @@ class WarpsGUI(private val plugin: SkyblockPlugin) {
             (it.whoClicked as Player).chat("/island")
         }
 
+        if (member.island != -1) {
+            gui.setItem(
+                1, Item.Builder(Material.REDSTONE).setName("#a6b2fc&lWarp Settings".color())
+                    .setLore(" &f| &7Click to change your".color(), " &f| &7island warp settings".color())
+                    .create()
+            ) {
+                data.getIsland(member.island)?.let { it1 -> WarpSettingsGUI(this.plugin, it1).create(member) }
+            }
+        }
+
         this.sortGUI(sortType.value)
         this.setSortItems(gui, member)
         this.loadWarps(gui, member)

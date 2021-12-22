@@ -51,8 +51,6 @@ class WarpSettingsGUI(private val plugin: SkyblockPlugin, private val island: Is
     }
 
     private fun setSettings(gui: Gui, member: Member) {
-        val warp = island.warp
-
         val nameLore = listOf(
             " &f| &7Click to change your",
             " &f| &7current island warp name.",
@@ -66,10 +64,19 @@ class WarpSettingsGUI(private val plugin: SkyblockPlugin, private val island: Is
                 return@setItem
             }
 
-            if (it.whoClicked.uniqueId.onCooldown())
+            if (it.whoClicked.uniqueId.onCooldown)
                 return@setItem
 
             this.editWarpName(gui, member)
+        }
+
+        gui.setItem(14, Item.Builder(Material.OAK_SIGN).setName("#a6b2fc&lWarp Description".color()).create()) {
+            if (member.role == Member.Role.MEMBER) {
+                this.plugin.send(it.whoClicked, "invalid-island-role")
+                return@setItem
+            }
+
+            WarpDescGUI(this.plugin, this.island, it.whoClicked as Player)
         }
 
         gui.update()
@@ -91,7 +98,7 @@ class WarpSettingsGUI(private val plugin: SkyblockPlugin, private val island: Is
             .itemLeft(Item.filler(Material.NAME_TAG).item)
             .onComplete { user, text ->
 
-                if (text.equals(island.settings.name, ignoreCase = true))
+                if (text.equals(island.warp.name, ignoreCase = true))
                     return@onComplete AnvilGUI.Response.close()
 
                 this.cooldown[user.uniqueId] = System.currentTimeMillis()
@@ -117,7 +124,8 @@ class WarpSettingsGUI(private val plugin: SkyblockPlugin, private val island: Is
             .forEach { this.plugin.send(it, "changed-warp", placeholders) }
     }
 
-    private fun UUID.onCooldown(): Boolean = System.currentTimeMillis() <= (cooldown[this] ?: 0) + 3000
+    private val UUID.onCooldown: Boolean
+        get() = System.currentTimeMillis() <= (cooldown[this] ?: 0) + 500
 
 
 }
