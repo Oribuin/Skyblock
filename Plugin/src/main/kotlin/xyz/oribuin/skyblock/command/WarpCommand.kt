@@ -4,6 +4,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import xyz.oribuin.orilibrary.command.SubCommand
 import xyz.oribuin.skyblock.SkyblockPlugin
+import xyz.oribuin.skyblock.gui.WarpSettingsGUI
 import xyz.oribuin.skyblock.gui.WarpsGUI
 import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.manager.DataManager
@@ -36,13 +37,12 @@ class WarpCommand(private val plugin: SkyblockPlugin) : SubCommand() {
             return
         }
 
-//        when (args[0]) {
-//            "editor" -> this.openEditor(member, args)
-//        }
+        when (args[1]) {
+            "settings" -> member.openEditor()
+            else -> this.plugin.send(sender, "unknown-cmd")
+        }
     }
 
-//    private fun openEditor(member: Member, args: Array<String>) {
-//        TODO("Add the function for editing the island warp.")
-//    }
+    private fun Member.openEditor() = data.getIsland(this.island)?.let { WarpSettingsGUI(plugin, it).create(this) }
 
 }

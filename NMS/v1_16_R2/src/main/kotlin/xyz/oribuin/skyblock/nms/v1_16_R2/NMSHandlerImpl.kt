@@ -8,7 +8,9 @@ import org.bukkit.Location
 import org.bukkit.craftbukkit.v1_16_R2.CraftChunk
 import org.bukkit.craftbukkit.v1_16_R2.CraftWorld
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_16_R2.inventory.CraftItemStack
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import xyz.oribuin.skyblock.nms.BorderColor
 import xyz.oribuin.skyblock.nms.NMSHandler
 
@@ -41,4 +43,38 @@ class NMSHandlerImpl : NMSHandler {
         }
     }
 
+    override fun setString(item: ItemStack, key: String, value: String): ItemStack {
+        val itemStack = CraftItemStack.asNMSCopy(item)
+        val tag = itemStack.orCreateTag
+        tag.setString(key, value)
+        return CraftItemStack.asBukkitCopy(itemStack)
+    }
+
+    override fun setInt(item: ItemStack, key: String, value: Int): ItemStack {
+        val itemStack = CraftItemStack.asNMSCopy(item)
+        val tag = itemStack.orCreateTag
+        tag.setInt(key, value)
+        return CraftItemStack.asBukkitCopy(itemStack)
+    }
+
+    override fun setLong(item: ItemStack, key: String, value: Long): ItemStack {
+        val itemStack = CraftItemStack.asNMSCopy(item)
+        val tag = itemStack.orCreateTag
+        tag.setLong(key, value)
+        return CraftItemStack.asBukkitCopy(itemStack)
+    }
+
+    override fun setDouble(item: ItemStack, key: String, value: Double): ItemStack {
+        val itemStack = CraftItemStack.asNMSCopy(item)
+        val tag = itemStack.orCreateTag
+        tag.setDouble(key, value)
+        return CraftItemStack.asBukkitCopy(itemStack)
+    }
+
+    override fun setBoolean(item: ItemStack, key: String, value: Boolean): ItemStack {
+        val itemStack = CraftItemStack.asNMSCopy(item)
+        val tag = itemStack.orCreateTag
+        tag.setBoolean(key, value)
+        return CraftItemStack.asBukkitCopy(itemStack)
+    }
 }

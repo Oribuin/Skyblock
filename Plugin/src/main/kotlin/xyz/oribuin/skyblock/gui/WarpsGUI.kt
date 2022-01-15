@@ -92,20 +92,18 @@ class WarpsGUI(private val plugin: SkyblockPlugin) {
                 " &f|"
             )
 
-            warp.desc.text.forEach { line -> lore.add(" &f| $line") }
+            if (warp.desc.text.isNotEmpty())
+                warp.desc.text.forEach { line -> lore.add(" &f| $line") }
+            else
+                lore.add(" &f| No Description Set.")
 
             val item = Item.Builder(warp.icon)
                 .setName(colorify("#a6b2fc&l${warp.name}"))
-                .setLore(lore.map { s -> placeholders.apply(s).color() })
+                .setLore(lore.map { s -> placeholders.apply(s) }.color())
                 .setOwner(Bukkit.getOfflinePlayer(it.owner))
                 .create()
 
             gui.addPageItem(item) { event ->
-                //                if (!warp.public) {
-                //                    this.plugin.send(event.whoClicked, "warp-private")
-                //                    return@addPageItem
-                //                }
-
                 // Check if the user is banned from the warp.
                 if (it.settings.banned.uuids.contains(event.whoClicked.uniqueId)) {
                     this.plugin.send(event.whoClicked, "is-banned")
@@ -124,10 +122,12 @@ class WarpsGUI(private val plugin: SkyblockPlugin) {
             37, Item.Builder(Material.OAK_SIGN)
                 .setName("#a6b2fc&lSort Warps &7| &f&l${sortType.value.display}".color())
                 .setLore(
-                    " &f| &7Click to change the".color(),
-                    " &f| &7way warps are sorted".color(),
-                    " &f|".color(),
-                    " &f| &7Next Sort: #a6b2fc${(SortType.values().getOrNull(sortType.index + 1) ?: SortType.NONE).display}".color()
+                    listOf(
+                        " &f| &7Click to change the",
+                        " &f| &7way warps are sorted",
+                        " &f|",
+                        " &f| &7Next Sort: #a6b2fc${(SortType.values().getOrNull(sortType.index + 1) ?: SortType.NONE).display}"
+                    ).color()
                 )
                 .create()
         ) {
@@ -149,10 +149,12 @@ class WarpsGUI(private val plugin: SkyblockPlugin) {
             43, Item.Builder(Material.HOPPER)
                 .setName("#a6b2fc&lFilter Warps &7| &f&l${filterType.value.format()}".color())
                 .setLore(
-                    " &f| &7Click to filter out".color(),
-                    " &f| &7all the island warps".color(),
-                    " &f|".color(),
-                    " &f| &7Next Filter: #a6b2fc${(FilterType.values().getOrNull(filterType.index + 1) ?: FilterType.NONE).format()}".color()
+                    listOf(
+                        " &f| &7Click to filter out",
+                        " &f| &7all the island warps",
+                        " &f|",
+                        " &f| &7Next Filter: #a6b2fc${(FilterType.values().getOrNull(filterType.index + 1) ?: FilterType.NONE).format()}"
+                    ).color()
                 )
                 .create()
         ) {

@@ -3,6 +3,7 @@ package xyz.oribuin.skyblock.nms
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 
 interface NMSHandler {
 
@@ -24,4 +25,53 @@ interface NMSHandler {
      */
     fun sendChunks(chunks: List<Chunk>, players: List<Player>)
 
+    /**
+     * Set an ItemStack NBT tag
+     *
+     * @param item The ItemStack
+     * @param key The key to the tag
+     * @param value The key value
+     * @return The modified itemstack.
+     */
+    fun setString(item: ItemStack, key: String, value: String): ItemStack
+
+    /**
+     * Set an ItemStack NBT tag
+     *
+     * @param item The ItemStack
+     * @param key The key to the tag
+     * @param value The key value
+     * @return The modified itemstack.
+     */
+    fun setInt(item: ItemStack, key: String, value: Int): ItemStack
+
+    /**
+     * Set an ItemStack NBT tag
+     *
+     * @param item The ItemStack
+     * @param key The key to the tag
+     * @param value The key value
+     * @return The modified itemstack.
+     */
+    fun setLong(item: ItemStack, key: String, value: Long): ItemStack
+
+    /**
+     * Set an ItemStack NBT tag
+     *
+     * @param item The ItemStack
+     * @param key The key to the tag
+     * @param value The key value
+     * @return The modified itemstack.
+     */
+    fun setDouble(item: ItemStack, key: String, value: Double): ItemStack
+
+    /**
+     * Set an ItemStack NBT tag
+     *
+     * @param item The ItemStack
+     * @param key The key to the tag
+     * @param value The key value
+     * @return The modified itemstack.
+     */
+    fun setBoolean(item: ItemStack, key: String, value: Boolean): ItemStack
 }

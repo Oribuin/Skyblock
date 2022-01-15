@@ -1,5 +1,6 @@
 package xyz.oribuin.skyblock.util
 
+import org.apache.commons.lang.WordUtils
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
@@ -26,6 +27,8 @@ fun SkyblockPlugin.send(receiver: CommandSender, messageId: String, placeholders
 }
 
 fun String.color(): String = HexUtils.colorify(this)
+
+fun List<String>.color(): List<String> = this.map { HexUtils.colorify(it) }
 
 /**
  * Format a string list into a single string.
@@ -171,8 +174,9 @@ fun <T : Enum<T>> parseEnum(enum: KClass<T>, value: String): T {
     } catch (ex: Exception) {
         error("Invalid ${enum.simpleName} specified: $value")
     }
-
 }
+
+fun String.formatEnum(): String = WordUtils.capitalizeFully(this.lowercase().replace("_", " "))
 
 /**
  * Check if the server is using Paper

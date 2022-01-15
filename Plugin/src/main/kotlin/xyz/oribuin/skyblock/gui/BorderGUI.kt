@@ -10,6 +10,7 @@ import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.nms.BorderColor
+import xyz.oribuin.skyblock.util.color
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.numRange
 
@@ -48,7 +49,7 @@ class BorderGUI(private val plugin: SkyblockPlugin) {
 
         gui.setItems(numRange(0, 26), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
 
-        gui.setItem(10, Item.Builder(Material.SPRUCE_SIGN).setName(colorify("#a6b2fc&lBorder Color")).setLore(infoLore).create()) {}
+        gui.setItem(10, Item.Builder(Material.SPRUCE_SIGN).setName("#a6b2fc&lBorder Color".color()).setLore(infoLore).create()) {}
         this.setBorderItems(gui)
 
         gui.open(player)
@@ -57,7 +58,7 @@ class BorderGUI(private val plugin: SkyblockPlugin) {
     private fun setBorderItems(gui: Gui) {
         gui.setItem(
             12, Item.Builder(Material.RED_DYE)
-                .setName(colorify("#ff6961&lRed Border"))
+                .setName("#ff6961&lRed Border".color())
                 .glow(activeColor == BorderColor.RED)
                 .setLore(borderLore).create()
         ) {
@@ -67,7 +68,7 @@ class BorderGUI(private val plugin: SkyblockPlugin) {
         }
         gui.setItem(
             13, Item.Builder(Material.LIME_DYE)
-                .setName(colorify("#77dd77&lGreen Border"))
+                .setName("#77dd77&lGreen Border".color())
                 .glow(activeColor == BorderColor.GREEN)
                 .setLore(borderLore).create()
         ) {
@@ -78,7 +79,7 @@ class BorderGUI(private val plugin: SkyblockPlugin) {
 
         gui.setItem(
             14, Item.Builder(Material.LIGHT_BLUE_DYE)
-                .setName(colorify("#417cfc&lBlue Border"))
+                .setName("#417cfc&lBlue Border".color())
                 .glow(activeColor == BorderColor.BLUE)
                 .setLore(borderLore)
                 .create()
@@ -91,7 +92,7 @@ class BorderGUI(private val plugin: SkyblockPlugin) {
         // reset the color
         gui.setItem(
             16, Item.Builder(Material.GRAY_DYE)
-                .setName(colorify("#a6b2fc&lInvisible Border"))
+                .setName("#a6b2fc&lInvisible Border".color())
                 .glow(activeColor == BorderColor.OFF)
                 .setLore(borderLore)
                 .create()
@@ -104,16 +105,16 @@ class BorderGUI(private val plugin: SkyblockPlugin) {
 
     private val infoLore: List<String>
         get() = mutableListOf(
-            colorify("&f | &7Click on the dyes change"),
-            colorify("&f | &7your personal border color!"),
+            "&f | &7Click on the dyes change",
+            "&f | &7your personal border color!",
             "",
-            colorify("&f | &7This is only visible to you.")
-        )
+            "&f | &7This is only visible to you."
+        ).color()
 
     private val borderLore: List<String>
         get() = mutableListOf(
-            colorify("&f | &7Click to change your"),
-            colorify("&f | &7personal island border"),
-            colorify("&f | &7to this color!")
-        )
+            "&f | &7Click to change your",
+            "&f | &7personal island border",
+            "&f | &7to this color!"
+        ).color()
 }

@@ -1,7 +1,6 @@
 package xyz.oribuin.skyblock.nms.v1_18_R1
 
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
-import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket
 import net.minecraft.world.level.border.WorldBorder
 import org.bukkit.Chunk
@@ -9,7 +8,9 @@ import org.bukkit.Location
 import org.bukkit.craftbukkit.v1_18_R1.CraftChunk
 import org.bukkit.craftbukkit.v1_18_R1.CraftWorld
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import xyz.oribuin.skyblock.nms.BorderColor
 import xyz.oribuin.skyblock.nms.NMSHandler
 
@@ -43,4 +44,41 @@ class NMSHandlerImpl : NMSHandler {
             nmsPlayers.forEach { it.connection.send(packet) }
         }
     }
+
+    override fun setString(item: ItemStack, key: String, value: String): ItemStack {
+        val itemStack = CraftItemStack.asNMSCopy(item)
+        val tag = itemStack.orCreateTag
+        tag.putString(key, value)
+        return CraftItemStack.asBukkitCopy(itemStack)
+    }
+
+    override fun setInt(item: ItemStack, key: String, value: Int): ItemStack {
+        val itemStack = CraftItemStack.asNMSCopy(item)
+        val tag = itemStack.orCreateTag
+        tag.putInt(key, value)
+        return CraftItemStack.asBukkitCopy(itemStack)
+    }
+
+    override fun setLong(item: ItemStack, key: String, value: Long): ItemStack {
+        val itemStack = CraftItemStack.asNMSCopy(item)
+        val tag = itemStack.orCreateTag
+        tag.putLong(key, value)
+        return CraftItemStack.asBukkitCopy(itemStack)
+    }
+
+    override fun setDouble(item: ItemStack, key: String, value: Double): ItemStack {
+        val itemStack = CraftItemStack.asNMSCopy(item)
+        val tag = itemStack.orCreateTag
+        tag.putDouble(key, value)
+        return CraftItemStack.asBukkitCopy(itemStack)
+    }
+
+    override fun setBoolean(item: ItemStack, key: String, value: Boolean): ItemStack {
+        val itemStack = CraftItemStack.asNMSCopy(item)
+        val tag = itemStack.orCreateTag
+        tag.putBoolean(key, value)
+        return CraftItemStack.asBukkitCopy(itemStack)
+    }
+
+
 }
