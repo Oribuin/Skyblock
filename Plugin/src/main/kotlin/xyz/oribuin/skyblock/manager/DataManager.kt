@@ -38,6 +38,8 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "`x` DOUBLE, " +
                         "`y` DOUBLE, " +
                         "`z` DOUBLE, " +
+                        "`yaw` FLOAT, " +
+                        "`pitch` FLOAT, " +
                         "world TEXT)"
 
                 it.prepareStatement(islandDB).executeUpdate()
@@ -87,6 +89,8 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                         "`x` DOUBLE, " + // Location of the warp.
                         "`y` DOUBLE, " +
                         "`z` DOUBLE, " +
+                        "`yaw` FLOAT, " +
+                        "`pitch` FLOAT, " +
                         "`world` TEXT, " +
                         "PRIMARY KEY(key))"
 
@@ -155,13 +159,15 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
         this.async { _ ->
             this.connector.connect {
 
-                val main = it.prepareStatement("REPLACE INTO ${tableName}_islands (`key`, owner, x, y, z, world) VALUES (?, ?, ?, ?, ?, ?)")
+                val main = it.prepareStatement("REPLACE INTO ${tableName}_islands (`key`, owner, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
                 main.setInt(1, island.key)
                 main.setString(2, island.owner.toString())
                 main.setDouble(3, island.center.blockX.toDouble())
                 main.setDouble(4, island.center.blockY.toDouble())
                 main.setDouble(5, island.center.blockZ.toDouble())
-                main.setString(6, island.center.world?.name)
+                main.setFloat(6, island.center.yaw)
+                main.setFloat(7, island.center.pitch)
+                main.setString(8, island.center.world?.name)
                 main.executeUpdate()
 
                 // Save the island settings
@@ -184,18 +190,20 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 upgrades.executeUpdate()
 
                 // Save the island warps
-                val warps = it.prepareStatement("REPLACE INTO ${tableName}_warps (`key`, `name`, icon, description, visits, votes, category, x, y, z, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                val warps = it.prepareStatement("REPLACE INTO ${tableName}_warps (`key`, `name`, icon, description, visits, votes, category, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
                 warps.setInt(1, island.key)
                 warps.setString(2, island.warp.name)
                 warps.setString(3, island.warp.icon.name)
                 warps.setString(4, gson.toJson(island.warp.desc))
                 warps.setInt(5, island.warp.visits)
                 warps.setInt(6, island.warp.votes)
-                warps.setString(7, island.warp.category.name)
+                warps.setString(7, gson.toJson(island.warp.categories))
                 warps.setDouble(8, island.warp.location.blockX.toDouble())
                 warps.setDouble(9, island.warp.location.blockY.toDouble())
                 warps.setDouble(10, island.warp.location.blockZ.toDouble())
-                warps.setString(11, island.warp.location.world?.name)
+                warps.setFloat(11, island.warp.location.yaw)
+                warps.setFloat(12, island.warp.location.pitch)
+                warps.setString(13, island.warp.location.world?.name)
                 warps.executeUpdate()
 
                 if (island.home != island.center) {
@@ -306,7 +314,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 if (island == null)
                     return@connect
 
-                val warpQuery = "SELECT name, icon, description, visits, votes, x, y, z, world, `public`, category FROM ${tableName}_warps WHERE key = ?"
+                val warpQuery = "SELECT name, icon, description, visits, votes, x, y, z, yaw, pitch, world, category FROM ${tableName}_warps WHERE key = ?"
                 val warpStatement = it.prepareStatement(warpQuery)
                 warpStatement.setInt(1, island.key)
                 val warpResult = warpStatement.executeQuery()
@@ -319,7 +327,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                     warp.desc = gson.fromJson(warpResult.getString("description"), Warp.Desc::class.java)
                     warp.visits = warpResult.getInt("visits")
                     warp.votes = warpResult.getInt("votes")
-                    warp.category = parseEnum(Warp.Category::class, warpResult.getString("category"))
+                    warp.categories = gson.fromJson(warpResult.getString("category"), Warp.Categories::class.java)
                     island.warp = warp
                 }
 

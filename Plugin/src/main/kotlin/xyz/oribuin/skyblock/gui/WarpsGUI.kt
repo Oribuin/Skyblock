@@ -14,10 +14,7 @@ import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.island.Warp
 import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.IslandManager
-import xyz.oribuin.skyblock.util.color
-import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.skyblock.util.numRange
-import xyz.oribuin.skyblock.util.send
+import xyz.oribuin.skyblock.util.*
 import java.util.*
 
 class WarpsGUI(private val plugin: SkyblockPlugin) {
@@ -80,13 +77,13 @@ class WarpsGUI(private val plugin: SkyblockPlugin) {
             val warp = it.warp
 
             val placeholders = StringPlaceholders.builder("votes", warp.votes)
-                .add("category", warp.category.name.lowercase().replaceFirstChar { x -> x.uppercase() })
+                .add("categories", warp.categories.types.map { type -> type.name.formatEnum() }.format())
                 .add("visits", warp.visits)
                 .add("owner", Bukkit.getOfflinePlayer(it.owner).name)
 
             val lore = mutableListOf(
                 " &f| &7Owner: #a6b2fc%owner%",
-                " &f| &7Category: #a6b2fc%category%",
+                " &f| &7Categories: #a6b2fc%categories%",
                 " &f| &7Visits: #a6b2fc%visits%",
                 " &f| &7Votes: #a6b2fc%votes%",
                 " &f|"
@@ -200,11 +197,11 @@ class WarpsGUI(private val plugin: SkyblockPlugin) {
     private fun filterGUI(type: FilterType) {
         val list = this.data.islandCache.values.toMutableList()
         when (type) {
-            FilterType.GENERAL -> list.removeIf { it.warp.category != Warp.Category.GENERAL }
-            FilterType.FARMS -> list.removeIf { it.warp.category != Warp.Category.FARMS }
-            FilterType.PARKOUR -> list.removeIf { it.warp.category != Warp.Category.PARKOUR }
-            FilterType.SHOPS -> list.removeIf { it.warp.category != Warp.Category.SHOPS }
-            FilterType.DESIGN -> list.removeIf { it.warp.category != Warp.Category.DESIGN }
+            FilterType.GENERAL -> list.removeIf { !it.warp.categories.types.contains(Warp.Categories.Type.GENERAL) }
+            FilterType.FARMS -> list.removeIf { !it.warp.categories.types.contains(Warp.Categories.Type.FARMS) }
+            FilterType.PARKOUR -> list.removeIf { !it.warp.categories.types.contains(Warp.Categories.Type.PARKOUR) }
+            FilterType.SHOPS -> list.removeIf { !it.warp.categories.types.contains(Warp.Categories.Type.SHOPS) }
+            FilterType.DESIGN -> list.removeIf { !it.warp.categories.types.contains(Warp.Categories.Type.DESIGN) }
             else -> {}
         }
 

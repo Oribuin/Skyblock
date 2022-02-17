@@ -2,7 +2,7 @@ package xyz.oribuin.skyblock.upgrade
 
 import org.bukkit.Material
 
-class IslandUpgrade(type: Type) {
+class IslandUpgrade(val type: Type) {
 
     val tiers = mutableMapOf<Int, Tier>()
 

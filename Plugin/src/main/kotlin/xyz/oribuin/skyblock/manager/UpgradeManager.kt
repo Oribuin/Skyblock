@@ -8,6 +8,7 @@ import xyz.oribuin.orilibrary.manager.Manager
 import xyz.oribuin.orilibrary.util.FileUtils
 import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.island.Island
+import xyz.oribuin.skyblock.island.Upgrade
 import xyz.oribuin.skyblock.upgrade.IslandUpgrade
 import xyz.oribuin.skyblock.util.parseEnum
 import kotlin.math.max

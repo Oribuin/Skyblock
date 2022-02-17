@@ -31,17 +31,6 @@ fun String.color(): String = HexUtils.colorify(this)
 fun List<String>.color(): List<String> = this.map { HexUtils.colorify(it) }
 
 /**
- * Format a string list into a single string.
- *
- * @return the converted string.
- */
-fun List<String>.format(): String {
-    val builder = StringBuilder()
-    this.forEach { s -> builder.append("$s\n") }
-    return builder.toString()
-}
-
-/**
  * Format a location into a readable String.
  *
  * @return The formatted Location.
@@ -56,7 +45,7 @@ fun Location.format(): String {
  * @return The block location
  */
 fun Location.block(): Location {
-    return Location(this.world, this.blockX.toDouble(), this.blockY.toDouble(), this.blockZ.toDouble())
+    return Location(this.world, this.blockX.toDouble(), this.blockY.toDouble(), this.blockZ.toDouble(), this.yaw, this.pitch)
 }
 
 /**
@@ -178,6 +167,17 @@ fun <T : Enum<T>> parseEnum(enum: KClass<T>, value: String): T {
 
 fun String.formatEnum(): String = WordUtils.capitalizeFully(this.lowercase().replace("_", " "))
 
+fun List<String>.format(): String {
+    val builder = StringBuilder()
+    for (i in this.indices) {
+        builder.append(this[i])
+        if (i != this.size - 1)
+            builder.append(", ")
+    }
+
+    return builder.toString()
+}
+
 /**
  * Check if the server is using Paper
  *
@@ -200,4 +200,4 @@ fun numRange(start: Int, end: Int): List<Int> {
     return list
 }
 
-fun Location.center() = Location(this.world, this.blockX + 0.5, this.blockY + 0.0, this.blockZ + 0.5)
+fun Location.center() = Location(this.world, this.blockX + 0.5, this.blockY + 0.0, this.blockZ + 0.5, this.yaw, this.pitch)
