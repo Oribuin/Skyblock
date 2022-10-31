@@ -1,87 +1,128 @@
 package xyz.oribuin.skyblock.gui
 
-import org.apache.commons.lang.WordUtils
+import dev.rosewood.rosegarden.RosePlugin
+import dev.rosewood.rosegarden.utils.StringPlaceholders
+import dev.triumphteam.gui.guis.GuiItem
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.event.Event
 import org.bukkit.event.inventory.ClickType
-import xyz.oribuin.gui.Item
-import xyz.oribuin.gui.PaginatedGui
-import xyz.oribuin.orilibrary.util.HexUtils.colorify
-import xyz.oribuin.orilibrary.util.StringPlaceholders
-import xyz.oribuin.skyblock.SkyblockPlugin
-import xyz.oribuin.skyblock.island.Island
-import xyz.oribuin.skyblock.manager.DataManager
+import xyz.oribuin.skyblock.hook.VaultHook
+import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.manager.IslandManager
+import xyz.oribuin.skyblock.manager.MenuManager
+import xyz.oribuin.skyblock.util.ItemBuilder
+import xyz.oribuin.skyblock.util.cache
+import xyz.oribuin.skyblock.util.color
+import xyz.oribuin.skyblock.util.getIsland
 import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.skyblock.util.numRange
 import xyz.oribuin.skyblock.util.send
 
-class BiomesGUI(private val plugin: SkyblockPlugin) {
+class BiomesGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
-    private val data = this.plugin.getManager<DataManager>()
-    private val islandManager = this.plugin.getManager<IslandManager>()
+    private val islandManager = this.rosePlugin.getManager<IslandManager>()
 
-    fun create(player: Player, island: Island) {
-        val gui = PaginatedGui(36, "Island Biomes", numRange(9, 26))
-        // Stop people from yoinking items out the gui.
-        gui.setDefaultClickFunction {
-            it.isCancelled = true
-            it.result = Event.Result.DENY
-            (it.whoClicked as Player).updateInventory()
-        }
+    fun openMenu(member: Member) {
+        val player = member.onlinePlayer ?: return
+        val island = member.getIsland(this.rosePlugin) ?: return
+        val gui = this.createPagedGUI(player)
 
-        // Stop people from putting stuff in the gui.
-        gui.setPersonalClickAction { gui.defaultClickFunction.accept(it) }
+        this.put(gui, "border-item", player)
+        this.put(gui, "next-page", player) { gui.next() }
+        this.put(gui, "go-back", player) { this.rosePlugin.getManager<MenuManager>()[PanelGUI::class].openMenu(member) }
+        this.put(gui, "previous-page", player) { gui.previous() }
 
-        gui.setItems(numRange(0, 8), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
-        gui.setItems(numRange(27, 35), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
+        this.islandManager.biomeMap.forEach { (_, islandBiome) ->
+            val biomeName = islandBiome.biome.name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
 
-        if (gui.page - 1 == gui.prevPage) {
-            gui.setItem(29, Item.Builder(Material.PAPER).setName(colorify("#a6b2fc&lPrevious Page")).create()) { gui.previous(it.whoClicked as Player) }
-        }
+            val newBiomeItem = ItemBuilder(islandBiome.icon)
+                .name("#a6b2fc&l$biomeName".color())
+                .lore(
+                    listOf(
+                        " &f| #a6b2fcShift-Left Click&7 to change",
+                        " &f| &7your island to this biome.",
+                        " &f|",
+                        " &f| &7Cost: #a6b2fc$${String.format("%.2f", islandBiome.cost)}"
+                    ).color()
+                )
+                .build()
 
-        if (gui.page + 1 == gui.nextPage) {
-            gui.setItem(33, Item.Builder(Material.PAPER).setName(colorify("#a6b2fc&lNext Page")).create()) { gui.next(it.whoClicked as Player) }
-        }
+            val guiItem = GuiItem(newBiomeItem)
+            guiItem.setAction {
 
-        islandManager.biomeMap.toMutableMap().toSortedMap { o1, o2 -> o1.name.compareTo(o2.name) }.forEach { (t, u) ->
-            val biomeName = WordUtils.capitalizeFully(t.name.lowercase().replace("_", " "))
-            val item = Item.Builder(u.icon)
-                .setName(colorify("#a6b2fc&l$biomeName"))
-                .setLore(colorify(" &f| #a6b2fcShift-Left Click&7 to change"), colorify(" &f| &7your island to this biome."), colorify(" &f|"), colorify(" &f| &7Cost: #a6b2fc$${u.cost}"))
-                .glow(island.settings.biome == t)
-                .create()
-
-            gui.addPageItem(item) {
-                if (it.click != ClickType.SHIFT_LEFT)
-                    return@addPageItem
+                if (it.click != ClickType.SHIFT_LEFT) {
+                    return@setAction
+                }
 
                 val whoClicked = it.whoClicked as Player
-
-                if (island.settings.biome == t)
-                    return@addPageItem
-
-                if (!this.plugin.vault.has(whoClicked, u.cost)) {
-                    this.plugin.send(whoClicked, "not-enough-money", StringPlaceholders.single("cost", u.cost))
-                    player.closeInventory()
-                    return@addPageItem
+                if (island.settings.biome == islandBiome.biome) {
+                    return@setAction
                 }
 
-                island.members.mapNotNull { member -> member.offlinePlayer.player }.forEach { member ->
-                    this.plugin.send(member, "changed-biome", StringPlaceholders.single("biome", biomeName))
+                if (!VaultHook.has(whoClicked, islandBiome.cost)) {
+                    this.rosePlugin.send(whoClicked, "no-money")
+                    return@setAction
                 }
+
+
 
                 whoClicked.closeInventory()
-                this.plugin.vault.withdrawPlayer(whoClicked, u.cost)
+                if (VaultHook.withdraw(whoClicked, islandBiome.cost)) {
 
-                island.settings.biome = t
-                islandManager.setIslandBiome(island)
-                this.data.saveIsland(island)
+                    island.settings.biome = islandBiome.biome
+                    islandManager.setIslandBiome(island)
+                    island.cache(this.rosePlugin)
+
+                    island.members.mapNotNull { member -> member.onlinePlayer }.forEach { member ->
+                        this.rosePlugin.send(member, "command-biome-success", StringPlaceholders.single("biome", biomeName))
+                    }
+                }
+
+
             }
+
+            gui.addItem(guiItem)
         }
 
         gui.open(player)
     }
+
+    override val defaultValues: Map<String, Any>
+        get() = mapOf(
+            "#0" to "GUI Settings",
+            "gui-settings.title" to "Island Biomes",
+            "gui-settings.rows" to 4,
+
+            "#1" to "Previous Page",
+            "previous-page.name" to "#a6b2fc&lPrevious Page",
+            "previous-page.lore" to listOf(" &f| #a6b2fcLeft Click&7 to go to the previous page."),
+            "previous-page.material" to Material.PAPER.toString(),
+            "previous-page.glow" to true,
+            "previous-page.slot" to 29,
+
+            "#2" to "Go Back",
+            "go-back.enable" to true,
+            "go-back.name" to "#a6b2fc&lGo Back",
+            "go-back.lore" to listOf(" &f| &7Click to go back to", " &f| &7the main island menu."),
+            "go-back.material" to Material.PLAYER_HEAD.toString(),
+            "go-back.slot" to 31,
+            "go-back.texture" to "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ",
+
+            "#3" to "Next Page",
+            "next-page.name" to "#a6b2fc&lNext Page",
+            "next-page.lore" to listOf(" &f| #a6b2fcLeft Click&7 to go to the next page."),
+            "next-page.material" to Material.PAPER.toString(),
+            "next-page.glow" to true,
+            "next-page.slot" to 33,
+
+            "#4" to "Border Item",
+            "border-item.enabled" to true,
+            "border-item.name" to "",
+            "border-item.material" to Material.BLACK_STAINED_GLASS_PANE.toString(),
+            "border-item.slots" to listOf("0-8", "27-35"),
+        )
+
+
+    override val menuName: String
+        get() = "biomes-gui"
 
 }

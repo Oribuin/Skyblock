@@ -1,29 +1,49 @@
 package xyz.oribuin.skyblock.manager
 
-import org.bukkit.*
+import dev.rosewood.rosegarden.RosePlugin
+import dev.rosewood.rosegarden.manager.Manager
+import dev.rosewood.rosegarden.utils.HexUtils
+import dev.rosewood.rosegarden.utils.StringPlaceholders
+import java.util.*
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.event.HoverEvent
+import org.bukkit.ChatColor
+import org.bukkit.Chunk
+import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.OfflinePlayer
+import org.bukkit.World
 import org.bukkit.block.Biome
 import org.bukkit.block.Block
+import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerTeleportEvent
-import xyz.oribuin.orilibrary.manager.Manager
-import xyz.oribuin.skyblock.SkyblockPlugin
+import xyz.oribuin.skyblock.gui.CreateGUI
 import xyz.oribuin.skyblock.island.BiomeOption
 import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.island.Warp
+import xyz.oribuin.skyblock.manager.ConfigurationManager.Setting
 import xyz.oribuin.skyblock.nms.NMSAdapter
+import xyz.oribuin.skyblock.util.cache
+import xyz.oribuin.skyblock.util.color
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.parseEnum
+import xyz.oribuin.skyblock.util.send
 import xyz.oribuin.skyblock.util.usingPaper
 import xyz.oribuin.skyblock.world.IslandSchematic
 
+class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
-class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
-
-    private val data = this.plugin.getManager<DataManager>()
+    private val dataManager = this.rosePlugin.getManager<DataManager>()
+    private val inviteMap = mutableMapOf<UUID, UUID>()
     val biomeMap = mutableMapOf<Biome, BiomeOption>()
 
-    override fun enable() {
-        val section = this.plugin.config.getConfigurationSection("biomes") ?: return
+    private var taskId = 0
+
+    override fun reload() {
+        this.dataManager.loadIslands()
+        val section = this.rosePlugin.config.getConfigurationSection("biomes") ?: return
 
         // Add all the biomes into the cache.
         section.getKeys(false).forEach {
@@ -34,6 +54,59 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
 
             this.biomeMap[biome] = option
         }
+
+        taskId = this.rosePlugin.server.scheduler.runTaskTimerAsynchronously(this.rosePlugin, Runnable {
+            this.dataManager.saveIslands()
+        }, 0, 20 * 60).taskId
+    }
+
+
+    /**
+     * Get the island member for the given player.
+     *
+     * @param player The player to get the island member for.
+     * @return The island member for the given player.
+     */
+    fun getMember(player: Player): Member = this.dataManager.getMember(player.uniqueId)
+
+    /**
+     * Get the island for the given uuid.
+     *
+     * @param uuid The uuid player to get the island for.
+     * @return The island for the given player.
+     *
+     */
+    fun getMember(uuid: UUID): Member = this.dataManager.getMember(uuid)
+
+    /**
+     * Get the island for the given player.
+     *
+     * @param player The player to get the island for.
+     * @return The island for the given player.
+     */
+    fun getIsland(player: Player): Island? = this.getMember(player).let { this.dataManager.getIsland(it.island) }
+
+    /**
+     * Get the island for the given uuid.
+     *
+     * @param uuid The uuid player to get the island for.
+     * @return The island for the given player.
+     */
+    fun getIsland(uuid: UUID): Island? = this.getMember(uuid).let { this.dataManager.getIsland(it.island) }
+
+    fun getIsland(player: OfflinePlayer): Island? = this.getIsland(player.uniqueId)
+
+    /**
+     * Get the island for the given member
+     *
+     * @param member The member to get the island for.
+     * @return The island for the given member.
+     */
+    fun getIsland(member: Member): Island? = this.dataManager.getIsland(member.island)
+
+    override fun disable() {
+        this.dataManager.saveIslands()
+        this.rosePlugin.server.scheduler.cancelTask(this.taskId)
     }
 
     /**
@@ -43,15 +116,15 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @param schematic The island design.
      */
     fun makeIsland(member: Member, schematic: IslandSchematic): Island {
-        val memberIsland = data.getIsland(member.island)
+        val memberIsland = dataManager.getIsland(member.island)
 
         if (memberIsland != null)
             return memberIsland
 
-        val island = data.createIsland(member.uuid)
-        schematic.paste(plugin, island.center) {
-            this.teleport(member, island.home)
-        }
+        member.onlinePlayer?.let { this.rosePlugin.send(it, "command-create-success") }
+
+        val island = dataManager.createIsland(member.uuid)
+        schematic.paste(this.rosePlugin, island.center) { this.teleport(member, island.home) }
         return island
     }
 
@@ -62,7 +135,13 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @param location The location the player is being teleported to
      */
     fun teleport(member: Member, location: Location) {
-        val player = member.offlinePlayer.player ?: return
+        val island = this.getIslandFromLoc(location) ?: return
+        val player = member.onlinePlayer ?: return
+
+        if (!island.settings.public || island.settings.banned.getUUIDs().contains(member.uuid)) {
+            return
+        }
+
         player.fallDistance = 0f
 
         when (usingPaper) {
@@ -70,9 +149,15 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
             false -> player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN)
         }
 
-        val island = this.getIslandFromLoc(location) ?: return
-        this.plugin.server.scheduler.runTaskLater(this.plugin, Runnable { this.createBorder(member, island) }, 1)
+        this.rosePlugin.server.scheduler.runTaskLater(this.rosePlugin, Runnable { this.createBorder(member, island) }, 1)
     }
+
+    /**
+     * Teleport the member to their island
+     *
+     * @param member The member being teleported.
+     */
+    fun teleportHome(member: Member) = this.getIsland(member)?.let { this.teleport(member, it.home) }
 
     /**
      * Create the island border for the player
@@ -81,9 +166,8 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @param island The island with the border surrounding it.
      */
     fun createBorder(member: Member, island: Island) {
-        val player = member.offlinePlayer.player ?: return
-        val size = this.plugin.getManager<UpgradeManager>().getIslandSize(island)
-        NMSAdapter.handler.sendWorldBorder(player, member.border, size.toDouble(), island.center)
+        val player = member.onlinePlayer ?: return
+        NMSAdapter.handler.sendWorldBorder(player, member.border, Setting.ISLAND_SIZE.double, island.center)
     }
 
     /**
@@ -92,8 +176,8 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @param id The id of the island.
      * @return The island with the matching ID.
      */
-    fun islandFromID(id: Int): Island? {
-        return this.data.islandCache.filter { entry -> entry.key == id }[0]
+    private fun getIslandFromId(id: Int): Island? {
+        return this.dataManager.getIsland(id)
     }
 
     /**
@@ -103,7 +187,7 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @return The island with the location in range.
      */
     fun getIslandFromLoc(location: Location): Island? {
-        return this.data.islandCache.values.find { this.isInside(it, location.x, location.z) }
+        return this.dataManager.islandCache.values.find { this.isInside(it, location.x, location.z) }
     }
 
     /**
@@ -113,11 +197,30 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @param z The Z Axis
      * @return true if it's inside the island.
      */
-    private fun isInside(island: Island, x: Double, z: Double): Boolean {
-        val pos1 = getPos1(island, null)
-        val pos2 = getPos2(island, null)
+    private fun isInside(island: Island, x: Double, z: Double, world: World? = null): Boolean {
+        val pos1 = getPos1(island, world)
+        val pos2 = getPos2(island, world)
 
         return pos1.x <= x && pos1.z <= z && pos2.x >= x && pos2.z >= z
+    }
+
+    /**
+     * Get all players that are inside the island
+     *
+     * @param island The island to check
+     * @return A list of players inside the island
+     */
+    fun getPlayersOnIsland(island: Island): List<Player> {
+        val worldManager = this.rosePlugin.getManager<WorldManager>()
+
+        var players = emptyList<Player>()
+        for (world in worldManager.worlds.values) {
+            players = world.players.filter { this.isInside(island, it.location.x, it.location.z, world) }
+            if (players.isNotEmpty())
+                return players
+        }
+
+        return players
     }
 
     /**
@@ -152,10 +255,10 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @param island The island.
      */
     fun setIslandBiome(island: Island) {
-        val chunks = this.getIslandChunks(island, world = this.plugin.getManager<WorldManager>().overworld)
+        val chunks = this.getIslandChunks(island, world = this.rosePlugin.getManager<WorldManager>().overworld)
         chunks.forEach { chunk -> chunk.blocks.forEach { it.biome = island.settings.biome } }
 
-        this.plugin.server.scheduler.runTaskLater(this.plugin, Runnable { NMSAdapter.handler.sendChunks(chunks, Bukkit.getOnlinePlayers().toList()) }, 2)
+        this.rosePlugin.server.scheduler.runTaskLater(this.rosePlugin, Runnable { NMSAdapter.handler.sendChunks(chunks, this.getPlayersOnIsland(island)) }, 2)
     }
 
     /**
@@ -164,7 +267,7 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @param world The world the island is in.
      */
     private fun getPos1(island: Island, world: World?): Location {
-        val size = plugin.getManager<UpgradeManager>().getIslandSize(island)
+        val size = Setting.ISLAND_SIZE.double
         val centerInWorld = Location(world, island.center.x, island.center.y, island.center.z)
         return centerInWorld.clone().subtract(Location(world, size / 2.0, 0.0, size / 2.0))
     }
@@ -175,7 +278,7 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @param world The world the island is in.
      */
     private fun getPos2(island: Island, world: World?): Location {
-        val size = plugin.getManager<UpgradeManager>().getIslandSize(island)
+        val size = Setting.ISLAND_SIZE.double
         val centerInWorld = Location(world, island.center.x, island.center.y, island.center.z)
         return centerInWorld.clone().add(Location(world, size / 2.0, 0.0, size / 2.0))
     }
@@ -206,34 +309,217 @@ class IslandManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      * @param member The member being teleported.
      */
     fun warpTeleport(warp: Warp, member: Member) {
+
+        val island = this.getIslandFromId(warp.key) ?: return
+
+        // Check if the island is locked or the warp is disabled
+        if (!island.settings.public || island.warp.disabled)
+            return
+
+        // Check if the user is banned from the island
+        if (member.onlinePlayer?.hasPermission("skyblock.bypass") != true && island.settings.banned.getUUIDs().contains(member.uuid))
+            return
+
         // Check if the user has already visited and if the user teleported is part of the island
         if (!warp.visitUsers.contains(member.uuid) && member.island != warp.key) {
             warp.visits++
             warp.visitUsers.add(member.uuid)
 
-            val island = this.islandFromID(warp.key)
-            if (island != null) {
-                island.warp = warp
-                this.data.islandCache[island.key] = island
-            }
+            island.cache(this.rosePlugin)
         }
 
         this.teleport(member, warp.location)
     }
 
+//    /**
+//     * Get a warp by the name of it
+//     *
+//     * @param name The name of the warp.
+//     * @return The warp with the matching name.
+//     */
+//    fun getWarpByName(name: String): Warp? = this.dataManager.islandCache.values
+//        .map { it.warp }
+//        .find { HexUtils.colorify(it.name).lowercase().let { x -> ChatColor.stripColor(x) }.equals(name.lowercase(), true) }
 
-    //    /**
-    //     * Get a member from the island.
-    //     *
-    //     * @param player The player's UUID
-    //     * @return The member
-    //     */
-    //    fun getMember(player: UUID): Member {
-    //        return data.islandCache.values.stream()
-    //            .map<List<Member>>(Island::members)
-    //            .flatMap { it.stream() }
-    //            .filter { (uuid): Member -> uuid == player }
-    //            .findFirst()
-    //            .orElse(Member(player))
-    //    }
+
+    fun getWarpsByName(name: String): Warp? {
+        for (warp in this.dataManager.islandCache.values.map { it.warp }) {
+            val warpName = HexUtils.colorify(warp.name.lowercase()).lowercase().let { x -> ChatColor.stripColor(x) }
+
+            println("$name / $warpName")
+            if (warpName.equals(name.lowercase(), true)) {
+                return warp
+            }
+        }
+
+        return null
+    }
+
+    /**
+     * Get a warp by the category of it
+     *
+     * @param category The warp category type
+     * @return The warp with the matching category.
+     */
+    fun getWarpByCategory(category: Warp.Category.Type): List<Warp> = this.dataManager.islandCache.values
+        .map { it.warp }
+        .filter { it.category.types.contains(category) }
+        .toMutableList()
+
+    /**
+     * Get all names for warps in a category
+     *
+     * @return The warp names.
+     */
+    fun getWarpNames(): MutableList<String> = this.dataManager.islandCache.values
+        .map { it.warp }
+        .mapNotNull { ChatColor.stripColor(it.name) }
+        .toMutableList()
+
+    /**
+     * Send all members of an island a message from the locale
+     *
+     * @param island The island.
+     * @param messageId The message id.
+     * @param placeholders The message placeholders.
+     */
+    fun sendMembersMessage(island: Island, messageId: String, placeholders: StringPlaceholders = StringPlaceholders.empty()) {
+        island.members.mapNotNull { it.onlinePlayer }.forEach { this.rosePlugin.send(it, messageId, placeholders) }
+    }
+
+    /**
+     * Get all the banned players from an island
+     *
+     * @param island The island.
+     * @return The banned players.
+     */
+    fun getBannedUsers(island: Island): List<UUID> = this.dataManager.islandCache[island.key]?.settings?.banned?.getUUIDs() ?: emptyList()
+
+
+    /**
+     * Send a player an island invite
+     *
+     * @param from The player sending the invite.
+     * @param to The player receiving the invite.
+     *
+     */
+    fun sendInvite(from: Player, to: Player) {
+
+        // Check if the players are the same person
+        if (from.uniqueId == to.uniqueId) {
+            this.rosePlugin.send(from, "island-invite-cant-invite-self")
+            return
+        }
+
+        // Get members
+        val fromMember = this.getMember(from)
+        val toMember = this.getMember(to)
+        // Get island
+        val fromIsland = this.getIsland(fromMember)
+
+        // Check if the fromPlayer has an island
+        if (fromIsland == null) {
+            CreateGUI(this.rosePlugin).openMenu(fromMember)
+            return
+        }
+
+        // Check if the toMember has an island
+        if (toMember.hasIsland) {
+            this.rosePlugin.send(from, "island-invite-has-island")
+            return
+        }
+
+        // Check if the island can fit the player
+        if (fromIsland.members.size >= Setting.MAX_MEMBERS.int) {
+            this.rosePlugin.send(from, "island-invite-full")
+            return
+        }
+
+        val localeManager = this.rosePlugin.getManager<LocaleManager>()
+        localeManager.sendMessage(from, "island-invite-sent", StringPlaceholders.single("player", to.name))
+        val prefix = localeManager.getLocaleMessage("prefix")
+        val receivedMessage = prefix + localeManager.getLocaleMessage("island-invite-received", StringPlaceholders.single("player", from.name))
+
+        to.sendMessage(
+            Component.text(receivedMessage.color())
+                .clickEvent(ClickEvent.suggestCommand("/is invite accept ${from.name}"))
+                .hoverEvent(HoverEvent.showText(Component.text("#a6b2fcClick to accept this request.".color())))
+        )
+
+        this.inviteMap[from.uniqueId] = to.uniqueId
+    }
+
+    /**
+     * Accept an island invite from a player
+     *
+     * @param member The player accepting the invite.
+     */
+    fun acceptInvite(member: Member) {
+
+        val player = member.onlinePlayer ?: return // Member cannot be offline
+
+        val invite = this.inviteMap.values.find { it == member.uuid }
+        if (invite == null) {
+            this.rosePlugin.send(player, "command-invite-no-invite")
+            return
+        }
+
+
+        val from = this.getMember(invite) // The player who sent the invite
+        val island = this.getIsland(from) // The island the player is being invited to
+
+        // Check if the person who sent the invite has an island
+        if (island == null) {
+            this.rosePlugin.send(player, "command-invite-no-island")
+            return
+        }
+
+        // Check if the member already has an island
+        if (member.hasIsland) {
+            this.rosePlugin.send(player, "command-invite-has-island")
+            return
+        }
+
+
+        // check if the member can fit on the island
+        if (island.members.size >= Setting.MAX_MEMBERS.int) {
+            this.rosePlugin.send(player, "command-invite-full")
+            return
+        }
+
+
+        // remove anything from inviteMap if member is the value
+        this.inviteMap.filterValues { it == member.uuid }.forEach { this.inviteMap.remove(it.key) }
+
+
+        island.members.add(member)
+        island.cache(this.rosePlugin)
+        this.rosePlugin.send(player, "command-invite-accepted")
+        this.sendMembersMessage(island, "command-invite.member-joined", StringPlaceholders.single("player", player.name))
+    }
+
+    /**
+     * Deny an island invite from a player
+     *
+     * @param player The player denying the invite.
+     */
+    fun denyInvite(player: Player) {
+        val invite = this.inviteMap.entries.find { it.value == player.uniqueId }
+        if (invite == null) {
+            this.rosePlugin.send(player, "command-invite-no-invite")
+            return
+        }
+
+        this.inviteMap.filterValues { it == player.uniqueId }.forEach { this.inviteMap.remove(it.key) }
+
+
+        this.rosePlugin.send(player, "command-invite-denied")
+
+        this.getMember(invite.key).onlinePlayer?.let {
+            this.rosePlugin.send(it, "command-invite-denied-other", StringPlaceholders.single("player", player.name))
+        }
+    }
+
+    fun getIslands(): List<Island> = this.dataManager.islandCache.values.toList()
+
 }

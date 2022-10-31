@@ -1,25 +1,36 @@
 package xyz.oribuin.skyblock.listener
 
-import org.bukkit.entity.*
+import dev.rosewood.rosegarden.RosePlugin
+import org.bukkit.entity.Animals
+import org.bukkit.entity.ArmorStand
+import org.bukkit.entity.Hanging
+import org.bukkit.entity.Mob
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.PlayerDeathEvent
-import org.bukkit.event.player.*
+import org.bukkit.event.player.PlayerInteractEntityEvent
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerRespawnEvent
+import org.bukkit.event.player.PlayerShearEntityEvent
+import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.inventory.Merchant
-import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.island.Member
-import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.manager.WorldManager
+import xyz.oribuin.skyblock.util.asMember
+import xyz.oribuin.skyblock.util.cache
+import xyz.oribuin.skyblock.util.getIsland
 import xyz.oribuin.skyblock.util.getManager
 
-class PlayerListeners(private val plugin: SkyblockPlugin) : Listener {
+class PlayerListeners(private val rosePlugin: RosePlugin) : Listener {
 
-    private val data = this.plugin.getManager<DataManager>()
-    private val islandManager = this.plugin.getManager<IslandManager>()
-    private val worldManager = this.plugin.getManager<WorldManager>()
+    private val islandManager = this.rosePlugin.getManager<IslandManager>()
+    private val worldManager = this.rosePlugin.getManager<WorldManager>()
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun PlayerTeleportEvent.onTeleport() {
@@ -27,23 +38,22 @@ class PlayerListeners(private val plugin: SkyblockPlugin) : Listener {
             return
 
         val island = islandManager.getIslandFromLoc(this.to) ?: return
-        val member = data.getMember(player.uniqueId)
 
-        islandManager.createBorder(member, island)
+        islandManager.createBorder(this.player.asMember(rosePlugin), island)
     }
 
     @EventHandler
     fun PlayerJoinEvent.onJoin() {
-        data.getMember(this.player.uniqueId)
+        this.player.asMember(rosePlugin)
 
         // we're getting the member again because the value above will still return null.
         lateinit var member: Member
-        plugin.server.scheduler.runTaskLaterAsynchronously(plugin, Runnable {
-            member = data.getMember(this.player.uniqueId)
-            data.getIsland(member.island)
+        rosePlugin.server.scheduler.runTaskLaterAsynchronously(rosePlugin, Runnable {
+            member = this.player.asMember(rosePlugin)
+            member.getIsland(rosePlugin)
         }, 2)
 
-        plugin.server.scheduler.runTaskLater(plugin, Runnable {
+        rosePlugin.server.scheduler.runTaskLater(rosePlugin, Runnable {
             val island = islandManager.getIslandFromLoc(player.location) ?: return@Runnable
             islandManager.createBorder(member, island)
         }, 3)
@@ -51,10 +61,7 @@ class PlayerListeners(private val plugin: SkyblockPlugin) : Listener {
 
     @EventHandler
     fun PlayerQuitEvent.onQuit() {
-        val member = data.getMember(this.player.uniqueId)
-        val island = data.getIsland(member.island) ?: return
-
-        data.saveIsland(island)
+        this.player.getIsland(rosePlugin)?.cache(rosePlugin)
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
@@ -143,11 +150,6 @@ class PlayerListeners(private val plugin: SkyblockPlugin) : Listener {
 
         val island = islandManager.getIslandFromLoc(this.player.location) ?: return
         this.respawnLocation = island.home
-    }
-
-    init {
-        // Register plugin listeners.
-        this.plugin.server.pluginManager.registerEvents(this, this.plugin)
     }
 
 }

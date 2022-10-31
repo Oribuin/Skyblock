@@ -6,11 +6,11 @@ import com.sk89q.worldedit.extent.clipboard.Clipboard
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import com.sk89q.worldedit.function.operation.Operations
 import com.sk89q.worldedit.session.ClipboardHolder
-import org.bukkit.Location
-import org.bukkit.Material
-import xyz.oribuin.skyblock.SkyblockPlugin
+import dev.rosewood.rosegarden.RosePlugin
 import java.io.File
 import java.io.FileInputStream
+import org.bukkit.Location
+import org.bukkit.Material
 
 /**
  * @author Esophose
@@ -31,7 +31,7 @@ class IslandSchematic(
      * @param location The location of the schematic
      * @param callback The callback function for the paste task.
      */
-    fun paste(plugin: SkyblockPlugin, location: Location, callback: (() -> Unit)? = null) {
+    fun paste(plugin: RosePlugin, location: Location, callback: (() -> Unit)? = null) {
         val clipboard: Clipboard
         this.format.getReader(FileInputStream(this.file)).use { clipboard = it.read() }
 

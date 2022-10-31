@@ -1,120 +1,133 @@
 package xyz.oribuin.skyblock.gui
 
+import dev.rosewood.rosegarden.RosePlugin
+import dev.rosewood.rosegarden.utils.StringPlaceholders
+import dev.triumphteam.gui.guis.Gui
+import dev.triumphteam.gui.guis.GuiItem
+import java.util.*
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.event.Event
-import xyz.oribuin.gui.Gui
-import xyz.oribuin.gui.Item
-import xyz.oribuin.orilibrary.util.HexUtils.colorify
-import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.nms.BorderColor
-import xyz.oribuin.skyblock.util.color
+import xyz.oribuin.skyblock.util.ItemBuilder
+import xyz.oribuin.skyblock.util.formatEnum
+import xyz.oribuin.skyblock.util.getItemStack
 import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.skyblock.util.numRange
+import xyz.oribuin.skyblock.util.send
 
-class BorderGUI(private val plugin: SkyblockPlugin) {
+class BorderGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
-    private val data = plugin.getManager<DataManager>()
-    private lateinit var activeColor: BorderColor
+    private val data = this.rosePlugin.getManager<DataManager>()
+    private val activeColors = mutableMapOf<UUID, BorderColor>()
 
-    fun create(player: Player) {
-
-        val member = data.getMember(player.uniqueId)
-        activeColor = member.border
-
-        val gui = Gui(27, "Border Color: " + activeColor.name.lowercase().replaceFirstChar { it.uppercase() })
-
-        // Stop people from yoinking items out the gui.
-        gui.setDefaultClickFunction {
-            it.isCancelled = true
-            it.result = Event.Result.DENY
-            (it.whoClicked as Player).updateInventory()
+    fun openMenu(player: Player) {
+        val gui = this.createGUI(player)
+        val member = this.data.getMember(player.uniqueId)
+        if (!this.activeColors.containsKey(player.uniqueId)) {
+            this.activeColors[player.uniqueId] = member.border
         }
 
-        // Stop people from putting stuff in the gui.
-        gui.setPersonalClickAction { gui.defaultClickFunction.accept(it) }
+        gui.setCloseGuiAction {
+            val active = this.activeColors[it.player.uniqueId] ?: return@setCloseGuiAction
 
-        gui.setCloseAction {
-            if (activeColor != member.border) {
-                member.border = activeColor
-                data.saveMember(member)
+            if (active != member.border) {
+                member.border = active
+                with(data) { member.save() }
+
+                this.rosePlugin.send(it.player, "command-border-success", StringPlaceholders.single("border", active.name.formatEnum()))
             }
 
-            val islandManager = this.plugin.getManager<IslandManager>()
-            val island = islandManager.getIslandFromLoc(it.player.location) ?: return@setCloseAction
+
+            val islandManager = this.rosePlugin.getManager<IslandManager>()
+            val island = islandManager.getIslandFromLoc(it.player.location) ?: return@setCloseGuiAction
             islandManager.createBorder(member, island)
         }
 
-        gui.setItems(numRange(0, 26), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
-
-        gui.setItem(10, Item.Builder(Material.SPRUCE_SIGN).setName("#a6b2fc&lBorder Color".color()).setLore(infoLore).create()) {}
-        this.setBorderItems(gui)
+        this.put(gui, "border-item", player)
+        this.put(gui, "border-info", player)
 
         gui.open(player)
+        gui.setBorderIcons(player)
     }
 
-    private fun setBorderItems(gui: Gui) {
-        gui.setItem(
-            12, Item.Builder(Material.RED_DYE)
-                .setName("#ff6961&lRed Border".color())
-                .glow(activeColor == BorderColor.RED)
-                .setLore(borderLore).create()
-        ) {
-            activeColor = BorderColor.RED
-            setBorderItems(gui)
-            gui.update()
-        }
-        gui.setItem(
-            13, Item.Builder(Material.LIME_DYE)
-                .setName("#77dd77&lGreen Border".color())
-                .glow(activeColor == BorderColor.GREEN)
-                .setLore(borderLore).create()
-        ) {
-            activeColor = BorderColor.GREEN
-            setBorderItems(gui)
-            gui.update()
+    private fun Gui.setBorderIcons(player: Player) {
+
+        val currentActive = activeColors[player.uniqueId] ?: BorderColor.BLUE
+
+        for (color in BorderColor.values()) {
+            val item = ItemBuilder(getItemStack(config, "${color.name.lowercase()}-border", player))
+                .glow(color == currentActive)
+                .build()
+
+            val slot = config.getInt("${color.name.lowercase()}-border.slot")
+            this.setItem(slot, GuiItem(item) {
+                activeColors[player.uniqueId] = color
+                this.setBorderIcons(player)
+            })
         }
 
-        gui.setItem(
-            14, Item.Builder(Material.LIGHT_BLUE_DYE)
-                .setName("#417cfc&lBlue Border".color())
-                .glow(activeColor == BorderColor.BLUE)
-                .setLore(borderLore)
-                .create()
-        ) {
-            activeColor = BorderColor.BLUE
-            setBorderItems(gui)
-            gui.update()
-        }
+        this.update()
+        this.updateTitle(formatString(player, get("gui-settings.title", "Border Color %color%"), StringPlaceholders.single("color", currentActive.name.formatEnum())))
 
-        // reset the color
-        gui.setItem(
-            16, Item.Builder(Material.GRAY_DYE)
-                .setName("#a6b2fc&lInvisible Border".color())
-                .glow(activeColor == BorderColor.OFF)
-                .setLore(borderLore)
-                .create()
-        ) {
-            activeColor = BorderColor.OFF
-            setBorderItems(gui)
-            gui.update()
-        }
     }
-
-    private val infoLore: List<String>
-        get() = mutableListOf(
-            "&f | &7Click on the dyes change",
-            "&f | &7your personal border color!",
-            "",
-            "&f | &7This is only visible to you."
-        ).color()
 
     private val borderLore: List<String>
         get() = mutableListOf(
             "&f | &7Click to change your",
             "&f | &7personal island border",
             "&f | &7to this color!"
-        ).color()
+        )
+
+    override val defaultValues: Map<String, Any>
+        get() = mapOf(
+            "#0" to "GUI Settings",
+            "gui-settings.title" to "Border Color | %color%",
+            "gui-settings.rows" to 3,
+
+            "#1" to "Red Border",
+            "red-border.material" to Material.RED_DYE.name,
+            "red-border.name" to "#ff6961&lRed Border",
+            "red-border.lore" to borderLore,
+            "red-border.slot" to 12,
+
+            "#2" to "Green Border",
+            "green-border.material" to Material.LIME_DYE.name,
+            "green-border.name" to "#77dd77&lGreen Border",
+            "green-border.lore" to borderLore,
+            "green-border.slot" to 13,
+
+            "#3" to "Blue Border",
+            "blue-border.material" to Material.LIGHT_BLUE_DYE.name,
+            "blue-border.name" to "#417cfc&lBlue Border",
+            "blue-border.lore" to borderLore,
+            "blue-border.slot" to 14,
+
+            "#4" to "Invisible Border",
+            "off-border.material" to Material.GRAY_DYE.name,
+            "off-border.name" to "#a6b2fc&lInvisible Border",
+            "off-border.lore" to borderLore,
+            "off-border.slot" to 15,
+
+            "#5" to "Border Info",
+            "border-info.enabled" to true,
+            "border-info.material" to Material.SPRUCE_SIGN.name,
+            "border-info.name" to "#a6b2fc&lBorder Color",
+            "border-info.lore" to listOf(
+                "&f | &7Click on the dyes change",
+                "&f | &7your personal border color!",
+                "",
+                "&f | &7This is only visible to you."
+            ),
+            "border-info.slot" to 10,
+
+            "#6" to "Border Item",
+            "border-item.enabled" to true,
+            "border-item.material" to Material.BLACK_STAINED_GLASS_PANE.name,
+            "border-item.name" to " ",
+            "border-item.slots" to listOf("0-26"),
+        )
+
+    override val menuName: String
+        get() = "border-gui"
 }

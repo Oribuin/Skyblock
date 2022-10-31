@@ -1,3 +1,4 @@
 dependencies {
     shadow 'org.spigotmc:spigot:1.17.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }

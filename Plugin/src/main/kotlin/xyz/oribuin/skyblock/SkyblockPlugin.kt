@@ -1,19 +1,31 @@
 package xyz.oribuin.skyblock
 
-import net.milkbowl.vault.economy.Economy
-import xyz.oribuin.orilibrary.OriPlugin
-import xyz.oribuin.skyblock.command.SkyblockCommand
+import dev.rosewood.rosegarden.RosePlugin
+import dev.rosewood.rosegarden.manager.Manager
+import xyz.oribuin.skyblock.hook.PAPI
+import xyz.oribuin.skyblock.hook.VaultHook
 import xyz.oribuin.skyblock.listener.BlockListeners
 import xyz.oribuin.skyblock.listener.EntityListeners
 import xyz.oribuin.skyblock.listener.PlayerListeners
-import xyz.oribuin.skyblock.manager.*
-import xyz.oribuin.skyblock.util.getManager
+import xyz.oribuin.skyblock.manager.CommandManager
+import xyz.oribuin.skyblock.manager.ConfigurationManager
+import xyz.oribuin.skyblock.manager.DataManager
+import xyz.oribuin.skyblock.manager.IslandManager
+import xyz.oribuin.skyblock.manager.LocaleManager
+import xyz.oribuin.skyblock.manager.MenuManager
+import xyz.oribuin.skyblock.manager.WorldManager
 
-class SkyblockPlugin : OriPlugin() {
+class SkyblockPlugin : RosePlugin(
+    -1,
+    -1,
+    ConfigurationManager::class.java,
+    DataManager::class.java,
+    LocaleManager::class.java,
+    CommandManager::class.java
+) {
 
-    lateinit var vault: Economy
 
-    override fun enablePlugin() {
+    override fun enable() {
 
         // Check for worldedit.
         val worldeditPlugins = listOf("WorldEdit", "FastAsyncWorldEdit", "AsyncWorldEdit")
@@ -30,29 +42,35 @@ class SkyblockPlugin : OriPlugin() {
             return
         }
 
-        // Load Plugin Managers.
-        this.getManager<ConfigManager>()
-        this.getManager<MessageManager>()
-        this.getManager<WorldManager>()
-        this.getManager<DataManager>()
-        this.getManager<IslandManager>()
-        this.getManager<UserManager>()
-        this.getManager<UpgradeManager>()
-
-        // Register Plugin Command.
-        SkyblockCommand(this)
 
         // Register Plugin Listeners
-        BlockListeners(this)
-        EntityListeners(this)
-        PlayerListeners(this)
+        this.server.pluginManager.registerEvents(BlockListeners(this), this)
+        this.server.pluginManager.registerEvents(EntityListeners(this), this)
+        this.server.pluginManager.registerEvents(PlayerListeners(this), this)
 
-        // Load Vault Eco
-        this.vault = this.server.servicesManager.getRegistration(Economy::class.java)?.provider!! // this cant be null so im happy to use !!
+        // Load Vault Hook
+        VaultHook()
+        PAPI(this)
     }
 
-    override fun disablePlugin() {
+    override fun disable() {
+        // Unused for now.
+    }
 
+    override fun getManagerLoadPriority(): MutableList<Class<out Manager>> {
+        return mutableListOf(
+            WorldManager::class.java,
+            IslandManager::class.java,
+            MenuManager::class.java,
+        )
+    }
+
+    companion object {
+        lateinit var instance: SkyblockPlugin
+    }
+
+    init {
+        instance = this
     }
 
 }

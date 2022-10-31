@@ -1,8 +1,0 @@
-plains:
-  name: '#a6b2fc&lPlains'
-  icon: GRASS_BLOCK
-  lore:
-    - ' &f| &7This is the main starter'
-    - ' &f| &7set in the plains biome!'
-    - ' &f|'
-    - ' &f| &7Click to create this island.'

@@ -8,25 +8,30 @@ compileJava {
 dependencies {
     implementation project(':NMS:Wrapper')
 
-    shadow 'org.spigotmc:spigot:1.17'
-    compileOnly 'io.papermc.paper:paper-api:1.17-R0.1-SNAPSHOT'
+    compileOnly 'org.jetbrains:annotations:23.0.0'
 
-    // Plugin Dependencies
-    compileOnly 'me.clip:placeholderapi:2.10.9'
-    compileOnly('com.github.MilkBowl:VaultAPI:1.7') { exclude group: 'org.bukkit' }
-    compileOnly 'com.sk89q.worldedit:worldedit-bukkit:7.2.6-SNAPSHOT'
+    // Spigot Dependencies
+    compileOnly 'org.spigotmc:spigot:1.19.1'
+    compileOnly 'io.papermc.paper:paper-api:1.19.1-R0.1-SNAPSHOT'
+    compileOnly 'com.mojang:authlib:1.5.21'
+
+    // Plugin APIs
+    compileOnly 'me.clip:placeholderapi:2.10.10'
+    compileOnly 'com.sk89q.worldedit:worldedit-bukkit:7.2.12-SNAPSHOT'
+    compileOnly('com.github.MilkBowl:VaultAPI:1.7') {
+        exclude group: 'org.bukkit'
+    }
 
     // Frameworks
-    implementation 'xyz.oribuin:orilib:1.3.7'
-    implementation 'xyz.oribuin:ori-gui:1.0.6'
-    // Compiled the 1.18 support in here since they weren't official releases at the time of adding this
-    implementation 'io.github.bananapuncher714:nbteditor:7.18.0'
-//    implementation name: 'nbteditor-7.18.0' // https://github.com/BananaPuncher714/NBTEditor
-    implementation name: 'anvilgui-1.5.4-SNAPSHOT'// https://github.com/WesJD/AnvilGUI
+    api 'dev.rosewood:rosegarden:1.1.0.42-SNAPSHOT' // https://github.com/Rosewood-Development/RoseGarden
+    api 'io.github.bananapuncher714:nbteditor:7.18.2' // https://github.com/BananaPuncher714/NBTEditor
+    api 'net.wesjd:anvilgui:1.5.3-SNAPSHOT'// https://github.com/WesJD/AnvilGUI
+    api('dev.triumphteam:triumph-gui:3.1.3') { // https://github.com/TriumphTeam/triumph-gui/
+        exclude group: 'com.google.code.gson', module: 'gson' // Already included in spigot-api
+    }
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
-    // Frameworks & MySQL APIs
-    implementation 'com.zaxxer:HikariCP:5.0.0'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.6.0'
+
 }
 
 shadowJar {

@@ -1,119 +1,60 @@
 package xyz.oribuin.skyblock.manager
 
 import com.google.gson.Gson
+import dev.rosewood.rosegarden.RosePlugin
+import dev.rosewood.rosegarden.database.DataMigration
+import dev.rosewood.rosegarden.manager.AbstractDataManager
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.sql.Connection
+import java.sql.Statement
+import java.util.*
+import java.util.function.Consumer
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.Material
 import org.bukkit.block.Biome
+import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitTask
-import xyz.oribuin.orilibrary.database.MySQLConnector
-import xyz.oribuin.orilibrary.manager.DataHandler
-import xyz.oribuin.skyblock.SkyblockPlugin
-import xyz.oribuin.skyblock.island.*
+import org.bukkit.util.io.BukkitObjectInputStream
+import org.bukkit.util.io.BukkitObjectOutputStream
+import xyz.oribuin.skyblock.database.migration.CreateInitialTables
+import xyz.oribuin.skyblock.island.Island
+import xyz.oribuin.skyblock.island.Member
+import xyz.oribuin.skyblock.island.Report
+import xyz.oribuin.skyblock.island.Settings
+import xyz.oribuin.skyblock.island.Warp
+import xyz.oribuin.skyblock.manager.ConfigurationManager.Setting
 import xyz.oribuin.skyblock.nms.BorderColor
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.getNextIslandLocation
 import xyz.oribuin.skyblock.util.parseEnum
-import java.sql.Statement
-import java.util.*
-import java.util.function.Consumer
 
-class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
+class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
 
     val islandCache = mutableMapOf<Int, Island>()
-    val userCache = mutableMapOf<UUID, Member>()
+    private val userCache = mutableMapOf<UUID, Member>()
+    private val islandReports = mutableSetOf<Report>()
 
     private val gson = Gson()
 
-    override fun enable() {
-        super.enable()
+    fun loadIslands() {
+        this.islandCache.clear()
+
         this.async { _ ->
-            val increment = if (connector is MySQLConnector) " AUTO_INCREMENT" else ""
-            this.connector.connect {
+            this.databaseConnector.connect {
 
-                // The table for saving island location.
-                val islandDB = "CREATE TABLE IF NOT EXISTS ${tableName}_islands (" +
-                        "`key` INTEGER PRIMARY KEY$increment, " +
-                        "owner VARCHAR(36), " +
-                        "`x` DOUBLE, " +
-                        "`y` DOUBLE, " +
-                        "`z` DOUBLE, " +
-                        "`yaw` FLOAT, " +
-                        "`pitch` FLOAT, " +
-                        "world TEXT)"
-
-                it.prepareStatement(islandDB).executeUpdate()
-
-                // The table for saving the island settings.
-                val settingsDB = "CREATE TABLE IF NOT EXISTS ${tableName}_settings (" +
-                        "`key` INT, " +
-                        "`name` TEXT, " +
-                        "`public` BOOLEAN DEFAULT true, " +
-                        "mobSpawning BOOLEAN DEFAULT true, " +
-                        "animalSpawning BOOLEAN DEFAULT true, " +
-                        "biome TEXT, " +
-                        "bans TEXT, " +
-                        "PRIMARY KEY(key))"
-
-                it.prepareStatement(settingsDB).executeUpdate()
-
-                // The table for saving the island upgrades.
-                val upgradesDB = "CREATE TABLE IF NOT EXISTS ${tableName}_upgrades (" +
-                        "`key` INT, " +
-                        "islandFly BOOLEAN DEFAULT false, " +
-                        "sizeTier INT, " +
-                        "chestGenTier INT, " +
-                        "PRIMARY KEY (key))"
-
-                it.prepareStatement(upgradesDB).executeUpdate()
-
-                // The table for the island members
-                val membersDB = "CREATE TABLE IF NOT EXISTS ${tableName}_members (" +
-                        "`key` INT, " +
-                        "player VARCHAR(36), " +
-                        "role VARCHAR(36), " +
-                        "border TEXT, " +
-                        "PRIMARY KEY(player))"
-
-                it.prepareStatement(membersDB).executeUpdate()
-
-                // The table for the island warps
-                val warpsDB = "CREATE TABLE IF NOT EXISTS ${tableName}_warps (" +
-                        "key INT, " +
-                        "name TEXT, " +
-                        "icon TEXT, " +
-                        "description TEXT," + // Will likely have to convert this into a string.
-                        "visits INT DEFAULT 0, " +
-                        "`votes` INT DEFAULT 0, " +
-                        "category TEXT, " +
-                        "`x` DOUBLE, " + // Location of the warp.
-                        "`y` DOUBLE, " +
-                        "`z` DOUBLE, " +
-                        "`yaw` FLOAT, " +
-                        "`pitch` FLOAT, " +
-                        "`world` TEXT, " +
-                        "PRIMARY KEY(key))"
-
-                it.prepareStatement(warpsDB).executeUpdate();
-
-                val homesDB = "CREATE TABLE IF NOT EXISTS ${tableName}_homes (" +
-                        "key INT, " +
-                        "x DOUBLE, " +
-                        "y DOUBLE, " +
-                        "z DOUBLE, " +
-                        "world TEXT, " +
-                        "yaw FLOAT, " +
-                        "pitch FLOAT, " +
-                        "PRIMARY KEY(key))"
-
-                it.prepareStatement(homesDB).executeUpdate()
-
-                val islandQuery = "SELECT key FROM ${tableName}_islands"
+                val islandQuery = "SELECT key FROM ${this.tablePrefix}islands"
                 val result = it.prepareStatement(islandQuery).executeQuery()
                 while (result.next()) {
                     this.getIsland(result.getInt(1))
                 }
             }
+        }
+    }
+
+    fun saveIslands() {
+        this.databaseConnector.connect {
+            this.islandCache.values.forEach { island -> this.saveIsland(island, it) }
         }
     }
 
@@ -125,8 +66,9 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
      */
     fun createIsland(owner: UUID): Island {
         lateinit var island: Island
-        this.connector.connect {
-            val insertGroup = "INSERT INTO ${tableName}_islands (owner) VALUES (?)"
+
+        this.databaseConnector.connect {
+            val insertGroup = "INSERT INTO ${this.tablePrefix}islands (owner) VALUES (?)"
 
             val islandStatement = it.prepareStatement(insertGroup, Statement.RETURN_GENERATED_KEYS)
             islandStatement.setString(1, owner.toString())
@@ -135,16 +77,26 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
             val keys = islandStatement.generatedKeys
             if (keys.next()) {
                 val key = keys.getInt(1)
-                val newIsland = Island(key, owner, getNextIslandLocation(key, plugin.getManager<WorldManager>().overworld, 350))
+                val newIsland = Island(key, owner, getNextIslandLocation(key, this.rosePlugin.getManager<WorldManager>().overworld, Setting.ISLAND_SIZE.int))
                 val username = Bukkit.getPlayer(owner)?.name ?: "Unknown"
                 newIsland.settings.name = "$username's Island"
                 newIsland.warp.name = "$username's Warp"
                 island = newIsland
-                this.saveIsland(newIsland) // save the new island that was created.
+                this.saveIsland(newIsland, it) // save the new island that was created.
             }
         }
 
         return island
+    }
+
+    fun cacheIsland(island: Island) {
+        this.islandCache[island.key] = island
+
+        // Check if it has been 10 minutes since the last save.
+        if (island.lastSave + 600000 < System.currentTimeMillis()) {
+            this.databaseConnector.connect { this.saveIsland(island, it) }
+        }
+
     }
 
     /**
@@ -152,81 +104,88 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
      *
      * @param island The island being saved
      */
-    fun saveIsland(island: Island) {
+    private fun saveIsland(island: Island, connection: Connection) {
+        island.lastSave = System.currentTimeMillis()
         this.islandCache[island.key] = island
 
-        // Get the remade connection or make a new one.
-        this.async { _ ->
-            this.connector.connect {
+        val main = connection.prepareStatement("REPLACE INTO ${this.tablePrefix}islands (`key`, owner, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+        main.setInt(1, island.key)
+        main.setString(2, island.owner.toString())
+        main.setDouble(3, island.center.blockX.toDouble())
+        main.setDouble(4, island.center.blockY.toDouble())
+        main.setDouble(5, island.center.blockZ.toDouble())
+        main.setFloat(6, island.center.yaw)
+        main.setFloat(7, island.center.pitch)
+        main.setString(8, island.center.world?.name)
+        main.executeUpdate()
 
-                val main = it.prepareStatement("REPLACE INTO ${tableName}_islands (`key`, owner, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-                main.setInt(1, island.key)
-                main.setString(2, island.owner.toString())
-                main.setDouble(3, island.center.blockX.toDouble())
-                main.setDouble(4, island.center.blockY.toDouble())
-                main.setDouble(5, island.center.blockZ.toDouble())
-                main.setFloat(6, island.center.yaw)
-                main.setFloat(7, island.center.pitch)
-                main.setString(8, island.center.world?.name)
-                main.executeUpdate()
+        // Save the island settings
+        val settings = connection.prepareStatement("REPLACE INTO ${this.tablePrefix}settings (`key`, `name`, `public`, mobSpawning, animalSpawning, biome, bans) VALUES (?, ?, ?, ?, ?, ?, ?)")
+        settings.setInt(1, island.key)
+        settings.setString(2, island.settings.name)
+        settings.setBoolean(3, island.settings.public)
+        settings.setBoolean(4, island.settings.mobSpawning)
+        settings.setBoolean(5, island.settings.animalSpawning)
+        settings.setString(6, island.settings.biome.name)
+        settings.setString(7, gson.toJson(island.settings.banned))
+        settings.executeUpdate()
 
-                // Save the island settings
-                val settings = it.prepareStatement("REPLACE INTO ${tableName}_settings (`key`, `name`, `public`, mobSpawning, animalSpawning, biome, bans) VALUES (?, ?, ?, ?, ?, ?, ?)")
-                settings.setInt(1, island.key)
-                settings.setString(2, island.settings.name)
-                settings.setBoolean(3, island.settings.public)
-                settings.setBoolean(4, island.settings.mobSpawning)
-                settings.setBoolean(5, island.settings.animalSpawning)
-                settings.setString(6, island.settings.biome.name)
-                settings.setString(7, gson.toJson(island.settings.banned))
-                settings.executeUpdate()
+        // Save the island warps
+        val warps = connection.prepareStatement("REPLACE INTO ${this.tablePrefix}warps (`key`, `name`, icon, visits, votes, category, disabled, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        warps.setInt(1, island.key)
+        warps.setString(2, island.warp.name)
+        warps.setBytes(3, this.serialize(island.warp.icon))
+        warps.setInt(4, island.warp.visits)
+        warps.setInt(5, island.warp.votes)
+        warps.setString(6, gson.toJson(island.warp.category))
+        warps.setBoolean(7, island.warp.disabled)
+        warps.setDouble(8, island.warp.location.blockX.toDouble())
+        warps.setDouble(9, island.warp.location.blockY.toDouble())
+        warps.setDouble(10, island.warp.location.blockZ.toDouble())
+        warps.setFloat(11, island.warp.location.yaw)
+        warps.setFloat(12, island.warp.location.pitch)
+        warps.setString(13, island.warp.location.world?.name)
+        warps.executeUpdate()
 
-                // Save the island upgrades.
-                val upgrades = it.prepareStatement("REPLACE INTO ${tableName}_upgrades (`key`, islandFly, sizeTier, chestGenTier) VALUES (?, ?, ?, ?)")
-                upgrades.setInt(1, island.key)
-                upgrades.setBoolean(2, island.upgrade.islandFly)
-                upgrades.setInt(3, island.upgrade.sizeTier)
-                upgrades.setInt(4, island.upgrade.chestGenTier)
-                upgrades.executeUpdate()
+        if (island.home != island.center) {
+            val homes = connection.prepareStatement("REPLACE INTO ${this.tablePrefix}homes (`key`, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?)")
+            homes.setInt(1, island.key)
+            homes.setDouble(2, island.home.x)
+            homes.setDouble(3, island.home.y)
+            homes.setDouble(4, island.home.z)
+            homes.setFloat(5, island.home.yaw)
+            homes.setFloat(6, island.home.pitch)
+            homes.setString(7, island.home.world?.name)
+            homes.executeUpdate()
+        }
 
-                // Save the island warps
-                val warps = it.prepareStatement("REPLACE INTO ${tableName}_warps (`key`, `name`, icon, description, visits, votes, category, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-                warps.setInt(1, island.key)
-                warps.setString(2, island.warp.name)
-                warps.setString(3, island.warp.icon.name)
-                warps.setString(4, gson.toJson(island.warp.desc))
-                warps.setInt(5, island.warp.visits)
-                warps.setInt(6, island.warp.votes)
-                warps.setString(7, gson.toJson(island.warp.categories))
-                warps.setDouble(8, island.warp.location.blockX.toDouble())
-                warps.setDouble(9, island.warp.location.blockY.toDouble())
-                warps.setDouble(10, island.warp.location.blockZ.toDouble())
-                warps.setFloat(11, island.warp.location.yaw)
-                warps.setFloat(12, island.warp.location.pitch)
-                warps.setString(13, island.warp.location.world?.name)
-                warps.executeUpdate()
+        // This could be pretty bad but who cares.
+        island.members.forEach { member ->
+            val members = connection.prepareStatement("REPLACE INTO ${this.tablePrefix}members (`key`, player, `role`, border) VALUES (?, ?, ?, ?)")
+            members.setInt(1, island.key)
+            members.setString(2, member.uuid.toString())
+            members.setString(3, member.role.name)
+            members.setString(4, member.border.name)
+            members.executeUpdate()
+        }
+    }
 
-                if (island.home != island.center) {
-                    val homes = it.prepareStatement("REPLACE INTO ${tableName}_homes (`key`, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?)")
-                    homes.setInt(1, island.key)
-                    homes.setDouble(2, island.home.x)
-                    homes.setDouble(3, island.home.y)
-                    homes.setDouble(4, island.home.z)
-                    homes.setFloat(5, island.home.yaw)
-                    homes.setFloat(6, island.home.pitch)
-                    homes.setString(7, island.home.world?.name)
-                    homes.executeUpdate()
-                }
+    /**
+     * Save a new report to the database.
+     *
+     * @param report The report being saved.
+     */
+    fun saveReport(report: Report) {
+        this.islandReports.add(report)
 
-                // This could be pretty bad but who cares.
-                island.members.forEach { member ->
-                    val members = it.prepareStatement("REPLACE INTO ${tableName}_members (`key`, player, `role`, border) VALUES (?, ?, ?, ?)")
-                    members.setInt(1, island.key)
-                    members.setString(2, member.uuid.toString())
-                    members.setString(3, member.role.name)
-                    members.setString(4, member.border.name)
-                    members.executeUpdate()
-                }
+        this.async {
+            this.databaseConnector.connect { connection ->
+                val insert = connection.prepareStatement("INSERT INTO ${this.tablePrefix}reports (reporter, island, reason, date) VALUES (?, ?, ?, ?)")
+                insert.setString(1, report.reporter.toString())
+                insert.setInt(2, report.island.key)
+                insert.setString(3, report.reason)
+                insert.setLong(4, report.date)
+                insert.executeUpdate()
             }
         }
     }
@@ -236,11 +195,11 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
      *
      * @param member The member being saved.
      */
-    fun saveMember(member: Member) {
+    private fun saveMember(member: Member) {
         this.userCache[member.uuid] = member
         this.async { _ ->
-            this.connector.connect {
-                val query = "REPLACE INTO ${tableName}_members (`key`, player, `role`, border) VALUES (?, ?, ?, ?)"
+            this.databaseConnector.connect {
+                val query = "REPLACE INTO ${this.tablePrefix}members (`key`, player, `role`, border) VALUES (?, ?, ?, ?)"
                 val statement = it.prepareStatement(query)
                 statement.setInt(1, member.island)
                 statement.setString(2, member.uuid.toString())
@@ -250,6 +209,11 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
             }
         }
     }
+
+    /**
+     * Save a member as an extension function
+     */
+    fun Member.save() = saveMember(this)
 
     /**
      * Get a member from the user's UUID.
@@ -263,8 +227,8 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
             return member
 
         val newMember = Member(player)
-        this.connector.connect {
-            val query = "SELECT `key`, `role`, `border` FROM ${tableName}_members WHERE player = ?"
+        this.databaseConnector.connect {
+            val query = "SELECT `key`, `role`, `border` FROM ${this.tablePrefix}members WHERE player = ?"
             val statement = it.prepareStatement(query)
             statement.setString(1, player.toString())
             val result = statement.executeQuery();
@@ -295,8 +259,8 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
             return cachedIsland
 
         this.async { _ ->
-            this.connector.connect {
-                val islandQuery = "SELECT owner, x, y, z, world FROM ${tableName}_islands WHERE key = ?"
+            this.databaseConnector.connect {
+                val islandQuery = "SELECT owner, x, y, z, world FROM ${this.tablePrefix}islands WHERE key = ?"
                 val islandStatement = it.prepareStatement(islandQuery)
                 islandStatement.setInt(1, key)
                 val islandResult = islandStatement.executeQuery()
@@ -314,7 +278,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 if (island == null)
                     return@connect
 
-                val warpQuery = "SELECT name, icon, description, visits, votes, x, y, z, yaw, pitch, world, category FROM ${tableName}_warps WHERE key = ?"
+                val warpQuery = "SELECT name, icon, visits, votes, x, y, z, yaw, pitch, world, category FROM ${this.tablePrefix}warps WHERE key = ?"
                 val warpStatement = it.prepareStatement(warpQuery)
                 warpStatement.setInt(1, island.key)
                 val warpResult = warpStatement.executeQuery()
@@ -323,11 +287,10 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                 if (warpResult.next()) {
                     val warp = Warp(island.key, Location(Bukkit.getWorld(warpResult.getString("world")), warpResult.getDouble("x"), warpResult.getDouble("y"), warpResult.getDouble("z")))
                     warp.name = warpResult.getString("name")
-                    warp.icon = parseEnum(Material::class, warpResult.getString("icon"))
-                    warp.desc = gson.fromJson(warpResult.getString("description"), Warp.Desc::class.java)
+                    warp.icon = this.deserialize(warpResult.getBytes("icon"))
                     warp.visits = warpResult.getInt("visits")
                     warp.votes = warpResult.getInt("votes")
-                    warp.categories = gson.fromJson(warpResult.getString("category"), Warp.Categories::class.java)
+                    warp.category = gson.fromJson(warpResult.getString("category"), Warp.Category::class.java)
                     island.warp = warp
                 }
 
@@ -336,7 +299,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                  * variable, This comment is entirely to section out everything because I feel like
                  * im gonna die with how cluttered this is.
                  */
-                val settingsQuery = "SELECT name, public, mobSpawning, animalSpawning, biome, bans FROM ${tableName}_settings WHERE key = ?"
+                val settingsQuery = "SELECT name, public, mobSpawning, animalSpawning, biome, bans FROM ${this.tablePrefix}settings WHERE key = ?"
                 val settingsState = it.prepareStatement(settingsQuery)
                 settingsState.setInt(1, island.key)
                 val settingsResult = settingsState.executeQuery()
@@ -353,20 +316,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
                     island.settings = settings
                 }
 
-                val upgradesQuery = "SELECT islandFly, sizeTier, chestGenTier FROM ${tableName}_upgrades WHERE key = ?"
-                val upgradesState = it.prepareStatement(upgradesQuery)
-                upgradesState.setInt(1, island.key)
-                val upgradesResult = upgradesState.executeQuery()
-
-                // Get any island upgrades if they don't exist
-                if (upgradesResult.next()) {
-                    val upgrade = Upgrade(island.key)
-                    upgrade.islandFly = upgradesResult.getBoolean("islandFly")
-                    upgrade.chestGenTier = upgradesResult.getInt("chestGenTier")
-                    upgrade.sizeTier = upgradesResult.getInt("sizeTier")
-                }
-
-                val memberQuery = "SELECT player, role, border FROM ${tableName}_members WHERE key = ?"
+                val memberQuery = "SELECT player, role, border FROM ${this.tablePrefix}members WHERE key = ?"
                 val members = mutableListOf<Member>()
                 val memberState = it.prepareStatement(memberQuery)
                 memberState.setInt(1, island.key)
@@ -385,7 +335,7 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
 
                 island.members = members
 
-                val homesQuery = "SELECT x, y, z, world, yaw, pitch FROM ${tableName}_homes WHERE key = ?"
+                val homesQuery = "SELECT x, y, z, world, yaw, pitch FROM ${this.tablePrefix}homes WHERE key = ?"
                 val homesState = it.prepareStatement(homesQuery)
                 homesState.setInt(1, key)
                 val homesResult = homesState.executeQuery()
@@ -412,7 +362,37 @@ class DataManager(private val plugin: SkyblockPlugin) : DataHandler(plugin) {
      * @param callback The task callback.
      */
     private fun async(callback: Consumer<BukkitTask>) {
-        this.plugin.server.scheduler.runTaskAsynchronously(this.plugin, callback)
+        this.rosePlugin.server.scheduler.runTaskAsynchronously(this.rosePlugin, callback)
+    }
+
+    override fun getDataMigrations(): MutableList<Class<out DataMigration>> {
+        return mutableListOf(CreateInitialTables::class.java)
+    }
+
+    /**
+     * Serialize an itemstack into a byte array.
+     *
+     *  @param itemStack The itemstack to serialize.
+     *  @return The serialized byte array.
+     */
+    private fun serialize(itemStack: ItemStack): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        val dataOutput = BukkitObjectOutputStream(outputStream)
+        dataOutput.writeObject(itemStack)
+
+        return outputStream.toByteArray()
+    }
+
+    /**
+     * Deserialize an item stack from a byte array.
+     *
+     * @param bytes The byte array.
+     * @return The item stack.
+     */
+    private fun deserialize(bytes: ByteArray): ItemStack {
+        val inputStream = ByteArrayInputStream(bytes)
+        val dataInput = BukkitObjectInputStream(inputStream)
+        return dataInput.readObject() as ItemStack
     }
 
 }

@@ -2,8 +2,10 @@ name: Skyblock
 main: xyz.oribuin.skyblock.SkyblockPlugin
 version: '1.0'
 api-version: '1.13'
-authors: [ 'Oribuin', 'Alexersion' ]
+authors: [ 'Oribuin' ]
 description: A custom made skyblock plugin for GoliMC.
+libraries:
+  - 'net.kyori:adventure-api:4.11.0'
 loadbefore:
   - Multiverse-Core
 softdepend:

@@ -1,240 +1,202 @@
 package xyz.oribuin.skyblock.gui
 
+import dev.rosewood.rosegarden.RosePlugin
+import dev.rosewood.rosegarden.utils.StringPlaceholders
+import dev.triumphteam.gui.guis.Gui
 import net.wesjd.anvilgui.AnvilGUI
-import org.apache.commons.lang.WordUtils
 import org.bukkit.Material
-import org.bukkit.entity.Player
-import org.bukkit.event.Event
-import xyz.oribuin.gui.Gui
-import xyz.oribuin.gui.Item
-import xyz.oribuin.gui.PaginatedGui
-import xyz.oribuin.orilibrary.util.StringPlaceholders
-import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.island.Member
-import xyz.oribuin.skyblock.manager.DataManager
+import xyz.oribuin.skyblock.island.Member.Role
 import xyz.oribuin.skyblock.manager.IslandManager
-import xyz.oribuin.skyblock.util.*
-import java.util.*
+import xyz.oribuin.skyblock.manager.MenuManager
+import xyz.oribuin.skyblock.util.ItemBuilder
+import xyz.oribuin.skyblock.util.cache
+import xyz.oribuin.skyblock.util.format
+import xyz.oribuin.skyblock.util.formatEnum
+import xyz.oribuin.skyblock.util.getIsland
+import xyz.oribuin.skyblock.util.getManager
+import xyz.oribuin.skyblock.util.getMenu
+import xyz.oribuin.skyblock.util.send
 
-class WarpSettingsGUI(private val plugin: SkyblockPlugin, private val island: Island) {
+class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
-    private val cooldown = mutableMapOf<UUID, Long>()
+    private val manager = this.rosePlugin.getManager<IslandManager>()
 
-    private val data = this.plugin.getManager<DataManager>()
-    private val islandManager = this.plugin.getManager<IslandManager>()
+    fun openMenu(member: Member) {
+        val island = member.getIsland(this.rosePlugin) ?: return
+        val player = member.onlinePlayer ?: return
 
-    fun create(member: Member) {
-
-        val player = member.offlinePlayer.player ?: return
-
-        val gui = Gui(27, "Warp Settings")
-        // Stop people from yoinking items out the gui.
-        gui.setDefaultClickFunction {
-            it.isCancelled = true
-            it.result = Event.Result.DENY
-            (it.whoClicked as Player).updateInventory()
-        }
-        // Stop people from putting stuff in the gui.
-        gui.setPersonalClickAction { gui.defaultClickFunction.accept(it) }
-        gui.setItems(numRange(0, 26), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
-
-        gui.setItem(10, Item.Builder(Material.PLAYER_HEAD).setName("#a6b2fc&lGo Back".color()).setLore(" &f| &7Click to go back".color(), " &f| &7to the main page.".color()).setTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==").create()) {
-            (it.whoClicked as Player).chat("/island warp")
-        }
-
-        this.setSettings(gui, member)
+        val gui = this.createGUI(player)
+        this.put(gui, "border-item", player)
+        this.put(gui, "back-item", player) { this.rosePlugin.getMenu(WarpsGUI::class).openMenu(member) }
+        this.setSettings(gui, member, island)
 
         gui.open(player)
-
     }
 
-    private fun setSettings(gui: Gui, member: Member) {
-        val nameLore = listOf(
-            " &f| &7Click to change your",
-            " &f| &7current island warp name.",
-            " &f| ",
-            " &f| &7Requires #a6b2fcAdmin &7role!"
-        )
+    private fun setSettings(gui: Gui, member: Member, island: Island) {
+        val player = member.onlinePlayer ?: return
 
-        gui.setItem(12, Item.Builder(Material.ANVIL).setName("#a6b2fc&lWarp Name".color()).setLore(nameLore.color()).create()) {
-            if (member.role == Member.Role.MEMBER) {
-                this.plugin.send(it.whoClicked, "invalid-island-role")
-                return@setItem
+        this.put(gui, "warp-name", player, StringPlaceholders.single("name", island.warp.name)) {
+            if (member.role == Role.MEMBER) {
+                this.rosePlugin.send(player, "island-no-permission")
+                gui.close(player)
+                return@put
             }
 
-            if (it.whoClicked.uniqueId.onCooldown)
-                return@setItem
+            AnvilGUI.Builder()
+                .plugin(this.rosePlugin)
+                .text(island.warp.name)
+                .title(island.warp.name)
+                .itemLeft(ItemBuilder.filler(Material.NAME_TAG))
+                .onComplete { _, text ->
 
-            this.editWarpName(gui, member)
+                    if (text.equals(island.warp.name, ignoreCase = true))
+                        return@onComplete AnvilGUI.Response.close()
+
+                    island.warp.name = text
+                    island.cache(this.rosePlugin)
+
+                    val placeholders = StringPlaceholders.builder("setting", "Warp Name")
+                        .addPlaceholder("value", text)
+                        .build()
+
+                    this.manager.sendMembersMessage(island, "island-warp-settings-changed", placeholders)
+                    return@onComplete AnvilGUI.Response.close()
+                }
+                .open(player)
         }
 
-        val descriptionLore = listOf(
-            " &f| &7Click to change your",
-            " &f| &7current island warp description.",
-            " &f| ",
-            " &f| &7Requires #a6b2fcAdmin &7role!"
-        )
-
-        gui.setItem(13, Item.Builder(Material.OAK_SIGN).setName("#a6b2fc&lWarp Description".color()).setLore(descriptionLore.color()).create()) {
-            if (member.role == Member.Role.MEMBER) {
-                this.plugin.send(it.whoClicked, "invalid-island-role")
-                return@setItem
+        this.put(gui, "warp-icon", player, StringPlaceholders.single("icon", island.warp.icon.type.name.formatEnum())) {
+            if (member.role == Role.MEMBER) {
+                this.rosePlugin.send(player, "island-no-permission")
+                gui.close(player)
+                return@put
             }
 
-            WarpDescGUI(this.plugin, this.island, it.whoClicked as Player)
-        }
+            val item = player.inventory.itemInMainHand.clone()
 
-        val iconLore = listOf(
-            " &f| &7Click to change your",
-            " &f| &7current island warp icon.",
-            " &f| ",
-            " &f| &7Requires #a6b2fcAdmin &7role!"
-        )
-
-        gui.setItem(14, Item.Builder(Material.ITEM_FRAME).setName("#a6b2fc&lWarp Icon".color()).setLore(iconLore.color()).create()) {
-            if (member.role == Member.Role.MEMBER) {
-                this.plugin.send(it.whoClicked, "invalid-island-role")
-                return@setItem
+            if (item.type.isAir) {
+                this.rosePlugin.send(player, "island-warp-icon-invalid")
+                return@put
             }
 
-            if (it.whoClicked.uniqueId.onCooldown)
-                return@setItem
-
-            this.editWarpIcon(member)
-        }
-
-        val categoryLore = listOf(
-            " &f| &7Click to change your",
-            " &f| &7current island warp category.",
-            " &f| ",
-            " &f| &7Requires #a6b2fcAdmin &7role!"
-        )
-
-        gui.setItem(15, Item.Builder(Material.NAME_TAG).setName("#a6b2fc&lWarp Category".color()).setLore(categoryLore.color()).create()) {
-            if (member.role == Member.Role.MEMBER) {
-                this.plugin.send(it.whoClicked, "invalid-island-role")
-                return@setItem
-            }
-
-            WarpCategoryGUI(this.plugin, this.island).create(member)
-        }
-
-        val homeLore = listOf(
-            " &f| &7Click to change your",
-            " &f| &7current island warp home" +
-                    ".",
-            " &f| ",
-            " &f| &7Requires #a6b2fcAdmin &7role!"
-        )
-
-        gui.setItem(16, Item.Builder(Material.BLUE_BED).setName("#a6b2fc&lWarp Location".color()).setLore(homeLore.color()).create()) {
-            if (member.role == Member.Role.MEMBER) {
-                this.plugin.send(it.whoClicked, "invalid-island-role")
-                return@setItem
-            }
-
-            val placeholders = StringPlaceholders.builder("setting", "Location")
-                .add("player", it.whoClicked.name)
-                .add("value", it.whoClicked.location.center().format())
+            island.warp.icon = item.clone()
+            island.cache(this.rosePlugin)
+            val placeholders = StringPlaceholders.builder("setting", "Warp Icon")
+                .addPlaceholder("value", item.type.name.formatEnum())
                 .build()
 
-            this.sendSettingMessage(placeholders)
-            island.warp.location = it.whoClicked.location.center()
-            data.saveIsland(island)
-            it.whoClicked.closeInventory()
+
+            this.manager.sendMembersMessage(island, "island-warp-settings-changed", placeholders)
+            gui.close(player)
         }
 
-        gui.update()
-    }
-
-    /**
-     * Edit the island's name using an anvil gui
-     *
-     * @param gui The GUI to go back to
-     * @param member The island member changing the name.
-     */
-    private fun editWarpName(gui: Gui, member: Member) {
-
-        val player = member.offlinePlayer.player ?: return
-        AnvilGUI.Builder()
-            .plugin(this.plugin)
-            .text(island.warp.name)
-            .title(island.warp.name)
-            .itemLeft(Item.filler(Material.NAME_TAG).item)
-            .onComplete { user, text ->
-
-                if (text.equals(island.warp.name, ignoreCase = true))
-                    return@onComplete AnvilGUI.Response.close()
-
-                this.cooldown[user.uniqueId] = System.currentTimeMillis()
-                island.warp.name = text
-                this.data.islandCache[island.key] = island
-
-                val placeholders = StringPlaceholders.builder("setting", "Name")
-                    .add("player", user.name)
-                    .add("value", text)
-                    .build()
-
-                this.sendSettingMessage(placeholders)
-                this.setSettings(gui, member)
-                return@onComplete AnvilGUI.Response.close()
+        this.put(gui, "warp-category", player, StringPlaceholders.single("category", island.warp.category.names.map { it.formatEnum() }.format())) {
+            if (member.role == Role.MEMBER) {
+                this.rosePlugin.send(player, "island-no-permission")
+                gui.close(player)
+                return@put
             }
-            .open(player)
-    }
 
-    private fun editWarpIcon(member: Member) {
-        val iconGUI = PaginatedGui(45, "Warp Icon", numRange(9, 35))
-        iconGUI.setDefaultClickFunction {
-            it.isCancelled = true
-            it.result = Event.Result.DENY
-            (it.whoClicked as Player).updateInventory()
+            this.rosePlugin.getManager<MenuManager>()[WarpCategoryGUI::class].openMenu(member, island)
         }
 
-        iconGUI.setPersonalClickAction { iconGUI.defaultClickFunction.accept(it) }
-        iconGUI.setItems(numRange(0, 8), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
-        iconGUI.setItems(numRange(36, 44), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
-
-        iconGUI.setItem(40, Item.Builder(Material.PLAYER_HEAD).setName("#a6b2fc&lGo Back".color()).setLore(" &f| &7Click to go back".color(), " &f| &7to the main page.".color()).setTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==").create()) {
-            (it.whoClicked as Player).chat("/island warp settings")
-        }
-
-        iconGUI.setItem(38, Item.Builder(Material.PAPER).setName("#a6b2fc&lPrevious Page".color()).create()) { iconGUI.previous(it.whoClicked as Player) }
-        iconGUI.setItem(42, Item.Builder(Material.PAPER).setName("#a6b2fc&lNext Page".color()).create()) { iconGUI.next(it.whoClicked as Player) }
-
-        Material.values().toMutableList().filter { it.isItem && !it.isAir }.sortedBy { it.name }.forEach {
-            val formattedName = WordUtils.capitalizeFully(it.name.lowercase().replace("_", " "))
-            val item = Item.Builder(it)
-                .setName("#a6b2fc&l$formattedName".color())
-                .create()
-
-            iconGUI.addPageItem(item) { event ->
-                island.warp.icon = it;
-                data.saveIsland(island)
-                event.whoClicked.closeInventory()
-
-                val placeholders = StringPlaceholders.builder("setting", "Icon")
-                    .add("player", member.offlinePlayer.name)
-                    .add("value", formattedName)
-                    .build()
-
-
-                this.sendSettingMessage(placeholders)
+        this.put(gui, "warp-location", player, StringPlaceholders.single("location", island.warp.location.format())) {
+            if (member.role == Role.MEMBER) {
+                this.rosePlugin.send(player, "island-no-permission")
+                gui.close(player)
+                return@put
             }
+
+            val placeholders = StringPlaceholders.builder("setting", "Warp Location")
+                .addPlaceholder("value", island.warp.location.format())
+                .build()
+
+            island.warp.location = player.location
+            island.cache(this.rosePlugin)
+            this.manager.sendMembersMessage(island, "island-warp-settings-changed", placeholders)
+
+            gui.close(player)
         }
 
-        val player = member.offlinePlayer.player ?: return
-        iconGUI.open(player)
     }
 
+    override val menuName: String
+        get() = "warp-settings"
 
-    private fun sendSettingMessage(placeholders: StringPlaceholders) {
-        island.members.mapNotNull { it.offlinePlayer.player }
-            .forEach { this.plugin.send(it, "changed-warp", placeholders) }
-    }
+    override val defaultValues: Map<String, Any>
+        get() = mapOf(
+            "#0" to "GUI Settings",
+            "gui-settings.title" to "Island Settings",
+            "gui-settings.rows" to 3,
 
-    private val UUID.onCooldown: Boolean
-        get() = System.currentTimeMillis() <= (cooldown[this] ?: 0) + 500
+            "#1" to "Border Item",
+            "border-item.enabled" to true,
+            "border-item.material" to Material.BLACK_STAINED_GLASS_PANE.toString(),
+            "border-item.name" to " ",
+            "border-item.slots" to listOf("0-26"),
 
+            "#2" to "Back Item",
+            "back-item.enabled" to true,
+            "back-item.material" to Material.OAK_SIGN.toString(),
+            "back-item.name" to "#a6b2fc&lGo Back",
+            "back-item.lore" to listOf(
+                " &f| &7Click to go back",
+                " &f| &7to the main page"
+            ),
+            "back-item.slot" to 10,
+            "back-item.texture" to "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==",
+
+            "#3" to "Warp Name",
+            "warp-name.enabled" to true,
+            "warp-name.material" to Material.ANVIL.toString(),
+            "warp-name.name" to "#a6b2fc&lWarp Name &f| #a6b2fc%name%",
+            "warp-name.lore" to listOf(
+                " &f| &7Click to change your",
+                " &f| &7current island warp name",
+                " &f| ",
+                " &f| &7Requires #a6b2fcAdmin &7role!"
+            ),
+            "warp-name.slot" to 13,
+
+            "#4" to "Warp Icon",
+            "warp-icon.enabled" to true,
+            "warp-icon.material" to Material.ITEM_FRAME.toString(),
+            "warp-icon.name" to "#a6b2fc&lWarp Icon &f| #a6b2fc%icon%",
+            "warp-icon.lore" to listOf(
+                " &f| &7Click to change your",
+                " &f| &7current island warp icon",
+                " &f| ",
+                " &f| &7Requires #a6b2fcAdmin &7role!"
+            ),
+            "warp-icon.slot" to 14,
+
+            "#5" to "Warp Category",
+            "warp-category.enabled" to true,
+            "warp-category.material" to Material.NAME_TAG.toString(),
+            "warp-category.name" to "#a6b2fc&lWarp Category &f| #a6b2fc%category%",
+            "warp-category.lore" to listOf(
+                " &f| &7Click to change your",
+                " &f| &7current island warp category",
+                " &f| ",
+                " &f| &7Requires #a6b2fcAdmin &7role!"
+            ),
+            "warp-category.slot" to 15,
+
+            "#6" to "Warp Location",
+            "warp-location.enabled" to true,
+            "warp-location.material" to Material.COMPASS.toString(),
+            "warp-location.name" to "#a6b2fc&lWarp Location &f| #a6b2fc%location%",
+            "warp-location.lore" to listOf(
+                " &f| &7Click to change your",
+                " &f| &7current island warp location",
+                " &f| ",
+                " &f| &7Requires #a6b2fcAdmin &7role!"
+            ),
+            "warp-location.slot" to 16,
+
+            )
 
 }
