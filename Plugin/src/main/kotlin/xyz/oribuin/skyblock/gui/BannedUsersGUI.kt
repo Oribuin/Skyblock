@@ -31,6 +31,7 @@ class BannedUsersGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
         this.put(gui, "member-info", player) {}
         this.put(gui, "previous-page", player) { gui.previous() }
         this.addMembers(viewer, gui, island)
+        this.addExtraItems(gui, player)
 
         gui.open(player)
     }

@@ -31,6 +31,7 @@ class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
         this.put(gui, "border-item", player)
         this.put(gui, "back-item", player) { this.rosePlugin.getMenu(WarpsGUI::class).openMenu(member) }
         this.setSettings(gui, member, island)
+        this.addExtraItems(gui, player)
 
         gui.open(player)
     }
@@ -93,7 +94,7 @@ class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             gui.close(player)
         }
 
-        this.put(gui, "warp-category", player, StringPlaceholders.single("category", island.warp.category.names.map { it.formatEnum() }.format())) {
+        this.put(gui, "warp-category", player, StringPlaceholders.single("category", island.warp.category.formatted())) {
             if (member.role == Role.MEMBER) {
                 this.rosePlugin.send(player, "island-no-permission")
                 gui.close(player)

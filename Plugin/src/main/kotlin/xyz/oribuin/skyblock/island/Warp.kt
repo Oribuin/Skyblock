@@ -4,6 +4,7 @@ import java.util.*
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
+import xyz.oribuin.skyblock.util.formatEnum
 import xyz.oribuin.skyblock.util.parseEnum
 
 data class Warp(val key: Int, var location: Location) {
@@ -23,8 +24,12 @@ data class Warp(val key: Int, var location: Location) {
         var types: MutableList<Type> = this.names.map { parseEnum(Type::class, it) }.toMutableList()
 
         fun formatted(): String {
-            return this.names.joinToString(", ") { it.lowercase().replaceFirstChar { x -> x.uppercase() } }
+            val sortedNames = this.names.toMutableList()
+            sortedNames.sortBy { it }
+            return sortedNames.joinToString(", ") { it.formatEnum() }
         }
+
+        fun clone() = Category(this.names)
 
         enum class Type(val icon: Material, val desc: List<String>, val slot: Int) {
             GENERAL(Material.NAME_TAG, listOf(" &f| &7General islands with", " &f| &7multiple purposes."), 12), // A vague island category

@@ -26,8 +26,8 @@ class WarpNameCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : Rose
             return
         }
 
-        if (name.length > 48) {
-            this.rosePlugin.send(context.sender, "command-warp-name-too-long")
+        if (name.isEmpty() || name.length > 48) {
+            this.rosePlugin.send(context.sender, "command-warp-name-incorrect")
             return
         }
 

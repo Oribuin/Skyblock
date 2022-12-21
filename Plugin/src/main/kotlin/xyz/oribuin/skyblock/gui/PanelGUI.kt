@@ -21,6 +21,7 @@ class PanelGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
         this.put(gui, "members-item", player) { menuManager[MembersGUI::class].openMenu(member) }
         this.put(gui, "settings-item", player) { menuManager[SettingsGUI::class].openMenu(member) }
         this.put(gui, "warps-item", player) { menuManager[WarpsGUI::class].openMenu(member) }
+        this.addExtraItems(gui, player)
 
         gui.open(player)
     }

@@ -46,6 +46,7 @@ class BorderGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
         this.put(gui, "border-item", player)
         this.put(gui, "border-info", player)
+        this.addExtraItems(gui, player)
 
         gui.open(player)
         gui.setBorderIcons(player)

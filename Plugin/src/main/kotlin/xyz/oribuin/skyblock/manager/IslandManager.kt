@@ -39,8 +39,6 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
     private val inviteMap = mutableMapOf<UUID, UUID>()
     val biomeMap = mutableMapOf<Biome, BiomeOption>()
 
-    private var taskId = 0
-
     override fun reload() {
         this.dataManager.loadIslands()
         val section = this.rosePlugin.config.getConfigurationSection("biomes") ?: return
@@ -54,10 +52,6 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
             this.biomeMap[biome] = option
         }
-
-        taskId = this.rosePlugin.server.scheduler.runTaskTimerAsynchronously(this.rosePlugin, Runnable {
-            this.dataManager.saveIslands()
-        }, 0, 20 * 60).taskId
     }
 
 
@@ -79,6 +73,14 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
     fun getMember(uuid: UUID): Member = this.dataManager.getMember(uuid)
 
     /**
+     * Get the island for the given offline player.
+     *
+     * @param player The offline player to get the island for.
+     * @return The island for the given player.
+     */
+    fun getMember(player: OfflinePlayer): Member = this.dataManager.getMember(player.uniqueId)
+
+    /**
      * Get the island for the given player.
      *
      * @param player The player to get the island for.
@@ -94,7 +96,14 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
      */
     fun getIsland(uuid: UUID): Island? = this.getMember(uuid).let { this.dataManager.getIsland(it.island) }
 
+    /**
+     * Get the island for the given offline player.
+     *
+     * @param player The offline player to get the island for.
+     * @return The island for the given player.
+     */
     fun getIsland(player: OfflinePlayer): Island? = this.getIsland(player.uniqueId)
+
 
     /**
      * Get the island for the given member
@@ -106,7 +115,6 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
     override fun disable() {
         this.dataManager.saveIslands()
-        this.rosePlugin.server.scheduler.cancelTask(this.taskId)
     }
 
     /**
@@ -126,6 +134,11 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
         val island = dataManager.createIsland(member.uuid)
         schematic.paste(this.rosePlugin, island.center) { this.teleport(member, island.home) }
         return island
+    }
+
+    fun deleteIsland(island: Island) {
+        // Delete all the island data (please don't create a new island with the same id)
+        this.dataManager.deleteIsland(island)
     }
 
     /**
@@ -230,7 +243,7 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
      * @param world The world the chunks are in
      * @return the island chunks.
      */
-    private fun getIslandChunks(island: Island, world: World): List<Chunk> {
+    fun getIslandChunks(island: Island, world: World): List<Chunk> {
         val chunks = mutableListOf<Chunk>()
 
         val pos1 = this.getPos1(island, world)
@@ -269,7 +282,7 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
     private fun getPos1(island: Island, world: World?): Location {
         val size = Setting.ISLAND_SIZE.double
         val centerInWorld = Location(world, island.center.x, island.center.y, island.center.z)
-        return centerInWorld.clone().subtract(Location(world, size / 2.0, 0.0, size / 2.0))
+        return centerInWorld.clone().subtract(Location(world, (size / 2.0) + 1, 0.0, (size / 2.0)))
     }
 
     /**
@@ -280,7 +293,7 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
     private fun getPos2(island: Island, world: World?): Location {
         val size = Setting.ISLAND_SIZE.double
         val centerInWorld = Location(world, island.center.x, island.center.y, island.center.z)
-        return centerInWorld.clone().add(Location(world, size / 2.0, 0.0, size / 2.0))
+        return centerInWorld.clone().add(Location(world, (size / 2.0) + 1, 0.0, (size / 2.0) + 1))
     }
 
     /**
@@ -296,7 +309,7 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
             for (x in 0..15)
                 for (z in 0..15)
-                    for (y in 0 until this.world.maxHeight)
+                    for (y in this.world.minHeight until this.world.maxHeight)
                         blocks.add(baseLocation.clone().add(x.toDouble(), y.toDouble(), z.toDouble()).block)
 
             return blocks
@@ -321,14 +334,53 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
             return
 
         // Check if the user has already visited and if the user teleported is part of the island
+
         if (!warp.visitUsers.contains(member.uuid) && member.island != warp.key) {
             warp.visits++
             warp.visitUsers.add(member.uuid)
 
+            island.warp = warp
             island.cache(this.rosePlugin)
         }
 
         this.teleport(member, warp.location)
+    }
+
+    /**
+     * Upvote an island warp from a player
+     *
+     * @param warp The island warp
+     * @param member The member upvoting the warp
+     */
+    fun upvoteWarp(warp: Warp, member: Member) {
+
+        // Check if the user is trying to upvote their own island
+        if (member.island == warp.key) {
+            member.onlinePlayer?.let { this.rosePlugin.send(it, "command-warp-upvote-self-upvote") }
+            return
+        }
+
+        // Check if the user has already upvoted the island
+        if (warp.votedUsers.contains(member.uuid)) {
+            member.onlinePlayer?.let { this.rosePlugin.send(it, "command-warp-upvote-already-voted") }
+            return
+        }
+
+        // Check if the user is banned from the island
+        if (member.onlinePlayer?.hasPermission("skyblock.bypass") != true && this.getIslandFromId(warp.key)?.settings?.banned?.getUUIDs()?.contains(member.uuid) == true) {
+            member.onlinePlayer?.let { this.rosePlugin.send(it, "command-warp-banned") }
+            return
+        }
+
+        // Add the user to the list of users who have upvoted the island
+        warp.votedUsers.add(member.uuid)
+        warp.votes++
+
+        val island = this.getIslandFromId(warp.key) ?: return
+        island.warp = warp
+        island.cache(this.rosePlugin)
+
+        member.onlinePlayer?.let { this.rosePlugin.send(it, "command-warp-upvote-success") }
     }
 
 //    /**
@@ -346,7 +398,6 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
         for (warp in this.dataManager.islandCache.values.map { it.warp }) {
             val warpName = HexUtils.colorify(warp.name.lowercase()).lowercase().let { x -> ChatColor.stripColor(x) }
 
-            println("$name / $warpName")
             if (warpName.equals(name.lowercase(), true)) {
                 return warp
             }
@@ -483,7 +534,7 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
         // check if the member can fit on the island
         if (island.members.size >= Setting.MAX_MEMBERS.int) {
-            this.rosePlugin.send(player, "command-invite-full")
+            this.rosePlugin.send(player, "command-invite-island-full")
             return
         }
 
@@ -494,8 +545,8 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
         island.members.add(member)
         island.cache(this.rosePlugin)
-        this.rosePlugin.send(player, "command-invite-accepted")
-        this.sendMembersMessage(island, "command-invite.member-joined", StringPlaceholders.single("player", player.name))
+        this.rosePlugin.send(player, "command-invite-accept-success", StringPlaceholders.single("island", island.settings.name))
+        this.sendMembersMessage(island, "command-invite-accept-joined", StringPlaceholders.single("player", player.name))
     }
 
     /**
@@ -513,10 +564,10 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
         this.inviteMap.filterValues { it == player.uniqueId }.forEach { this.inviteMap.remove(it.key) }
 
 
-        this.rosePlugin.send(player, "command-invite-denied")
+        this.rosePlugin.send(player, "command-invite-deny-denied")
 
         this.getMember(invite.key).onlinePlayer?.let {
-            this.rosePlugin.send(it, "command-invite-denied-other", StringPlaceholders.single("player", player.name))
+            this.rosePlugin.send(it, "command-invite-deny-other", StringPlaceholders.single("player", player.name))
         }
     }
 

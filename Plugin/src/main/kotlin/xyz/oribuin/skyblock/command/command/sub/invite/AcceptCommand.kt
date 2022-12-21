@@ -19,4 +19,8 @@ class AcceptCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseSu
 
     override fun isPlayerOnly(): Boolean = true
 
+    override fun getDescriptionKey(): String = "command-invite-accept-description"
+
+    override fun getRequiredPermission(): String = "skyblock.command.invite.accept"
+
 }

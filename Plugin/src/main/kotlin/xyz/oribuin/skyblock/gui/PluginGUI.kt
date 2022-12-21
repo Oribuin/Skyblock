@@ -272,5 +272,22 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
             .build()
     }
 
+    // Create extension function from a basegui using <T : BaseGui>
+
+    /**
+     * Add extra items to the gui
+     *
+     * @param gui The gui
+     * @param player The viewer
+     */
+    protected fun addExtraItems(gui: BaseGui, player: Player) {
+        val extraItems = config.getConfigurationSection("extra-items") ?: return
+
+        for (key in extraItems.getKeys(false)) {
+            this.put(gui, "extra-items.$key", player)
+        }
+
+    }
+
     fun async(runnable: Runnable) = this.rosePlugin.server.scheduler.runTaskAsynchronously(this.rosePlugin, runnable)
 }

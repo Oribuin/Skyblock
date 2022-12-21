@@ -74,4 +74,15 @@ interface NMSHandler {
      * @return The modified itemstack.
      */
     fun setBoolean(item: ItemStack, key: String, value: Boolean): ItemStack
+
+//    /**
+//     * Serialize an ItemStack to a byte array
+//     */
+//    fun serialize(item: ItemStack): ByteArray
+//
+//    /**
+//     * Deserialize an ItemStack from a byte array
+//     */
+//    fun deserialize(bytes: ByteArray): ItemStack
+
 }

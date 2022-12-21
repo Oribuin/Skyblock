@@ -30,6 +30,7 @@ class BiomesGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
         this.put(gui, "next-page", player) { gui.next() }
         this.put(gui, "go-back", player) { this.rosePlugin.getManager<MenuManager>()[PanelGUI::class].openMenu(member) }
         this.put(gui, "previous-page", player) { gui.previous() }
+        this.addExtraItems(gui, player)
 
         this.islandManager.biomeMap.forEach { (_, islandBiome) ->
             val biomeName = islandBiome.biome.name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }

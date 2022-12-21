@@ -18,7 +18,8 @@ class MemberArgument(rosePlugin: RosePlugin) : RoseCommandArgumentHandler<Member
         val input = argumentParser.next()
 
         val exception = HandledArgumentException("argument-handler-member-option", StringPlaceholders.single("input", input))
-        return this.islandManager.getMember(Bukkit.getPlayer(input) ?: throw exception)
+
+        return this.islandManager.getMember(Bukkit.getOfflinePlayerIfCached(input) ?: throw exception)
     }
 
     override fun suggestInternal(argumentInfo: RoseCommandArgumentInfo, argumentParser: ArgumentParser): MutableList<String> {

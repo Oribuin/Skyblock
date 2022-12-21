@@ -1,17 +1,14 @@
+
 compileJava {
     options.compilerArgs += ['-parameters']
     options.fork = true
-    options.forkOptions.executable = 'javac'
     options.encoding = 'UTF-8'
 }
 
 dependencies {
     implementation project(':NMS:Wrapper')
 
-    compileOnly 'org.jetbrains:annotations:23.0.0'
-
     // Spigot Dependencies
-    compileOnly 'org.spigotmc:spigot:1.19.1'
     compileOnly 'io.papermc.paper:paper-api:1.19.1-R0.1-SNAPSHOT'
     compileOnly 'com.mojang:authlib:1.5.21'
 
@@ -23,13 +20,14 @@ dependencies {
     }
 
     // Frameworks
-    api 'dev.rosewood:rosegarden:1.1.0.42-SNAPSHOT' // https://github.com/Rosewood-Development/RoseGarden
+    api 'dev.rosewood:rosegarden:1.1.0.48-SNAPSHOT' // https://github.com/Rosewood-Development/RoseGarden
     api 'io.github.bananapuncher714:nbteditor:7.18.2' // https://github.com/BananaPuncher714/NBTEditor
     api 'net.wesjd:anvilgui:1.5.3-SNAPSHOT'// https://github.com/WesJD/AnvilGUI
     api('dev.triumphteam:triumph-gui:3.1.3') { // https://github.com/TriumphTeam/triumph-gui/
         exclude group: 'com.google.code.gson', module: 'gson' // Already included in spigot-api
     }
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
 
 }

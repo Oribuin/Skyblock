@@ -32,6 +32,7 @@ class SettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
         this.put(gui, "border-item", player)
         this.put(gui, "go-back", player) { this.rosePlugin.getManager<MenuManager>()[PanelGUI::class].openMenu(member) }
         this.setItems(gui, member, island)
+        this.addExtraItems(gui, player)
 
         gui.open(player)
     }

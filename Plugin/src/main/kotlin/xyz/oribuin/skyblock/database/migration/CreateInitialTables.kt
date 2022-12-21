@@ -39,6 +39,7 @@ class CreateInitialTables : DataMigration(1) {
         val membersDB = "CREATE TABLE IF NOT EXISTS ${tablePrefix}members (" +
                 "`key` INT, " +
                 "player VARCHAR(36), " +
+                "username VARCHAR(24), " +
                 "role VARCHAR(36), " +
                 "border TEXT, " +
                 "PRIMARY KEY(player))"
@@ -47,7 +48,7 @@ class CreateInitialTables : DataMigration(1) {
 
         // The table for the island warps
         val warpsDB = "CREATE TABLE IF NOT EXISTS ${tablePrefix}warps (" +
-                "key INT, " +
+                "`key` INT, " +
                 "name TEXT, " +
                 "icon VARBINARY(2456) NOT NULL, " +
                 "visits INT DEFAULT 0, " +
@@ -65,7 +66,7 @@ class CreateInitialTables : DataMigration(1) {
         connection.prepareStatement(warpsDB).executeUpdate();
 
         val homesDB = "CREATE TABLE IF NOT EXISTS ${tablePrefix}homes (" +
-                "key INT, " +
+                "`key` INT, " +
                 "x DOUBLE, " +
                 "y DOUBLE, " +
                 "z DOUBLE, " +
@@ -78,7 +79,7 @@ class CreateInitialTables : DataMigration(1) {
 
         val reports = "CREATE TABLE IF NOT EXISTS ${tablePrefix}reports (" +
                 "reporter VARCHAR(36), " +
-                "island INT, " +
+                "`key` INT, " +
                 "reason TEXT, " +
                 "`date` LONG)"
 

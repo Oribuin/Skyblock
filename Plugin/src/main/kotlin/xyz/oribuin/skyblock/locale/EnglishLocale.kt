@@ -55,8 +55,40 @@ class EnglishLocale : Locale {
             // Invite Command
             this["#7"] = "Invite Command"
             this["command-invite-description"] = "Invites a player to your island"
-            this["command-invite-success"] = "You have invited %player% to your island!"
+            this["command-invite-no-invite"] = "You do not have a pending invite"
+            this["command-invite-no-island"] = "You do not have an island"
+            this["command-invite-has-island"] = "You already have an island"
+            this["command-invite-island-full"] = "Their island has reached the maximum amount of members"
 
+            // Invite Accept Command
+            this["#8"] = "Invite Accept Command"
+            this["command-invite-accept-description"] = "Accepts an island invite"
+            this["command-invite-accept-success"] = "You have joined %island%"
+            this["command-invite-accept-joined"] = "%player% has joined your island"
+
+            // Invite Deny Command
+            this["#9"] = "Invite Deny Command"
+            this["command-invite-deny-description"] = "Denies an island invite"
+            this["command-invite-deny-denied"] = "You have denied the invite"
+            this["command-invite-deny-other"] = "%player% has denied your invite"
+
+            // Member Command
+            this["#10"] = "Member Command"
+            this["command-members-description"] = "Manages island members"
+            this["command-members-usage"] = "Usage: /is members"
+
+            // Settings Command
+            this["#11"] = "Settings Command"
+            this["command-settings-description"] = "Manages island settings"
+            this["command-settings-usage"] = "Usage: /is settings"
+
+            // Teleport Command
+            this["#12"] = "Teleport Command"
+            this["command-teleport-description"] = "Teleports to your island"
+            this["command-teleport-success"] = "You have been teleported to your island"
+
+            // Warp Commands
+            this["#13"] = "Warp Commands"
 
         }
     }

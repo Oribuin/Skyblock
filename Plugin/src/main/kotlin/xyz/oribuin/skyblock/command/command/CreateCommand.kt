@@ -7,7 +7,10 @@ import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable
 import org.bukkit.entity.Player
 import xyz.oribuin.skyblock.gui.CreateGUI
+import xyz.oribuin.skyblock.manager.IslandManager
+import xyz.oribuin.skyblock.manager.WorldManager
 import xyz.oribuin.skyblock.util.asMember
+import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.getMenu
 import xyz.oribuin.skyblock.util.send
 
@@ -20,6 +23,17 @@ class CreateCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseCo
         val member = player.asMember(this.rosePlugin)
         if (member.hasIsland) {
             this.rosePlugin.send(player, "command-create-has-island")
+            return
+        }
+
+
+        val worldManager = this.rosePlugin.getManager<WorldManager>()
+
+        // Don't go through the gui if there's only one schematic
+        if (worldManager.schematics.size == 1) {
+            val firstSchem = worldManager.schematics.values.first()
+
+            this.rosePlugin.getManager<IslandManager>().makeIsland(context.asMember(this.rosePlugin), firstSchem)
             return
         }
 

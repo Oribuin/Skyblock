@@ -16,16 +16,19 @@ class WarpArgument(rosePlugin: RosePlugin) : RoseCommandArgumentHandler<Warp>(ro
     private val islandManager = this.rosePlugin.getManager<IslandManager>()
 
     override fun handleInternal(argumentInfo: RoseCommandArgumentInfo, argumentParser: ArgumentParser): Warp {
-        val input = argumentParser.next()
+        val input = StringBuilder()
+        while (argumentParser.hasNext()) {
+            input.append(argumentParser.next()).append(" ")
+        }
 
-        return islandManager.getWarpsByName(input) ?: throw HandledArgumentException("argument-handler-warp-option", StringPlaceholders.single("input", input))
+        return islandManager.getWarpsByName(input.toString().lowercase()) ?: throw HandledArgumentException("argument-handler-warp-option", StringPlaceholders.single("input", input))
     }
 
     override fun suggestInternal(argumentInfo: RoseCommandArgumentInfo, argumentParser: ArgumentParser): MutableList<String> {
         argumentParser.next()
         return this.islandManager.getWarpNames().stream()
             .map { HexUtils.colorify(it) }
-            .map { ChatColor.stripColor(it)?.lowercase() }
+            .map { ChatColor.stripColor(it) }
             .distinct()
             .toList()
             .filterNotNull()

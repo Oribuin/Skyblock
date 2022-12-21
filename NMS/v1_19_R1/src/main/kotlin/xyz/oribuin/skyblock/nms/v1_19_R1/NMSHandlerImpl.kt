@@ -80,4 +80,12 @@ class NMSHandlerImpl : NMSHandler {
         return CraftItemStack.asBukkitCopy(itemStack)
     }
 
+    override fun serialize(item: ItemStack): ByteArray {
+
+    }
+
+    override fun deserialize(bytes: ByteArray): ItemStack {
+        TODO("Not yet implemented")
+    }
+
 }

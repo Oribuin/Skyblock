@@ -1,5 +1,6 @@
 package xyz.oribuin.skyblock.nms.v1_18_R2
 
+import javax.print.DocFlavor.STRING
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket
 import net.minecraft.world.level.border.WorldBorder
@@ -43,6 +44,10 @@ class NMSHandlerImpl : NMSHandler {
             val packet = ClientboundLevelChunkWithLightPacket(levelChunk, levelChunk.level.lightEngine, null, null, true)
             nmsPlayers.forEach { it.connection.send(packet) }
         }
+    }
+
+    override fun test(itemStack: ItemStack): STRING {
+        return CraftItemStack.asNMSCopy(itemStack).tag.toString();
     }
 
     override fun setString(item: ItemStack, key: String, value: String): ItemStack {

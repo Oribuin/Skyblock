@@ -24,6 +24,7 @@ class CreateGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
         this.put(gui, "next-page", player) { gui.next() }
         this.put(gui, "island-info", player) {}
         this.put(gui, "previous-page", player) { gui.previous() }
+        this.addExtraItems(gui, player)
 
         this.worldManager.schematics.forEach { (_, schem) ->
             val item = GuiItem(

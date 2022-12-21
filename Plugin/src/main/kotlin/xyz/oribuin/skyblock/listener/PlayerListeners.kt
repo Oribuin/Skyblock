@@ -141,6 +141,8 @@ class PlayerListeners(private val rosePlugin: RosePlugin) : Listener {
         @Suppress("deprecation")
         this.deathMessage = null
 
+        islandManager.getIslandFromLoc(this.entity.location)?.let { this.entity.teleport(it.home) }
+
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)

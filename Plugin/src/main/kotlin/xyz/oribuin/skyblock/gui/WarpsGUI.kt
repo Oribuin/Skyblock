@@ -5,12 +5,14 @@ import dev.rosewood.rosegarden.utils.StringPlaceholders
 import dev.triumphteam.gui.guis.GuiItem
 import dev.triumphteam.gui.guis.PaginatedGui
 import java.util.*
-import xyz.oribuin.skyblock.island.Island
+import xyz.oribuin.skyblock.enums.FilterType
+import xyz.oribuin.skyblock.enums.SortType
 import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.manager.MenuManager
-import xyz.oribuin.skyblock.util.EnumIterator
+import xyz.oribuin.skyblock.util.FilterOption
 import xyz.oribuin.skyblock.util.ItemBuilder
+import xyz.oribuin.skyblock.util.SortOption
 import xyz.oribuin.skyblock.util.color
 import xyz.oribuin.skyblock.util.format
 import xyz.oribuin.skyblock.util.formatEnum
@@ -22,8 +24,8 @@ class WarpsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
     private val manager = this.rosePlugin.getManager<IslandManager>()
     private val menuManager = this.rosePlugin.getManager<MenuManager>()
-    private val sortMap = mutableMapOf<UUID, SortType>()
-    private val filterMap = mutableMapOf<UUID, FilterType>()
+    private val sortMap = mutableMapOf<UUID, SortOption>()
+    private val filterMap = mutableMapOf<UUID, FilterOption>()
 
     fun openMenu(member: Member) {
         val player = member.onlinePlayer ?: return
@@ -46,6 +48,7 @@ class WarpsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
         this.setDynamicItems(gui, member)
         this.loadWarps(gui, member)
+        this.addExtraItems(gui, player)
 
         gui.open(player)
     }
@@ -59,27 +62,28 @@ class WarpsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
     private fun setDynamicItems(gui: PaginatedGui, member: Member) {
         val player = member.onlinePlayer ?: return
 
-        val sortType = sortMap[member.uuid] ?: SortType.NONE
-        val filterType = filterMap[member.uuid] ?: FilterType.NONE
+        val sortType = sortMap[member.uuid] ?: SortOption()
 
-        val sortIterator = EnumIterator(SortType::class)
-        sortIterator.skipTo(sortType)
+        this.put(gui, "sort-item", player, StringPlaceholders.single("value", sortType.sort.display)) {
 
-        this.put(gui, "sort-item", player, StringPlaceholders.single("value", sortType.display)) {
-            sortIterator.next()
+            if (!sortType.iterator.hasNext())
+                sortType.iterator = SortType.values().iterator()
 
-            this.sortMap[member.uuid] = sortIterator.get()
+            sortType.sort = sortType.iterator.next()
+            this.sortMap += member.uuid to sortType
+
             this.setDynamicItems(gui, member)
             this.loadWarps(gui, member)
         }
 
-        val filterIterator = EnumIterator(FilterType::class)
-        filterIterator.skipTo(filterType)
+        val filterType = filterMap[member.uuid] ?: FilterOption()
 
-        this.put(gui, "filter-item", player, StringPlaceholders.single("value", filterType.name.formatEnum())) {
-            filterIterator.next()
+        this.put(gui, "filter-item", player, StringPlaceholders.single("value", filterType.filter.name.formatEnum())) {
+            if (!filterType.iterator.hasNext())
+                filterType.iterator = FilterType.values().iterator()
 
-            this.filterMap[member.uuid] = filterIterator.get()
+            filterType.filter = filterType.iterator.next()
+            this.filterMap += member.uuid to filterType
             this.setDynamicItems(gui, member)
             this.loadWarps(gui, member)
         }
@@ -94,10 +98,10 @@ class WarpsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
      */
     private fun loadWarps(gui: PaginatedGui, member: Member) {
         gui.clearPageItems()
-        val islands = manager.getIslands().toMutableList()
+        var islands = manager.getIslands().toMutableList()
 
-        (filterMap[member.uuid] ?: FilterType.NONE).filter(islands) // Filter the list
-        (sortMap[member.uuid] ?: SortType.NONE).sort(islands) // Sort the list
+        islands = (filterMap[member.uuid] ?: FilterOption(FilterType.NONE)).filter.filter(islands) // Filter the list
+        islands = (sortMap[member.uuid] ?: SortOption(SortType.NONE)).sort.sort(islands) // Sort the list
 
         this.async {
             islands.filter { !it.warp.disabled && it.settings.public }.forEach {
@@ -120,6 +124,7 @@ class WarpsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
                 val item = ItemBuilder(warp.icon)
                     .name(("#a6b2fc&l" + warp.name).color())
                     .lore(lore.color())
+                    .amount(1)
                     .build()
 
                 gui.addItem(GuiItem(item) { _ -> this.manager.warpTeleport(it.warp, member) })
@@ -222,74 +227,5 @@ class WarpsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
     override val menuName: String
         get() = "warp-gui"
-
-    private enum class SortType(val display: String) {
-        NONE("None"),
-
-        // Sort by warp names.
-        NAMES_ASCENDING("Names ↑"),
-        NAMES_DESCENDING("Names ↓"),
-
-        // Sort by island up votes
-        VOTES_ASCENDING("Votes ↑"),
-        VOTES_DESCENDING("Votes ↓"),
-
-        // Sort by island visits
-        VISITS_ASCENDING("Visits ↑"),
-        VISITS_DESCENDING("Visits ↓");
-
-
-        /**
-         * Sort the list of islands by the given type.
-         *
-         * @param islands The list of islands to sort.
-         * @return The sorted list of islands.
-         */
-        fun sort(islands: MutableList<Island>): MutableList<Island> {
-            when (this) {
-                // Warp Names
-                NAMES_ASCENDING -> islands.sortedBy { it.warp.name }
-                NAMES_DESCENDING -> islands.sortedByDescending { it.warp.name }
-
-                // Warp Votes
-                VOTES_ASCENDING -> islands.sortedBy { it.warp.votes }
-                VOTES_DESCENDING -> islands.sortedByDescending { it.warp.votes }
-
-                // Warp Visits
-                VISITS_ASCENDING -> islands.sortedBy { it.warp.visits }
-                VISITS_DESCENDING -> islands.sortedByDescending { it.warp.visits }
-                else -> {}
-            }
-
-            return islands
-        }
-
-    }
-
-    enum class FilterType {
-        NONE,
-
-        // Categories
-        CATEGORY,
-        FARMS,
-        PARKOUR,
-        SHOPS,
-        DESIGN;
-
-        /**
-         * Filter the list of islands by the given type.
-         *
-         * @param islands The list of islands to filter.
-         * @return The filtered list of islands.
-         */
-        fun filter(islands: MutableList<Island>): MutableList<Island> {
-            if (this == NONE)
-                return islands
-
-            islands.removeIf { !it.warp.category.names.contains(this.name) }
-            return islands
-        }
-
-    }
 
 }

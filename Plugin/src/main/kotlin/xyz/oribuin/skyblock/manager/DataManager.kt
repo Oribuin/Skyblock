@@ -89,12 +89,36 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
         return island
     }
 
+    /**
+     * The function for deleting an island from the plugin.
+     *
+     * @param island The island to delete.
+     */
+    fun deleteIsland(island: Island) {
+        this.islandCache.remove(island.key)
+        this.islandReports.removeIf { it.island.key == island.key }
+
+        this.async {
+            this.databaseConnector.connect {
+
+                val tableNames = listOf("islands", "settings", "members", "warps", "homes", "reports")
+
+                tableNames.forEach { table ->
+                    val deleteQuery = "DELETE FROM ${this.tablePrefix}$table WHERE key = ?"
+                    val deleteStatement = it.prepareStatement(deleteQuery)
+                    deleteStatement.setInt(1, island.key)
+                    deleteStatement.executeUpdate()
+                }
+            }
+        }
+    }
+
     fun cacheIsland(island: Island) {
         this.islandCache[island.key] = island
 
         // Check if it has been 10 minutes since the last save.
         if (island.lastSave + 600000 < System.currentTimeMillis()) {
-            this.databaseConnector.connect { this.saveIsland(island, it) }
+            this.async { this.databaseConnector.connect { this.saveIsland(island, it) } }
         }
 
     }
@@ -161,11 +185,12 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
 
         // This could be pretty bad but who cares.
         island.members.forEach { member ->
-            val members = connection.prepareStatement("REPLACE INTO ${this.tablePrefix}members (`key`, player, `role`, border) VALUES (?, ?, ?, ?)")
+            val members = connection.prepareStatement("REPLACE INTO ${this.tablePrefix}members (`key`, player, `username`, `role`, border) VALUES (?, ?, ?, ?, ?)")
             members.setInt(1, island.key)
             members.setString(2, member.uuid.toString())
-            members.setString(3, member.role.name)
-            members.setString(4, member.border.name)
+            members.setString(3, member.username)
+            members.setString(4, member.role.name)
+            members.setString(5, member.border.name)
             members.executeUpdate()
         }
     }
@@ -197,14 +222,16 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
      */
     private fun saveMember(member: Member) {
         this.userCache[member.uuid] = member
+
         this.async { _ ->
             this.databaseConnector.connect {
-                val query = "REPLACE INTO ${this.tablePrefix}members (`key`, player, `role`, border) VALUES (?, ?, ?, ?)"
+                val query = "REPLACE INTO ${this.tablePrefix}members (`key`, player, `username`,`role`, border) VALUES (?, ?, ?, ?, ?)"
                 val statement = it.prepareStatement(query)
                 statement.setInt(1, member.island)
                 statement.setString(2, member.uuid.toString())
-                statement.setString(3, member.role.name)
-                statement.setString(4, member.border.name)
+                statement.setString(3, member.username)
+                statement.setString(4, member.role.name)
+                statement.setString(5, member.border.name)
                 statement.executeUpdate()
             }
         }
@@ -327,6 +354,7 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
                     val player = UUID.fromString(result.getString("player"))
                     val newMember = Member(player)
                     newMember.island = island.key
+                    newMember.username = result.getString("username")
                     newMember.role = Member.Role.valueOf(result.getString("role").uppercase())
                     newMember.border = BorderColor.valueOf(result.getString("border").uppercase())
                     this.userCache[player] = newMember

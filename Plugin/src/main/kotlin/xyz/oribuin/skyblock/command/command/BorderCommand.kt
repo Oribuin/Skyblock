@@ -9,7 +9,7 @@ import org.bukkit.entity.Player
 import xyz.oribuin.skyblock.gui.BorderGUI
 import xyz.oribuin.skyblock.util.getMenu
 
-class BorderCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper?) : RoseCommand(rosePlugin, parent) {
+class BorderCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseCommand(rosePlugin, parent) {
 
     @RoseExecutable
     fun execute(context: CommandContext) = this.rosePlugin.getMenu(BorderGUI::class).openMenu(context.sender as Player)
@@ -21,4 +21,5 @@ class BorderCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper?) : RoseC
     override fun getRequiredPermission(): String = "skyblock.command.border"
 
     override fun isPlayerOnly(): Boolean = true
+
 }

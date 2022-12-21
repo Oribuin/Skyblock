@@ -43,19 +43,19 @@ class WarpCategoryGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             this.rosePlugin.getManager<MenuManager>()[WarpSettingsGUI::class].openMenu(member)
         }
 
-        this.setupCategories(gui, island)
+        this.addExtraItems(gui, player)
+
+
         gui.open(player)
+        this.setupCategories(gui, island)
     }
 
     private fun setupCategories(gui: Gui, island: Island) {
-
-        gui.update()
-        val activeCategories = this.categories[island.key] ?: island.warp.category
-
+        val activeCategories = island.warp.category.clone()
         Warp.Category.Type.values().forEach {
 
-           val description = it.desc.toMutableList()
-           description.addAll(listOf(" &f|", " &f| &7Click to switch category"))
+            val description = it.desc.toMutableList()
+            description.addAll(listOf(" &f|", " &f| &7Click to switch category"))
 
             val item = ItemBuilder(it.icon)
                 .name("#a6b2fc&l${it.name.formatEnum()}".color())
@@ -68,14 +68,7 @@ class WarpCategoryGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
                 if (!activeCategories.names.remove(it.name))
                     activeCategories.names.add(it.name)
 
-                island.warp.category = activeCategories
-                island.cache(this.rosePlugin)
-
-                val placeholders = StringPlaceholders.builder("setting", "Warp Category")
-                    .addPlaceholder("value", island.warp.category.formatted())
-                    .build()
-
-                this.manager.sendMembersMessage(island, "island-warp-settings-changed", placeholders)
+                this.categories[island.key] = activeCategories
                 this.setupCategories(gui, island)
             })
         }
@@ -101,7 +94,7 @@ class WarpCategoryGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             "#2" to "Category Info",
             "category-info.enabled" to true,
             "category-info.slot" to 10,
-            "category-info.material" to Material.OAK_SIGN .toString(),
+            "category-info.material" to Material.OAK_SIGN.toString(),
             "category-info.name" to "#a6b2fc&lCategory Info",
             "category-info.lore" to listOf(
                 "&f | &7Click on icons to change",

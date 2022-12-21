@@ -7,6 +7,7 @@ import dev.rosewood.rosegarden.command.framework.RoseCommandArgumentInfo
 import dev.rosewood.rosegarden.utils.StringPlaceholders
 import org.bukkit.Bukkit
 import xyz.oribuin.skyblock.island.Island
+import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.util.getManager
 
@@ -19,15 +20,14 @@ class IslandArgument(rosePlugin: RosePlugin) : RoseCommandArgumentHandler<Island
 
         val exception = HandledArgumentException("argument-handler-island-option", StringPlaceholders.single("input", input))
 
-        val player = Bukkit.getOfflinePlayerIfCached(input) ?: throw exception
-        return this.islandManager.getIsland(player.uniqueId) ?: throw exception
+        return this.islandManager.getIsland(Bukkit.getOfflinePlayerIfCached(input) ?: throw exception) ?: throw exception
     }
 
     override fun suggestInternal(argumentInfo: RoseCommandArgumentInfo, argumentParser: ArgumentParser): MutableList<String> {
         argumentParser.next()
-        return Bukkit.getOnlinePlayers()
-            .filter { !it.hasMetadata("vanished") }
-            .map { it.name }
+        return this.islandManager.getIslands()
+            .map { it.members.filter { x -> x.role == Member.Role.OWNER } }
+            .mapNotNull { it.firstOrNull()?.username }
             .toMutableList()
     }
 

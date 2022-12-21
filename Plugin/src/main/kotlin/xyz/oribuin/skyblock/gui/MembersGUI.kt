@@ -10,15 +10,13 @@ import xyz.oribuin.skyblock.hook.VaultHook
 import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.island.Member.Role
-import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.util.ItemBuilder
 import xyz.oribuin.skyblock.util.color
 import xyz.oribuin.skyblock.util.getIsland
-import xyz.oribuin.skyblock.util.getManager
+import xyz.oribuin.skyblock.util.getMenu
 
 class MembersGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
-    private val manager = this.rosePlugin.getManager<IslandManager>()
     private val dateFormat = SimpleDateFormat("dd/MMM/yyyy hh:mm:ss z")
 
     fun openMenu(viewer: Member) {
@@ -28,9 +26,10 @@ class MembersGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
         val gui = this.createPagedGUI(player)
         this.put(gui, "border-item", player)
         this.put(gui, "next-page", player) { gui.next() }
-        this.put(gui, "member-info", player) {}
+        this.put(gui, "go-back", player) { this.rosePlugin.getMenu(PanelGUI::class).openMenu(viewer) }
         this.put(gui, "previous-page", player) { gui.previous() }
         this.addMembers(viewer, gui, island)
+        this.addExtraItems(gui, player)
 
         gui.open(player)
     }
@@ -78,7 +77,7 @@ class MembersGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             " &f| &7Rank: #a6b2fc${VaultHook.getRankCapital(viewerPlayer.world.name, member.offlinePlayer)}",
             " &f| &7Role: #a6b2fc${member.role.name.lowercase().replaceFirstChar { it.uppercase() }}",
             " &f| &7Balance: #a6b2fc${VaultHook.getBalance(member.offlinePlayer)}",
-            " &f| &7Last Login: #a6b2fc${if (member.offlinePlayer.isOnline) "Online" else dateFormat.format(member.offlinePlayer.lastLogin)}"
+            " &f| &7Last Online: #a6b2fc${if (member.offlinePlayer.isOnline) "Now" else dateFormat.format(member.offlinePlayer.lastLogin)}"
         )
 
         if (viewer.role == Role.OWNER && member.uuid != viewer.uuid) {
@@ -118,16 +117,15 @@ class MembersGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             "previous-page.name" to "#a6b2fc&lPrevious Page",
             "previous-page.slot" to 30,
 
-            "#4" to "Member Info",
-            "member-info.enabled" to true,
-            "member-info.material" to "PLAYER_HEAD",
-            "member-info.name" to "#a6b2fc&lMember Info",
-            "member-info.slot" to 31,
-            "member-info.lore" to listOf(
-                " &f| &7Here are all the members",
-                " &f| &7of your island.",
+            "#4" to "Go Back",
+            "go-back.enabled" to true,
+            "go-back.material" to "OAK_SIGN",
+            "go-back.name" to "#a6b2fc&lGo Back",
+            "go-back.slot" to 31,
+            "go-back.lore" to listOf(
+                " &f| &7Go back to the",
+                " &f| &7main island panel.",
             ),
-            "member-info.owner" to "self"
 
         )
 
