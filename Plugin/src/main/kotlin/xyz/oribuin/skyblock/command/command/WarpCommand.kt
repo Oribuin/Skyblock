@@ -26,7 +26,7 @@ class WarpCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseComm
 ) {
 
     @RoseExecutable
-    fun execute(context: CommandContext, @Optional type: RoseSubCommand?) {
+    fun execute(context: CommandContext, @Optional command: RoseSubCommand?) {
         this.rosePlugin.getMenu(WarpsGUI::class).openMenu(context.asMember(this.rosePlugin))
     }
 

@@ -180,6 +180,9 @@ class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             "warp-icon.lore" to listOf(
                 " &f| &7Click to change your",
                 " &f| &7current island warp icon",
+                " &f|",
+                " &f| &7Hold the item you want",
+                " &f| &7to be the warp icon",
                 " &f| ",
                 " &f| &7Requires #a6b2fcAdmin &7role!"
             ),
