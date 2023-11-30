@@ -281,8 +281,8 @@ fun CommandContext.asPlayer(): Player = this.sender as Player
 
 fun CommandContext.asMember(rosePlugin: RosePlugin): Member = (this.sender as Player).asMember(rosePlugin)
 
-fun Enum<*>.format(): String = StringUtils.capitalize(this.name.replace("_", " "))
+fun Enum<*>.format(): String = StringUtils.capitalize(this.name.lowercase().replace("_", " "))
 
-fun String.formatEnum(): String = StringUtils.capitalize(this.replace("_", " "))
+fun String.formatEnum(): String = StringUtils.capitalize(this.lowercase().replace("_", " "))
 
 fun Location.format(): String = "${this.blockX}, ${this.blockY}, ${this.blockZ}"
