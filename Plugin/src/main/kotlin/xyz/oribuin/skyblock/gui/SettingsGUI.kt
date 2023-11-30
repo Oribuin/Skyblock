@@ -6,6 +6,7 @@ import dev.rosewood.rosegarden.utils.StringPlaceholders
 import dev.triumphteam.gui.guis.Gui
 import net.wesjd.anvilgui.AnvilGUI
 import org.bukkit.Material
+import org.bukkit.entity.Player
 import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.manager.IslandManager
@@ -61,8 +62,8 @@ class SettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
                 island.settings.public = !island.settings.public
                 this.manager.sendMembersMessage(
                     island,
-                    "island-settings-changed",
-                    this.getSettingPlc("Island Privacy", if (island.settings.public) "Public" else "Private")
+                    "command-settings-changed",
+                    this.getSettingPlc("Island Privacy", if (island.settings.public) "Public" else "Private", player)
                 )
             }
         }
@@ -79,8 +80,8 @@ class SettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
                 island.settings.animalSpawning = !island.settings.animalSpawning
                 this.manager.sendMembersMessage(
                     island,
-                    "island-settings-changed",
-                    this.getSettingPlc("Animal Spawning", if (island.settings.animalSpawning) "Enabled" else "Disabled")
+                    "command-settings-changed",
+                    this.getSettingPlc("Animal Spawning", if (island.settings.animalSpawning) "Enabled" else "Disabled", player)
                 )
 
             }
@@ -96,8 +97,8 @@ class SettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
                 island.settings.mobSpawning = !island.settings.mobSpawning
                 this.manager.sendMembersMessage(
                     island,
-                    "island-settings-changed",
-                    this.getSettingPlc("Mob Spawning", if (island.settings.mobSpawning) "Enabled" else "Disabled")
+                    "command-settings-changed",
+                    this.getSettingPlc("Mob Spawning", if (island.settings.mobSpawning) "Enabled" else "Disabled", player)
                 )
             }
         }
@@ -138,7 +139,7 @@ class SettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
                 this.setItems(gui, member, island)
 
                 this.manager.sendMembersMessage(
-                    island, "island-settings-changed", StringPlaceholders.of(
+                    island, "command-settings-changed", StringPlaceholders.of(
                         "setting", "Island Name",
                         "value", snapshot.text
                     )
@@ -169,8 +170,9 @@ class SettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
         this.setItems(gui, member, island)
     }
 
-    private fun getSettingPlc(name: String, value: String) = StringPlaceholders.builder("setting", name)
+    private fun getSettingPlc(name: String, value: String, player: Player) = StringPlaceholders.builder("setting", name)
         .add("value", value)
+        .add("who", player.name)
         .build()
 
     private fun getBooleanPlc(value: Boolean, enabled: String, disabled: String) =

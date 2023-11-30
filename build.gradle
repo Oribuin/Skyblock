@@ -34,9 +34,9 @@ allprojects {
 
     dependencies {
         compileOnly "org.jetbrains:annotations:24.0.1"
-
-        api "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+        compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0"
     }
+
 }
 
 dependencies {
@@ -48,11 +48,9 @@ dependencies {
 
 shadowJar {
     archiveClassifier.set(null)
-
-    // TODO: Relocate everything
-
     relocate("dev.rosewood.rosegarden", "${project.group}.libs.rosegarden")
-
+    relocate("net.wesjd.anvilgui", "${project.group}.libs.anvilgui")
+    relocate("dev.triumphteam.gui", "${project.group}.libs.triumphgui")
 }
 
 tasks {

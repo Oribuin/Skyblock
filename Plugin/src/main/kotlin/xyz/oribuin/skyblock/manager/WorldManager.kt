@@ -4,7 +4,11 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import dev.rosewood.rosegarden.RosePlugin
 import dev.rosewood.rosegarden.config.CommentedFileConfiguration
 import dev.rosewood.rosegarden.manager.Manager
-import org.bukkit.*
+import org.bukkit.Bukkit
+import org.bukkit.Material
+import org.bukkit.World
+import org.bukkit.WorldCreator
+import org.bukkit.WorldType
 import xyz.oribuin.skyblock.util.copyResourceTo
 import xyz.oribuin.skyblock.util.parseEnum
 import xyz.oribuin.skyblock.world.IslandSchematic
@@ -16,7 +20,6 @@ class WorldManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
     val worlds = mutableMapOf<World.Environment, World>()
     val schematics = mutableMapOf<String, IslandSchematic>()
     private lateinit var schemConfig: CommentedFileConfiguration
-    private lateinit var schemFolder: File
 
     override fun reload() {
         val section = this.rosePlugin.config.getConfigurationSection("world-names")
@@ -45,9 +48,9 @@ class WorldManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
         this.schemConfig = CommentedFileConfiguration.loadConfiguration(schemFile)
         if (!exists) {
-            val defaultFile = File(this.rosePlugin.dataFolder, "default.schem")
-            this.rosePlugin.copyResourceTo("default.schem",defaultFile)
-            this.saveDefaults(this.schemConfig, defaultFile)
+            val defaultFile = File(this.rosePlugin.dataFolder, "schematics/default.schem")
+            this.rosePlugin.copyResourceTo("schematics/default.schem", defaultFile)
+            this.saveDefaults(this.schemConfig, schemFile)
         }
 
         val schemFiles = schemFolder.listFiles() ?: error("Schematics folder does not exist.")
@@ -109,7 +112,7 @@ class WorldManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
      * @param config The config to save to.
      */
     private fun saveDefaults(config: CommentedFileConfiguration, file: File) {
-        val section = config.createSection("plains")
+        val section = config.createSection("default")
         section["name"] = "#a6b2fc&lPlains"
         section["icon"] = "GRASS_BLOCK"
         section["lore"] = listOf(

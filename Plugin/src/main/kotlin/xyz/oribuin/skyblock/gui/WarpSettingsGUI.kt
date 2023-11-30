@@ -10,7 +10,14 @@ import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.island.Member.Role
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.manager.MenuManager
-import xyz.oribuin.skyblock.util.*
+import xyz.oribuin.skyblock.util.ItemBuilder
+import xyz.oribuin.skyblock.util.cache
+import xyz.oribuin.skyblock.util.format
+import xyz.oribuin.skyblock.util.formatEnum
+import xyz.oribuin.skyblock.util.getIsland
+import xyz.oribuin.skyblock.util.getManager
+import xyz.oribuin.skyblock.util.getMenu
+import xyz.oribuin.skyblock.util.send
 
 class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
@@ -41,8 +48,8 @@ class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
             AnvilGUI.Builder()
                 .plugin(this.rosePlugin)
+                .title("Enter a new warp name")
                 .text(island.warp.name)
-                .title(island.warp.name)
                 .itemLeft(ItemBuilder.filler(Material.NAME_TAG))
                 .onClick { slot, snapshot ->
                     if (slot != AnvilGUI.Slot.OUTPUT) {
@@ -57,10 +64,12 @@ class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
                     island.warp.name = text
                     island.cache(this.rosePlugin)
 
-                    this.manager.sendMembersMessage(island, "island-warp-settings-changed", StringPlaceholders.of(
-                        "setting", "Warp Name",
-                        "value", text
-                    ))
+                    this.manager.sendMembersMessage(
+                        island, "island-warp-settings-changed", StringPlaceholders.of(
+                            "setting", "Warp Name",
+                            "value", text
+                        )
+                    )
                     return@onClick listOf(AnvilGUI.ResponseAction.close())
                 }
                 .open(player)

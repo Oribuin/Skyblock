@@ -5,13 +5,16 @@ import dev.rosewood.rosegarden.command.framework.CommandContext
 import dev.rosewood.rosegarden.config.CommentedConfigurationSection
 import dev.rosewood.rosegarden.manager.Manager
 import dev.rosewood.rosegarden.utils.HexUtils
+import dev.rosewood.rosegarden.utils.NMSUtil
 import dev.rosewood.rosegarden.utils.StringPlaceholders
 import org.apache.commons.lang3.StringUtils
 import org.bukkit.*
 import org.bukkit.command.CommandSender
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.gui.PluginGUI
 import xyz.oribuin.skyblock.hook.PAPI
 import xyz.oribuin.skyblock.island.Island
@@ -25,6 +28,7 @@ import java.nio.file.Files
 import java.util.*
 import kotlin.math.floor
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sqrt
 import kotlin.reflect.KClass
 
@@ -160,64 +164,66 @@ fun numRange(start: Int, end: Int): List<Int> {
     return list
 }
 
+
+
 /**
- * Get ItemStack from CommentedFileSection path
+ * Deserialize an ItemStack from a CommentedConfigurationSection with placeholders
  *
- * @param config       The CommentedFileSection
- * @param path         The path to the item
- * @param player       The player
- * @param placeholders The placeholders
- * @return The itemstack
+ * @param section      The section to deserialize from
+ * @param sender       The CommandSender to apply placeholders from
+ * @param key          The key to deserialize from
+ * @param placeholders The placeholders to apply
+ * @return The deserialized ItemStack
  */
-fun getItemStack(
-    config: CommentedConfigurationSection,
-    path: String,
-    player: Player,
+fun deserialize(
+    section: CommentedConfigurationSection,
+    sender: CommandSender? = null,
+    key: String,
     placeholders: StringPlaceholders = StringPlaceholders.empty()
-): ItemStack {
-    val material =
-        Material.getMaterial(config.getString("$path.material") ?: "STONE") ?: return ItemStack(Material.STONE)
+): ItemStack? {
+    val locale = SkyblockPlugin.instance.getManager(LocaleManager::class.java)
+    val material = Material.getMaterial(section.getString("$key.material") ?: "") ?: return null
 
-    // Format the item lore
-    val lore = config.getStringList("$path.lore").map { format(player, it, placeholders) }
-
-//    // Get item flags
-//    val flags = config.getStringList("$path.flags")
-//        .stream()
-//        .map { it.uppercase() }
-//        .map { ItemFlag.valueOf(it) }
-//        .toArray<ItemFlag>()
-//        .toArray<ItemFlag>(::arrayOfNulls)
-
-    // Build the item stack
-    val builder = ItemBuilder(material)
-        .name(format(player, config.getString("$path.name") ?: "Unknown", placeholders))
-        .lore(lore)
-        .amount(max(config.getInt("$path.amount"), 1))
-//        .flags(flags)
-        .texture(config.getString("$path.texture") ?: "")
-        .potionColor(config.getString("$path.potion-color", null).toColor())
-        .model(config.getInt("$path.model-data"))
-        .glow(config.getBoolean("$path.glow"))
-
-    val owner = config.getString("$path.owner")
-    if (owner != null) {
-        if (owner.equals("self", true)) {
-            builder.owner(player)
-        } else {
-            Bukkit.getOfflinePlayer(UUID.fromString(owner)).let { builder.owner(it) }
+    // Load enchantments
+    val enchantments = mutableMapOf<Enchantment, Int>()
+    val enchantmentSection = section.getConfigurationSection("$key.enchantments")
+    if (enchantmentSection != null) {
+        for (enchantmentKey in enchantmentSection.getKeys(false)) {
+            val enchantment = Enchantment.getByKey(NamespacedKey.minecraft(enchantmentKey.lowercase(Locale.getDefault()))) ?: continue
+            enchantments[enchantment] = enchantmentSection.getInt(enchantmentKey, 1)
         }
     }
 
-    // Get item enchantments
-    val enchants = config.getConfigurationSection("$path.enchants")
-    enchants?.getKeys(false)?.forEach { key ->
-        val enchant = Enchantment.getByKey(NamespacedKey.minecraft(key)) ?: return@forEach
-        val level = enchants.getInt("$key.level")
-        builder.enchant(enchant, level)
+    // Load potion item flags
+    val flags = section.getStringList("$key.flags").stream()
+        .filter { it != null }
+        .map { ItemFlag.valueOf(it) }
+        .toArray<ItemFlag> { arrayOf() }
+
+    // Get the player head owner
+    val owner = section.getString("$key.owner")
+    var offlinePlayer: OfflinePlayer? = null
+
+    if (owner != null) {
+        offlinePlayer = if (owner.equals("self", true) && sender is OfflinePlayer) {
+            sender
+        } else {
+            Bukkit.getOfflinePlayerIfCached(owner)
+        }
     }
 
-    return builder.build()
+    return ItemBuilder(material)
+        .name(locale.format(sender, section.getString("$key.name"), placeholders))
+        .amount(min(1, section.getInt("$key.amount", 1)))
+        .lore(locale.format(sender, section.getStringList("$key.lore"), placeholders))
+        .glow(section.getBoolean("$key.glowing", false))
+        .unbreakable(section.getBoolean("$key.unbreakable", false))
+        .model(locale.format(sender, section.getString("$key.model-data"), placeholders)?.toIntOrNull() ?: -1)
+        .enchant(enchantments)
+        .flags(flags)
+        .owner(offlinePlayer)
+        .texture(locale.format(sender, section.getString("$key.texture"), placeholders))
+        .build()
 }
 
 /**

@@ -9,7 +9,11 @@ import org.bukkit.entity.Player
 import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.nms.BorderColor
-import xyz.oribuin.skyblock.util.*
+import xyz.oribuin.skyblock.util.ItemBuilder
+import xyz.oribuin.skyblock.util.deserialize
+import xyz.oribuin.skyblock.util.format
+import xyz.oribuin.skyblock.util.getManager
+import xyz.oribuin.skyblock.util.send
 import java.util.*
 
 class BorderGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
@@ -57,12 +61,12 @@ class BorderGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
         val currentActive = activeColors[player.uniqueId] ?: BorderColor.BLUE
 
         for (color in BorderColor.entries) {
-            val item = ItemBuilder(getItemStack(config, "${color.name.lowercase()}-border", player))
+            val itemStack = ItemBuilder(deserialize(config, player, "${color.name.lowercase()}-border") ?: return)
                 .glow(color == currentActive)
                 .build()
 
             val slot = config.getInt("${color.name.lowercase()}-border.slot")
-            this.setItem(slot, GuiItem(item) {
+            this.setItem(slot, GuiItem(itemStack) {
                 activeColors[player.uniqueId] = color
                 this.setBorderIcons(player)
             })

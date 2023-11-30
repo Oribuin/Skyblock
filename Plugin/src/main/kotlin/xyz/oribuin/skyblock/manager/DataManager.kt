@@ -12,7 +12,11 @@ import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.io.BukkitObjectInputStream
 import org.bukkit.util.io.BukkitObjectOutputStream
 import xyz.oribuin.skyblock.database.migration.CreateInitialTables
-import xyz.oribuin.skyblock.island.*
+import xyz.oribuin.skyblock.island.Island
+import xyz.oribuin.skyblock.island.Member
+import xyz.oribuin.skyblock.island.Report
+import xyz.oribuin.skyblock.island.Settings
+import xyz.oribuin.skyblock.island.Warp
 import xyz.oribuin.skyblock.manager.ConfigurationManager.Setting
 import xyz.oribuin.skyblock.nms.BorderColor
 import xyz.oribuin.skyblock.util.getManager
@@ -346,8 +350,7 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
                  * variable, This comment is entirely to section out everything because I feel like
                  * im gonna die with how cluttered this is.
                  */
-                val settingsQuery =
-                    "SELECT name, public, mobSpawning, animalSpawning, biome, bans FROM ${this.tablePrefix}settings WHERE key = ?"
+                val settingsQuery = "SELECT name, public, mobSpawning, animalSpawning, biome, bans FROM ${this.tablePrefix}settings WHERE key = ?"
                 val settingsState = it.prepareStatement(settingsQuery)
                 settingsState.setInt(1, island.key)
                 val settingsResult = settingsState.executeQuery()

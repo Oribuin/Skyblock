@@ -7,7 +7,11 @@ import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper
 import dev.rosewood.rosegarden.command.framework.RoseSubCommand
 import dev.rosewood.rosegarden.command.framework.annotation.Optional
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable
-import xyz.oribuin.skyblock.command.command.sub.warp.*
+import xyz.oribuin.skyblock.command.command.sub.warp.WarpCategoryCommand
+import xyz.oribuin.skyblock.command.command.sub.warp.WarpIconCommand
+import xyz.oribuin.skyblock.command.command.sub.warp.WarpNameCommand
+import xyz.oribuin.skyblock.command.command.sub.warp.WarpSettingsCommand
+import xyz.oribuin.skyblock.command.command.sub.warp.WarpTeleportCommand
 import xyz.oribuin.skyblock.gui.WarpsGUI
 import xyz.oribuin.skyblock.util.asMember
 import xyz.oribuin.skyblock.util.getMenu

@@ -13,7 +13,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import xyz.oribuin.skyblock.hook.PAPI
 import xyz.oribuin.skyblock.util.color
-import xyz.oribuin.skyblock.util.getItemStack
+import xyz.oribuin.skyblock.util.deserialize
 import java.io.File
 import java.util.function.Consumer
 
@@ -206,8 +206,8 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
         eventConsumer: Consumer<InventoryClickEvent> = Consumer { }
     ) {
 
-        val item = getItemStack(config, itemPath, viewer, placeholders)
-        gui.setItem(slots, GuiItem(item) { t -> eventConsumer.accept(t) })
+        val item = deserialize(config, viewer, itemPath, placeholders) ?: return
+        gui.setItem(slots, GuiItem(item) { eventConsumer.accept(it) })
     }
 
     /**
