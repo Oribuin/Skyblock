@@ -3,7 +3,6 @@ package xyz.oribuin.skyblock.gui
 import dev.rosewood.rosegarden.RosePlugin
 import dev.triumphteam.gui.guis.GuiItem
 import dev.triumphteam.gui.guis.PaginatedGui
-import java.text.SimpleDateFormat
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import xyz.oribuin.skyblock.hook.VaultHook
@@ -15,6 +14,7 @@ import xyz.oribuin.skyblock.util.ItemBuilder
 import xyz.oribuin.skyblock.util.color
 import xyz.oribuin.skyblock.util.getIsland
 import xyz.oribuin.skyblock.util.getManager
+import java.text.SimpleDateFormat
 
 class BannedUsersGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 

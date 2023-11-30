@@ -13,7 +13,8 @@ import xyz.oribuin.skyblock.util.getManager
 class AcceptCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseSubCommand(rosePlugin, parent) {
 
     @RoseExecutable
-    fun execute(@Inject context: CommandContext) = this.rosePlugin.getManager<IslandManager>().acceptInvite(context.asMember(this.rosePlugin))
+    fun execute(@Inject context: CommandContext) =
+        this.rosePlugin.getManager<IslandManager>().acceptInvite(context.asMember(this.rosePlugin))
 
     override fun getDefaultName(): String = "accept"
 

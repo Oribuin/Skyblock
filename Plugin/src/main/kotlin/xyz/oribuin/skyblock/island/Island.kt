@@ -1,7 +1,7 @@
 package xyz.oribuin.skyblock.island
 
-import java.util.*
 import org.bukkit.Location
+import java.util.*
 
 data class Island(val key: Int, var owner: UUID, val center: Location) {
 

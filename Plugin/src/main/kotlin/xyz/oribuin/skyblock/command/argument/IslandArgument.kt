@@ -18,12 +18,17 @@ class IslandArgument(rosePlugin: RosePlugin) : RoseCommandArgumentHandler<Island
     override fun handleInternal(argumentInfo: RoseCommandArgumentInfo, argumentParser: ArgumentParser): Island {
         val input = argumentParser.next()
 
-        val exception = HandledArgumentException("argument-handler-island-option", StringPlaceholders.single("input", input))
+        val exception =
+            HandledArgumentException("argument-handler-island-option", StringPlaceholders.of("input", input))
 
-        return this.islandManager.getIsland(Bukkit.getOfflinePlayerIfCached(input) ?: throw exception) ?: throw exception
+        return this.islandManager.getIsland(Bukkit.getOfflinePlayerIfCached(input) ?: throw exception)
+            ?: throw exception
     }
 
-    override fun suggestInternal(argumentInfo: RoseCommandArgumentInfo, argumentParser: ArgumentParser): MutableList<String> {
+    override fun suggestInternal(
+        argumentInfo: RoseCommandArgumentInfo,
+        argumentParser: ArgumentParser
+    ): MutableList<String> {
         argumentParser.next()
         return this.islandManager.getIslands()
             .map { it.members.filter { x -> x.role == Member.Role.OWNER } }

@@ -7,10 +7,10 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import com.sk89q.worldedit.function.operation.Operations
 import com.sk89q.worldedit.session.ClipboardHolder
 import dev.rosewood.rosegarden.RosePlugin
-import java.io.File
-import java.io.FileInputStream
 import org.bukkit.Location
 import org.bukkit.Material
+import java.io.File
+import java.io.FileInputStream
 
 /**
  * @author Esophose
@@ -52,7 +52,8 @@ class IslandSchematic(
             callback?.invoke()
         }
 
-        if (plugin.server.pluginManager.isPluginEnabled("FastAsyncWorldEdit") || plugin.server.pluginManager.isPluginEnabled("AsyncWorldEdit"))
+        val pluginManager = plugin.server.pluginManager
+        if (pluginManager.isPluginEnabled("FastAsyncWorldEdit") || pluginManager.isPluginEnabled("AsyncWorldEdit"))
             plugin.server.scheduler.runTaskAsynchronously(plugin, task)
         else
             task.run()

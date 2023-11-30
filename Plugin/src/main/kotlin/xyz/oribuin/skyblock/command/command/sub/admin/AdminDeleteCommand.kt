@@ -27,7 +27,7 @@ class AdminDeleteCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : R
 
     override fun getDescriptionKey(): String = "command-admin-delete-description"
 
-    override fun getRequiredPermission(): String = "skyblock.admin.delete"
+    override fun getRequiredPermission(): String = "skyblock.command.admin.delete"
 
 
 }

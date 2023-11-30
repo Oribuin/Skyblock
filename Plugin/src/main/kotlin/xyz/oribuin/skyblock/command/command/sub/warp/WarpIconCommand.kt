@@ -9,13 +9,9 @@ import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable
 import dev.rosewood.rosegarden.utils.StringPlaceholders
 import org.bukkit.entity.Player
 import xyz.oribuin.skyblock.manager.IslandManager
-import xyz.oribuin.skyblock.util.asMember
-import xyz.oribuin.skyblock.util.cache
-import xyz.oribuin.skyblock.util.getIsland
-import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.skyblock.util.send
+import xyz.oribuin.skyblock.util.*
 
-class WarpIconCommand (rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseSubCommand(rosePlugin, parent) {
+class WarpIconCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseSubCommand(rosePlugin, parent) {
 
     @RoseExecutable
     fun execute(@Inject context: CommandContext) {
@@ -39,7 +35,7 @@ class WarpIconCommand (rosePlugin: RosePlugin, parent: RoseCommandWrapper) : Ros
         island.cache(this.rosePlugin)
 
         val placeholders = StringPlaceholders.builder("setting", "Warp Icon")
-            .addPlaceholder("value", name)
+            .add("value", name)
             .build()
 
         this.rosePlugin.getManager<IslandManager>()

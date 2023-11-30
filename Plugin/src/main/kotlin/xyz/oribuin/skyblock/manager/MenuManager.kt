@@ -2,17 +2,8 @@ package xyz.oribuin.skyblock.manager
 
 import dev.rosewood.rosegarden.RosePlugin
 import dev.rosewood.rosegarden.manager.Manager
+import xyz.oribuin.skyblock.gui.*
 import kotlin.reflect.KClass
-import xyz.oribuin.skyblock.gui.BiomesGUI
-import xyz.oribuin.skyblock.gui.BorderGUI
-import xyz.oribuin.skyblock.gui.CreateGUI
-import xyz.oribuin.skyblock.gui.MembersGUI
-import xyz.oribuin.skyblock.gui.PanelGUI
-import xyz.oribuin.skyblock.gui.PluginGUI
-import xyz.oribuin.skyblock.gui.SettingsGUI
-import xyz.oribuin.skyblock.gui.WarpCategoryGUI
-import xyz.oribuin.skyblock.gui.WarpSettingsGUI
-import xyz.oribuin.skyblock.gui.WarpsGUI
 
 class MenuManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 

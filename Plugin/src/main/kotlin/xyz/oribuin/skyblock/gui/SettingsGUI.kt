@@ -4,25 +4,23 @@ import dev.rosewood.rosegarden.RosePlugin
 import dev.rosewood.rosegarden.utils.HexUtils
 import dev.rosewood.rosegarden.utils.StringPlaceholders
 import dev.triumphteam.gui.guis.Gui
-import java.util.*
-import java.util.function.Consumer
 import net.wesjd.anvilgui.AnvilGUI
 import org.bukkit.Material
 import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.island.Member
-import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.manager.MenuManager
 import xyz.oribuin.skyblock.util.ItemBuilder
 import xyz.oribuin.skyblock.util.cache
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.send
+import java.util.*
+import java.util.function.Consumer
 
 class SettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
     private val cooldown = mutableMapOf<UUID, Long>()
     private val manager = this.rosePlugin.getManager<IslandManager>()
-    private val dataManager = this.rosePlugin.getManager<DataManager>()
 
     fun openMenu(member: Member) {
         val player = member.onlinePlayer ?: return
@@ -46,29 +44,61 @@ class SettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
     private fun setItems(gui: Gui, member: Member, island: Island) {
         val player = member.onlinePlayer ?: return
 
-        this.put(gui, "island-name", player, StringPlaceholders.single("island_name", island.settings.name)) { this.setIslandName(gui, member, island) }
+        this.put(
+            gui,
+            "island-name",
+            player,
+            StringPlaceholders.of("island_name", island.settings.name)
+        ) { this.setIslandName(gui, member, island) }
 
-        this.put(gui, "island-public", player, this.getBooleanPlc(island.settings.public, "#77dd77&lPublic", "#dd7777&lPrivate")) {
+        this.put(
+            gui,
+            "island-public",
+            player,
+            this.getBooleanPlc(island.settings.public, "#77dd77&lPublic", "#dd7777&lPrivate")
+        ) {
             this.setOption(gui, member, island) { island ->
                 island.settings.public = !island.settings.public
-                this.manager.sendMembersMessage(island, "island-settings-changed", this.getSettingPlc("Island Privacy", if (island.settings.public) "Public" else "Private"))
+                this.manager.sendMembersMessage(
+                    island,
+                    "island-settings-changed",
+                    this.getSettingPlc("Island Privacy", if (island.settings.public) "Public" else "Private")
+                )
             }
         }
 
 //        }
 
-        this.put(gui, "island-animals", player, this.getBooleanPlc(island.settings.animalSpawning, "#77dd77&lEnabled", "#dd7777&lDisabled")) {
+        this.put(
+            gui,
+            "island-animals",
+            player,
+            this.getBooleanPlc(island.settings.animalSpawning, "#77dd77&lEnabled", "#dd7777&lDisabled")
+        ) {
             this.setOption(gui, member, island) { island ->
                 island.settings.animalSpawning = !island.settings.animalSpawning
-                this.manager.sendMembersMessage(island, "island-settings-changed", this.getSettingPlc("Animal Spawning", if (island.settings.animalSpawning) "Enabled" else "Disabled"))
+                this.manager.sendMembersMessage(
+                    island,
+                    "island-settings-changed",
+                    this.getSettingPlc("Animal Spawning", if (island.settings.animalSpawning) "Enabled" else "Disabled")
+                )
 
             }
         }
 
-        this.put(gui, "island-mobs", player, this.getBooleanPlc(island.settings.mobSpawning, "#77dd77&lEnabled", "#dd7777&lDisabled")) {
+        this.put(
+            gui,
+            "island-mobs",
+            player,
+            this.getBooleanPlc(island.settings.mobSpawning, "#77dd77&lEnabled", "#dd7777&lDisabled")
+        ) {
             this.setOption(gui, member, island) { island ->
                 island.settings.mobSpawning = !island.settings.mobSpawning
-                this.manager.sendMembersMessage(island, "island-settings-changed", this.getSettingPlc("Mob Spawning", if (island.settings.mobSpawning) "Enabled" else "Disabled"))
+                this.manager.sendMembersMessage(
+                    island,
+                    "island-settings-changed",
+                    this.getSettingPlc("Mob Spawning", if (island.settings.mobSpawning) "Enabled" else "Disabled")
+                )
             }
         }
 
@@ -93,22 +123,28 @@ class SettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             .plugin(this.rosePlugin)
             .title(HexUtils.colorify(island.settings.name))
             .itemLeft(ItemBuilder.filler(Material.NAME_TAG))
-            .onComplete { user, text ->
-                if (text.equals(island.settings.name, ignoreCase = true))
-                    return@onComplete AnvilGUI.Response.close()
+            .onClick { slot, snapshot ->
+                if (slot != AnvilGUI.Slot.OUTPUT) {
+                    return@onClick listOf(AnvilGUI.ResponseAction.close())
+                }
 
-                island.settings.name = text
-                this.cooldown[user.uniqueId] = System.currentTimeMillis()
+                if (snapshot.text.equals(island.settings.name, ignoreCase = true))
+                    return@onClick listOf(AnvilGUI.ResponseAction.close())
+
+                island.settings.name = snapshot.text
+                this.cooldown[snapshot.player.uniqueId] = System.currentTimeMillis()
                 island.cache(this.rosePlugin)
 
                 this.setItems(gui, member, island)
 
-                val placeholders = StringPlaceholders.builder("setting", "Island Name")
-                    .addPlaceholder("value", text)
-                    .build()
+                this.manager.sendMembersMessage(
+                    island, "island-settings-changed", StringPlaceholders.of(
+                        "setting", "Island Name",
+                        "value", snapshot.text
+                    )
+                )
 
-                this.manager.sendMembersMessage(island, "island-settings-changed", placeholders)
-                return@onComplete AnvilGUI.Response.close()
+                return@onClick listOf(AnvilGUI.ResponseAction.close())
             }
             .open(player)
     }
@@ -134,11 +170,12 @@ class SettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
     }
 
     private fun getSettingPlc(name: String, value: String) = StringPlaceholders.builder("setting", name)
-        .addPlaceholder("value", value)
+        .add("value", value)
         .build()
 
-    private fun getBooleanPlc(value: Boolean, enabled: String, disabled: String) = StringPlaceholders.builder("value", if (value) enabled else disabled)
-        .build()
+    private fun getBooleanPlc(value: Boolean, enabled: String, disabled: String) =
+        StringPlaceholders.builder("value", if (value) enabled else disabled)
+            .build()
 
     override val menuName: String
         get() = "settings"

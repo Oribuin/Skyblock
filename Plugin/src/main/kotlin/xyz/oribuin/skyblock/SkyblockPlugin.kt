@@ -7,13 +7,7 @@ import xyz.oribuin.skyblock.hook.VaultHook
 import xyz.oribuin.skyblock.listener.BlockListeners
 import xyz.oribuin.skyblock.listener.EntityListeners
 import xyz.oribuin.skyblock.listener.PlayerListeners
-import xyz.oribuin.skyblock.manager.CommandManager
-import xyz.oribuin.skyblock.manager.ConfigurationManager
-import xyz.oribuin.skyblock.manager.DataManager
-import xyz.oribuin.skyblock.manager.IslandManager
-import xyz.oribuin.skyblock.manager.LocaleManager
-import xyz.oribuin.skyblock.manager.MenuManager
-import xyz.oribuin.skyblock.manager.WorldManager
+import xyz.oribuin.skyblock.manager.*
 
 class SkyblockPlugin : RosePlugin(
     -1,
@@ -23,7 +17,6 @@ class SkyblockPlugin : RosePlugin(
     LocaleManager::class.java,
     CommandManager::class.java
 ) {
-
 
     override fun enable() {
 
@@ -41,7 +34,6 @@ class SkyblockPlugin : RosePlugin(
             this.server.pluginManager.disablePlugin(this)
             return
         }
-
 
         // Register Plugin Listeners
         this.server.pluginManager.registerEvents(BlockListeners(this), this)

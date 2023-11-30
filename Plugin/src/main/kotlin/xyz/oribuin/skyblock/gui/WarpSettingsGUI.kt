@@ -10,14 +10,7 @@ import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.island.Member.Role
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.manager.MenuManager
-import xyz.oribuin.skyblock.util.ItemBuilder
-import xyz.oribuin.skyblock.util.cache
-import xyz.oribuin.skyblock.util.format
-import xyz.oribuin.skyblock.util.formatEnum
-import xyz.oribuin.skyblock.util.getIsland
-import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.skyblock.util.getMenu
-import xyz.oribuin.skyblock.util.send
+import xyz.oribuin.skyblock.util.*
 
 class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
@@ -39,7 +32,7 @@ class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
     private fun setSettings(gui: Gui, member: Member, island: Island) {
         val player = member.onlinePlayer ?: return
 
-        this.put(gui, "warp-name", player, StringPlaceholders.single("name", island.warp.name)) {
+        this.put(gui, "warp-name", player, StringPlaceholders.of("name", island.warp.name)) {
             if (member.role == Role.MEMBER) {
                 this.rosePlugin.send(player, "island-no-permission")
                 gui.close(player)
@@ -51,25 +44,29 @@ class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
                 .text(island.warp.name)
                 .title(island.warp.name)
                 .itemLeft(ItemBuilder.filler(Material.NAME_TAG))
-                .onComplete { _, text ->
+                .onClick { slot, snapshot ->
+                    if (slot != AnvilGUI.Slot.OUTPUT) {
+                        return@onClick listOf(AnvilGUI.ResponseAction.close())
+                    }
 
-                    if (text.equals(island.warp.name, ignoreCase = true))
-                        return@onComplete AnvilGUI.Response.close()
+                    val text = snapshot.text
+                    if (text.isEmpty() || text.equals(island.warp.name, ignoreCase = true)) {
+                        return@onClick listOf(AnvilGUI.ResponseAction.close())
+                    }
 
                     island.warp.name = text
                     island.cache(this.rosePlugin)
 
-                    val placeholders = StringPlaceholders.builder("setting", "Warp Name")
-                        .addPlaceholder("value", text)
-                        .build()
-
-                    this.manager.sendMembersMessage(island, "island-warp-settings-changed", placeholders)
-                    return@onComplete AnvilGUI.Response.close()
+                    this.manager.sendMembersMessage(island, "island-warp-settings-changed", StringPlaceholders.of(
+                        "setting", "Warp Name",
+                        "value", text
+                    ))
+                    return@onClick listOf(AnvilGUI.ResponseAction.close())
                 }
                 .open(player)
         }
 
-        this.put(gui, "warp-icon", player, StringPlaceholders.single("icon", island.warp.icon.type.name.formatEnum())) {
+        this.put(gui, "warp-icon", player, StringPlaceholders.of("icon", island.warp.icon.type.name.formatEnum())) {
             if (member.role == Role.MEMBER) {
                 this.rosePlugin.send(player, "island-no-permission")
                 gui.close(player)
@@ -86,7 +83,7 @@ class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             island.warp.icon = item.clone()
             island.cache(this.rosePlugin)
             val placeholders = StringPlaceholders.builder("setting", "Warp Icon")
-                .addPlaceholder("value", item.type.name.formatEnum())
+                .add("value", item.type.name.formatEnum())
                 .build()
 
 
@@ -94,7 +91,12 @@ class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             gui.close(player)
         }
 
-        this.put(gui, "warp-category", player, StringPlaceholders.single("category", island.warp.category.formatted())) {
+        this.put(
+            gui,
+            "warp-category",
+            player,
+            StringPlaceholders.of("category", island.warp.category.formatted())
+        ) {
             if (member.role == Role.MEMBER) {
                 this.rosePlugin.send(player, "island-no-permission")
                 gui.close(player)
@@ -104,7 +106,7 @@ class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             this.rosePlugin.getManager<MenuManager>()[WarpCategoryGUI::class].openMenu(member, island)
         }
 
-        this.put(gui, "warp-location", player, StringPlaceholders.single("location", island.warp.location.format())) {
+        this.put(gui, "warp-location", player, StringPlaceholders.of("location", island.warp.location.format())) {
             if (member.role == Role.MEMBER) {
                 this.rosePlugin.send(player, "island-no-permission")
                 gui.close(player)
@@ -112,7 +114,7 @@ class WarpSettingsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             }
 
             val placeholders = StringPlaceholders.builder("setting", "Warp Location")
-                .addPlaceholder("value", island.warp.location.format())
+                .add("value", island.warp.location.format())
                 .build()
 
             island.warp.location = player.location

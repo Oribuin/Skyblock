@@ -1,0 +1,62 @@
+# Plugin Prefix
+prefix: "#a6b2fc&lSkyblock &8| &f"
+
+#Generic Command Messages
+no-permission: "You do not have permission to do that."
+only-player: "This command can only be executed by a player."
+unknown-command: "Unknown command, use #a6b2fc&l%cmd% &fhelp for more info"
+no-money: "You do not have enough money to do that."
+
+#Help Command
+command-help-title: "Available Commands:"
+command-help-description: "Displays the help menu"
+command-help-list-description: " &8- #a6b2fc/%cmd% %subcmd% %args% &7- &f%desc%"
+command-help-list-description-no-args: " &8- #a6b2fc/%cmd% %subcmd% &7- &f%desc%"
+
+#Reload Command
+command-reload-description: "Reloads the plugin."
+command-reload-reloaded: "Configuration and locale files were reloaded"
+
+#Biomes Command
+command-biome-description: "Changes the player's island biome"
+command-biome-success: "Your island biome has been set to %biome%"
+
+#Border Command
+command-border-description: "Changes the player's visible island border"
+command-border-success: "Your island border has been set to %border%"
+
+#Create Command
+command-create-description: "Creates a new island"
+command-create-success: "You have created a new island!"
+command-create-has-island: "You already have an island!"
+
+#Invite Command
+command-invite-description: "Invites a player to your island"
+command-invite-no-invite: "You do not have a pending invite"
+command-invite-no-island: "You do not have an island"
+command-invite-has-island: "You already have an island"
+command-invite-island-full: "Their island has reached the maximum amount of members"
+
+#Invite Accept Command
+command-invite-accept-description: "Accepts an island invite"
+command-invite-accept-success: "You have joined %island%"
+command-invite-accept-joined: "%player% has joined your island"
+
+# Invite Deny Command
+command-invite-deny-description: "Denies an island invite"
+command-invite-deny-denied: "You have denied the invite"
+command-invite-deny-other: "%player% has denied your invite"
+
+# Member Command
+command-members-description: "Manages island members"
+command-members-usage: "Usage: /is members"
+
+# Settings Command
+command-settings-description: "Manages island settings""command-settings-usage: "Usage: /is settings"
+
+# Teleport Command
+command-teleport-description: "Teleports to your island"
+command-teleport-success: "You have been teleported to your island"
+
+# Warp Commands
+command-warp-description: "Teleports to an island"

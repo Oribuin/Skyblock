@@ -4,22 +4,19 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import dev.rosewood.rosegarden.RosePlugin
 import dev.rosewood.rosegarden.config.CommentedFileConfiguration
 import dev.rosewood.rosegarden.manager.Manager
-import java.io.File
-import org.bukkit.Bukkit
-import org.bukkit.Material
-import org.bukkit.World
-import org.bukkit.WorldCreator
-import org.bukkit.WorldType
+import org.bukkit.*
 import xyz.oribuin.skyblock.util.copyResourceTo
 import xyz.oribuin.skyblock.util.parseEnum
 import xyz.oribuin.skyblock.world.IslandSchematic
 import xyz.oribuin.skyblock.world.LayeredChunkGenerator
+import java.io.File
 
 class WorldManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
     val worlds = mutableMapOf<World.Environment, World>()
     val schematics = mutableMapOf<String, IslandSchematic>()
     private lateinit var schemConfig: CommentedFileConfiguration
+    private lateinit var schemFolder: File
 
     override fun reload() {
         val section = this.rosePlugin.config.getConfigurationSection("world-names")
@@ -33,7 +30,7 @@ class WorldManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
         section.getKeys(false).forEach {
             // Match the island name
-            val environment = World.Environment.values().find { env -> env.name.equals(it, true) } ?: return
+            val environment = World.Environment.entries.find { env -> env.name.equals(it, true) } ?: return
             // Create the worlds.
             val world = this.createWorld(section.getString(it) ?: ("islands_" + environment.name.lowercase()), environment)
             this.worlds[environment] = world
@@ -48,8 +45,9 @@ class WorldManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
         this.schemConfig = CommentedFileConfiguration.loadConfiguration(schemFile)
         if (!exists) {
-            this.rosePlugin.copyResourceTo("plains.schem", File(schemFolder, "plains.schem"))
-            this.saveDefaults(this.schemConfig)
+            val defaultFile = File(this.rosePlugin.dataFolder, "default.schem")
+            this.rosePlugin.copyResourceTo("default.schem",defaultFile)
+            this.saveDefaults(this.schemConfig, defaultFile)
         }
 
         val schemFiles = schemFolder.listFiles() ?: error("Schematics folder does not exist.")
@@ -83,13 +81,13 @@ class WorldManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
      * Get or create the island world.
      *
      * @param name The name of the world
-     * @param enviroment The world enviroment
+     * @param environment The world environment
      * @return The world.
      */
-    private fun createWorld(name: String, enviroment: World.Environment): World {
+    private fun createWorld(name: String, environment: World.Environment): World {
         return Bukkit.getWorld(name) ?: WorldCreator.name(name)
             .type(WorldType.FLAT)
-            .environment(enviroment)
+            .environment(environment)
             .generateStructures(false)
             .generator(LayeredChunkGenerator())
             .createWorld() ?: throw Error("Couldn't create the world.")
@@ -110,7 +108,7 @@ class WorldManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
      *
      * @param config The config to save to.
      */
-    private fun saveDefaults(config: CommentedFileConfiguration) {
+    private fun saveDefaults(config: CommentedFileConfiguration, file: File) {
         val section = config.createSection("plains")
         section["name"] = "#a6b2fc&lPlains"
         section["icon"] = "GRASS_BLOCK"
@@ -120,8 +118,7 @@ class WorldManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
             " &f|", " &f| &7Click to create this island."
         )
 
-        config.save();
-
+        config.save(file);
     }
 
     val overworld: World

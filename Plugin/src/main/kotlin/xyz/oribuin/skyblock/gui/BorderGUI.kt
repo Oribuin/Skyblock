@@ -4,17 +4,13 @@ import dev.rosewood.rosegarden.RosePlugin
 import dev.rosewood.rosegarden.utils.StringPlaceholders
 import dev.triumphteam.gui.guis.Gui
 import dev.triumphteam.gui.guis.GuiItem
-import java.util.*
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.nms.BorderColor
-import xyz.oribuin.skyblock.util.ItemBuilder
-import xyz.oribuin.skyblock.util.formatEnum
-import xyz.oribuin.skyblock.util.getItemStack
-import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.skyblock.util.send
+import xyz.oribuin.skyblock.util.*
+import java.util.*
 
 class BorderGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
@@ -35,7 +31,11 @@ class BorderGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
                 member.border = active
                 with(data) { member.save() }
 
-                this.rosePlugin.send(it.player, "command-border-success", StringPlaceholders.single("border", active.name.formatEnum()))
+                this.rosePlugin.send(
+                    it.player,
+                    "command-border-success",
+                    StringPlaceholders.of("border", active.format())
+                )
             }
 
 
@@ -56,7 +56,7 @@ class BorderGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
         val currentActive = activeColors[player.uniqueId] ?: BorderColor.BLUE
 
-        for (color in BorderColor.values()) {
+        for (color in BorderColor.entries) {
             val item = ItemBuilder(getItemStack(config, "${color.name.lowercase()}-border", player))
                 .glow(color == currentActive)
                 .build()
@@ -69,7 +69,13 @@ class BorderGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
         }
 
         this.update()
-        this.updateTitle(formatString(player, get("gui-settings.title", "Border Color %color%"), StringPlaceholders.single("color", currentActive.name.formatEnum())))
+        this.updateTitle(
+            formatString(
+                player,
+                get("gui-settings.title", "Border Color %color%"),
+                StringPlaceholders.of("color", currentActive.format())
+            )
+        )
 
     }
 

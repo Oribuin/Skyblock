@@ -1,16 +1,15 @@
 package xyz.oribuin.skyblock.hook
 
 import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.utils.HexUtils
 import me.clip.placeholderapi.PlaceholderAPI
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.entity.Player
-import xyz.oribuin.skyblock.manager.ConfigurationManager.Setting
-import xyz.oribuin.skyblock.util.asMember
 import xyz.oribuin.skyblock.util.formatEnum
-import xyz.oribuin.skyblock.util.getIsland
+import java.util.*
 
 class PAPI(private val rosePlugin: RosePlugin) : PlaceholderExpansion() {
+
+    private val userData = mutableMapOf<UUID, PlaceholderUser>()
 
     override fun getIdentifier(): String = "Skyblock"
 
@@ -25,30 +24,40 @@ class PAPI(private val rosePlugin: RosePlugin) : PlaceholderExpansion() {
     @Suppress("DEPRECATION")
     override fun onPlaceholderRequest(player: Player, params: String): String? {
 
-        val island = player.getIsland(this.rosePlugin)
-        val member = player.asMember(this.rosePlugin)
-        val nullPlaceholder = Setting.NULL_PLACEHOLDER.string
+        // force update the user data when requested
+        if (params.equals("update", true)) {
+            this.userData[player.uniqueId] = PlaceholderUser.update(this.rosePlugin, player)
+            return "Updated"
+        }
 
+        // get the placeholder user
+        var placeholderUser = this.userData[player.uniqueId]
 
+        // check if it has been more than 5 minutes since the last update
+
+        if (placeholderUser == null || (System.currentTimeMillis() - placeholderUser.updateTime) > 300000) {
+            placeholderUser = PlaceholderUser.update(this.rosePlugin, player)
+            this.userData[player.uniqueId] = placeholderUser
+        }
 
         return when (params) {
             // Basic island info
-            "island_name" -> HexUtils.colorify(island?.settings?.name ?: nullPlaceholder)
-            "island_biome" -> island?.settings?.biome?.name?.formatEnum() ?: nullPlaceholder
-            "island_size" -> island?.members?.size?.toString() ?: nullPlaceholder
-            "island_owner" -> island?.ownerMember?.offlinePlayer?.name ?: nullPlaceholder
+            "island_name" -> placeholderUser.islandName
+            "island_biome" -> placeholderUser.islandBiome
+            "island_size" -> placeholderUser.islandOwner
+            "island_owner" -> placeholderUser.islandOwner
 
             // Island Member Info
-            "island_border" -> member.border.name.formatEnum()
-            "has_island" -> member.hasIsland.toString()
-            "island_role" -> member.role.name.formatEnum()
+            "island_border" -> placeholderUser.border.formatEnum()
+            "has_island" -> placeholderUser.hasIsland
+            "island_role" -> placeholderUser.role.formatEnum()
 
             // Warp Information
-            "warp_name" -> island?.warp?.name ?: nullPlaceholder
-            "warp_categories" -> island?.warp?.category?.formatted()
-            "warp_visits" -> island?.warp?.visits?.toString() ?: nullPlaceholder
-            "warp_upvotes" -> island?.warp?.votes?.toString() ?: nullPlaceholder
-            else -> nullPlaceholder
+            "warp_name" -> placeholderUser.warpName
+            "warp_categories" -> placeholderUser.warpCategories
+            "warp_visits" -> placeholderUser.warpVisits
+            "warp_upvotes" -> placeholderUser.warpUpvotes
+            else -> null
 
         }
 

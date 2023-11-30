@@ -13,9 +13,12 @@ import xyz.oribuin.skyblock.util.getManager
 class DenyCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseSubCommand(rosePlugin, parent) {
 
     @RoseExecutable
-    fun execute(@Inject context: CommandContext) = this.rosePlugin.getManager<IslandManager>().denyInvite(context.asPlayer())
+    fun execute(@Inject context: CommandContext) =
+        this.rosePlugin.getManager<IslandManager>().denyInvite(context.asPlayer())
 
     override fun getDefaultName(): String = "deny"
 
     override fun isPlayerOnly(): Boolean = true
+
+    override fun getRequiredPermission(): String = "skyblock.command.invite.deny"
 }

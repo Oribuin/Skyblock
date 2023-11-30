@@ -17,12 +17,16 @@ class MemberArgument(rosePlugin: RosePlugin) : RoseCommandArgumentHandler<Member
     override fun handleInternal(argumentInfo: RoseCommandArgumentInfo, argumentParser: ArgumentParser): Member {
         val input = argumentParser.next()
 
-        val exception = HandledArgumentException("argument-handler-member-option", StringPlaceholders.single("input", input))
+        val exception =
+            HandledArgumentException("argument-handler-member-option", StringPlaceholders.of("input", input))
 
         return this.islandManager.getMember(Bukkit.getOfflinePlayerIfCached(input) ?: throw exception)
     }
 
-    override fun suggestInternal(argumentInfo: RoseCommandArgumentInfo, argumentParser: ArgumentParser): MutableList<String> {
+    override fun suggestInternal(
+        argumentInfo: RoseCommandArgumentInfo,
+        argumentParser: ArgumentParser
+    ): MutableList<String> {
         argumentParser.next()
         return Bukkit.getOfflinePlayers().mapNotNull { it.name }.toMutableList()
     }

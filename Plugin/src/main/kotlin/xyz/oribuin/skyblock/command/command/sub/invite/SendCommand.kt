@@ -13,9 +13,12 @@ import xyz.oribuin.skyblock.util.getManager
 class SendCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseSubCommand(rosePlugin, parent) {
 
     @RoseExecutable
-    fun execute(@Inject context: CommandContext, player: Player) = this.rosePlugin.getManager<IslandManager>().sendInvite(context.sender as Player, player)
+    fun execute(@Inject context: CommandContext, player: Player) =
+        this.rosePlugin.getManager<IslandManager>().sendInvite(context.sender as Player, player)
 
     override fun getDefaultName(): String = "send"
 
     override fun isPlayerOnly(): Boolean = true
+
+    override fun getRequiredPermission(): String = "skyblock.command.invite.send"
 }

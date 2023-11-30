@@ -3,7 +3,7 @@ package xyz.oribuin.skyblock.util
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import dev.triumphteam.gui.guis.GuiItem
-import java.util.*
+import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -17,6 +17,8 @@ import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffect
+import java.net.URL
+import java.util.*
 
 @Suppress("deprecation")
 class ItemBuilder(private var item: ItemStack) {
@@ -124,36 +126,6 @@ class ItemBuilder(private var item: ItemStack) {
     }
 
     /**
-     * Sets the item PDC container values
-     *
-     * @param plugin
-     * @param key The key of the value
-     * @param value The value
-     * @return The item builder
-     */
-    fun pdc(plugin: Plugin, key: String, value: Any): ItemBuilder {
-        val meta = this.item.itemMeta ?: return this
-        val cont = meta.persistentDataContainer
-        val namespacedKey = NamespacedKey(plugin, key)
-
-        when (value) {
-            is String -> cont.set(namespacedKey, PersistentDataType.STRING, value)
-            is Int -> cont.set(namespacedKey, PersistentDataType.INTEGER, value)
-            is Boolean -> cont.set(namespacedKey, PersistentDataType.INTEGER, value.compareTo(false))
-            is Double -> cont.set(namespacedKey, PersistentDataType.DOUBLE, value)
-            is Float -> cont.set(namespacedKey, PersistentDataType.FLOAT, value)
-            is Long -> cont.set(namespacedKey, PersistentDataType.LONG, value)
-            is Byte -> cont.set(namespacedKey, PersistentDataType.BYTE, value)
-            is ByteArray -> cont.set(namespacedKey, PersistentDataType.BYTE_ARRAY, value)
-            is Short -> cont.set(namespacedKey, PersistentDataType.SHORT, value)
-            else -> return this
-        }
-
-        item.itemMeta = meta
-        return this
-    }
-
-    /**
      * Sets the item skull texture
      *
      * @param texture The texture of the skull
@@ -167,11 +139,12 @@ class ItemBuilder(private var item: ItemStack) {
         if (texture.isEmpty())
             return this
 
-        val field = meta.javaClass.getDeclaredField("profile")
-        field.isAccessible = true
-        val profile = GameProfile(UUID.randomUUID(), null)
-        profile.properties.put("textures", Property("textures", texture))
-        field.set(meta, profile)
+        val profile = Bukkit.createProfile(UUID.nameUUIDFromBytes(texture.toByteArray()), "")
+        val textures = profile.textures
+        val decodedTextureJson = String(Base64.getDecoder().decode(texture))
+        val decodedTextureUrl = decodedTextureJson.substring(28, decodedTextureJson.length - 4)
+        textures.skin = URL(decodedTextureUrl)
+
         item.itemMeta = meta
         return this
     }

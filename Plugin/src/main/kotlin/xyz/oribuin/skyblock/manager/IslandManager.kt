@@ -4,16 +4,10 @@ import dev.rosewood.rosegarden.RosePlugin
 import dev.rosewood.rosegarden.manager.Manager
 import dev.rosewood.rosegarden.utils.HexUtils
 import dev.rosewood.rosegarden.utils.StringPlaceholders
-import java.util.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
-import org.bukkit.ChatColor
-import org.bukkit.Chunk
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.OfflinePlayer
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.block.Biome
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
@@ -25,13 +19,9 @@ import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.island.Warp
 import xyz.oribuin.skyblock.manager.ConfigurationManager.Setting
 import xyz.oribuin.skyblock.nms.NMSAdapter
-import xyz.oribuin.skyblock.util.cache
-import xyz.oribuin.skyblock.util.color
-import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.skyblock.util.parseEnum
-import xyz.oribuin.skyblock.util.send
-import xyz.oribuin.skyblock.util.usingPaper
+import xyz.oribuin.skyblock.util.*
 import xyz.oribuin.skyblock.world.IslandSchematic
+import java.util.*
 
 class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
@@ -39,6 +29,7 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
     private val inviteMap = mutableMapOf<UUID, UUID>()
     val biomeMap = mutableMapOf<Biome, BiomeOption>()
 
+    @Suppress("deprecation")
     override fun reload() {
         this.dataManager.loadIslands()
         val section = this.rosePlugin.config.getConfigurationSection("biomes") ?: return
@@ -137,7 +128,6 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
     }
 
     fun deleteIsland(island: Island) {
-        // Delete all the island data (please don't create a new island with the same id)
         this.dataManager.deleteIsland(island)
     }
 
@@ -156,13 +146,10 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
         }
 
         player.fallDistance = 0f
-
-        when (usingPaper) {
-            true -> player.teleportAsync(location, PlayerTeleportEvent.TeleportCause.PLUGIN)
-            false -> player.teleport(location, PlayerTeleportEvent.TeleportCause.PLUGIN)
+        player.teleportAsync(location, PlayerTeleportEvent.TeleportCause.PLUGIN).thenRun {
+            this.createBorder(member, island)
         }
 
-        this.rosePlugin.server.scheduler.runTaskLater(this.rosePlugin, Runnable { this.createBorder(member, island) }, 1)
     }
 
     /**
@@ -271,7 +258,10 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
         val chunks = this.getIslandChunks(island, world = this.rosePlugin.getManager<WorldManager>().overworld)
         chunks.forEach { chunk -> chunk.blocks.forEach { it.biome = island.settings.biome } }
 
-        this.rosePlugin.server.scheduler.runTaskLater(this.rosePlugin, Runnable { NMSAdapter.handler.sendChunks(chunks, this.getPlayersOnIsland(island)) }, 2)
+        this.rosePlugin.server.scheduler.runTaskLater(this.rosePlugin, Runnable {
+            NMSAdapter.handler.sendChunks(chunks, this.getPlayersOnIsland(island))
+        }, 2)
+
     }
 
     /**
@@ -330,7 +320,9 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
             return
 
         // Check if the user is banned from the island
-        if (member.onlinePlayer?.hasPermission("skyblock.bypass") != true && island.settings.banned.getUUIDs().contains(member.uuid))
+        if (member.onlinePlayer?.hasPermission("skyblock.island.bypass") != true && island.settings.banned.getUUIDs()
+                .contains(member.uuid)
+        )
             return
 
         // Check if the user has already visited and if the user teleported is part of the island
@@ -367,7 +359,9 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
         }
 
         // Check if the user is banned from the island
-        if (member.onlinePlayer?.hasPermission("skyblock.bypass") != true && this.getIslandFromId(warp.key)?.settings?.banned?.getUUIDs()?.contains(member.uuid) == true) {
+        if (member.onlinePlayer?.hasPermission("skyblock.island.bypass") != true && this.getIslandFromId(warp.key)?.settings?.banned?.getUUIDs()
+                ?.contains(member.uuid) == true
+        ) {
             member.onlinePlayer?.let { this.rosePlugin.send(it, "command-warp-banned") }
             return
         }
@@ -414,7 +408,7 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
      */
     fun getWarpByCategory(category: Warp.Category.Type): List<Warp> = this.dataManager.islandCache.values
         .map { it.warp }
-        .filter { it.category.types.contains(category) }
+        .filter { it.category.types.contains(category.name) }
         .toMutableList()
 
     /**
@@ -434,7 +428,11 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
      * @param messageId The message id.
      * @param placeholders The message placeholders.
      */
-    fun sendMembersMessage(island: Island, messageId: String, placeholders: StringPlaceholders = StringPlaceholders.empty()) {
+    fun sendMembersMessage(
+        island: Island,
+        messageId: String,
+        placeholders: StringPlaceholders = StringPlaceholders.empty()
+    ) {
         island.members.mapNotNull { it.onlinePlayer }.forEach { this.rosePlugin.send(it, messageId, placeholders) }
     }
 
@@ -444,7 +442,8 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
      * @param island The island.
      * @return The banned players.
      */
-    fun getBannedUsers(island: Island): List<UUID> = this.dataManager.islandCache[island.key]?.settings?.banned?.getUUIDs() ?: emptyList()
+    fun getBannedUsers(island: Island): List<UUID> =
+        this.dataManager.islandCache[island.key]?.settings?.banned?.getUUIDs() ?: emptyList()
 
 
     /**
@@ -487,9 +486,12 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
         }
 
         val localeManager = this.rosePlugin.getManager<LocaleManager>()
-        localeManager.sendMessage(from, "island-invite-sent", StringPlaceholders.single("player", to.name))
+        localeManager.sendMessage(from, "island-invite-sent", StringPlaceholders.of("player", to.name))
         val prefix = localeManager.getLocaleMessage("prefix")
-        val receivedMessage = prefix + localeManager.getLocaleMessage("island-invite-received", StringPlaceholders.single("player", from.name))
+        val receivedMessage = prefix + localeManager.getLocaleMessage(
+            "island-invite-received",
+            StringPlaceholders.of("player", from.name)
+        )
 
         to.sendMessage(
             Component.text(receivedMessage.color())
@@ -545,8 +547,16 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
         island.members.add(member)
         island.cache(this.rosePlugin)
-        this.rosePlugin.send(player, "command-invite-accept-success", StringPlaceholders.single("island", island.settings.name))
-        this.sendMembersMessage(island, "command-invite-accept-joined", StringPlaceholders.single("player", player.name))
+        this.rosePlugin.send(
+            player,
+            "command-invite-accept-success",
+            StringPlaceholders.of("island", island.settings.name)
+        )
+        this.sendMembersMessage(
+            island,
+            "command-invite-accept-joined",
+            StringPlaceholders.of("player", player.name)
+        )
     }
 
     /**
@@ -567,7 +577,7 @@ class IslandManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
         this.rosePlugin.send(player, "command-invite-deny-denied")
 
         this.getMember(invite.key).onlinePlayer?.let {
-            this.rosePlugin.send(it, "command-invite-deny-other", StringPlaceholders.single("player", player.name))
+            this.rosePlugin.send(it, "command-invite-deny-other", StringPlaceholders.of("player", player.name))
         }
     }
 

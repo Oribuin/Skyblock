@@ -4,12 +4,6 @@ import com.google.gson.Gson
 import dev.rosewood.rosegarden.RosePlugin
 import dev.rosewood.rosegarden.database.DataMigration
 import dev.rosewood.rosegarden.manager.AbstractDataManager
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.sql.Connection
-import java.sql.Statement
-import java.util.*
-import java.util.function.Consumer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.block.Biome
@@ -18,16 +12,18 @@ import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.io.BukkitObjectInputStream
 import org.bukkit.util.io.BukkitObjectOutputStream
 import xyz.oribuin.skyblock.database.migration.CreateInitialTables
-import xyz.oribuin.skyblock.island.Island
-import xyz.oribuin.skyblock.island.Member
-import xyz.oribuin.skyblock.island.Report
-import xyz.oribuin.skyblock.island.Settings
-import xyz.oribuin.skyblock.island.Warp
+import xyz.oribuin.skyblock.island.*
 import xyz.oribuin.skyblock.manager.ConfigurationManager.Setting
 import xyz.oribuin.skyblock.nms.BorderColor
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.getNextIslandLocation
 import xyz.oribuin.skyblock.util.parseEnum
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.sql.Connection
+import java.sql.Statement
+import java.util.*
+import java.util.function.Consumer
 
 class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
 
@@ -77,7 +73,15 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
             val keys = islandStatement.generatedKeys
             if (keys.next()) {
                 val key = keys.getInt(1)
-                val newIsland = Island(key, owner, getNextIslandLocation(key, this.rosePlugin.getManager<WorldManager>().overworld, Setting.ISLAND_SIZE.int))
+                val newIsland = Island(
+                    key,
+                    owner,
+                    getNextIslandLocation(
+                        key,
+                        this.rosePlugin.getManager<WorldManager>().overworld,
+                        Setting.ISLAND_SIZE.int
+                    )
+                )
                 val username = Bukkit.getPlayer(owner)?.name ?: "Unknown"
                 newIsland.settings.name = "$username's Island"
                 newIsland.warp.name = "$username's Warp"
@@ -132,7 +136,8 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
         island.lastSave = System.currentTimeMillis()
         this.islandCache[island.key] = island
 
-        val main = connection.prepareStatement("REPLACE INTO ${this.tablePrefix}islands (`key`, owner, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+        val main =
+            connection.prepareStatement("REPLACE INTO ${this.tablePrefix}islands (`key`, owner, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
         main.setInt(1, island.key)
         main.setString(2, island.owner.toString())
         main.setDouble(3, island.center.blockX.toDouble())
@@ -144,7 +149,8 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
         main.executeUpdate()
 
         // Save the island settings
-        val settings = connection.prepareStatement("REPLACE INTO ${this.tablePrefix}settings (`key`, `name`, `public`, mobSpawning, animalSpawning, biome, bans) VALUES (?, ?, ?, ?, ?, ?, ?)")
+        val settings =
+            connection.prepareStatement("REPLACE INTO ${this.tablePrefix}settings (`key`, `name`, `public`, mobSpawning, animalSpawning, biome, bans) VALUES (?, ?, ?, ?, ?, ?, ?)")
         settings.setInt(1, island.key)
         settings.setString(2, island.settings.name)
         settings.setBoolean(3, island.settings.public)
@@ -155,7 +161,8 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
         settings.executeUpdate()
 
         // Save the island warps
-        val warps = connection.prepareStatement("REPLACE INTO ${this.tablePrefix}warps (`key`, `name`, icon, visits, votes, category, disabled, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        val warps =
+            connection.prepareStatement("REPLACE INTO ${this.tablePrefix}warps (`key`, `name`, icon, visits, votes, category, disabled, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
         warps.setInt(1, island.key)
         warps.setString(2, island.warp.name)
         warps.setBytes(3, this.serialize(island.warp.icon))
@@ -172,7 +179,8 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
         warps.executeUpdate()
 
         if (island.home != island.center) {
-            val homes = connection.prepareStatement("REPLACE INTO ${this.tablePrefix}homes (`key`, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?)")
+            val homes =
+                connection.prepareStatement("REPLACE INTO ${this.tablePrefix}homes (`key`, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?)")
             homes.setInt(1, island.key)
             homes.setDouble(2, island.home.x)
             homes.setDouble(3, island.home.y)
@@ -185,7 +193,8 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
 
         // This could be pretty bad but who cares.
         island.members.forEach { member ->
-            val members = connection.prepareStatement("REPLACE INTO ${this.tablePrefix}members (`key`, player, `username`, `role`, border) VALUES (?, ?, ?, ?, ?)")
+            val members =
+                connection.prepareStatement("REPLACE INTO ${this.tablePrefix}members (`key`, player, `username`, `role`, border) VALUES (?, ?, ?, ?, ?)")
             members.setInt(1, island.key)
             members.setString(2, member.uuid.toString())
             members.setString(3, member.username)
@@ -205,7 +214,8 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
 
         this.async {
             this.databaseConnector.connect { connection ->
-                val insert = connection.prepareStatement("INSERT INTO ${this.tablePrefix}reports (reporter, island, reason, date) VALUES (?, ?, ?, ?)")
+                val insert =
+                    connection.prepareStatement("INSERT INTO ${this.tablePrefix}reports (reporter, island, reason, date) VALUES (?, ?, ?, ?)")
                 insert.setString(1, report.reporter.toString())
                 insert.setInt(2, report.island.key)
                 insert.setString(3, report.reason)
@@ -225,7 +235,8 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
 
         this.async { _ ->
             this.databaseConnector.connect {
-                val query = "REPLACE INTO ${this.tablePrefix}members (`key`, player, `username`,`role`, border) VALUES (?, ?, ?, ?, ?)"
+                val query =
+                    "REPLACE INTO ${this.tablePrefix}members (`key`, player, `username`,`role`, border) VALUES (?, ?, ?, ?, ?)"
                 val statement = it.prepareStatement(query)
                 statement.setInt(1, member.island)
                 statement.setString(2, member.uuid.toString())
@@ -305,14 +316,23 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
                 if (island == null)
                     return@connect
 
-                val warpQuery = "SELECT name, icon, visits, votes, x, y, z, yaw, pitch, world, category FROM ${this.tablePrefix}warps WHERE key = ?"
+                val warpQuery =
+                    "SELECT name, icon, visits, votes, x, y, z, yaw, pitch, world, category FROM ${this.tablePrefix}warps WHERE key = ?"
                 val warpStatement = it.prepareStatement(warpQuery)
                 warpStatement.setInt(1, island.key)
                 val warpResult = warpStatement.executeQuery()
 
                 // Get the island warp if it exists.
                 if (warpResult.next()) {
-                    val warp = Warp(island.key, Location(Bukkit.getWorld(warpResult.getString("world")), warpResult.getDouble("x"), warpResult.getDouble("y"), warpResult.getDouble("z")))
+                    val warp = Warp(
+                        island.key,
+                        Location(
+                            Bukkit.getWorld(warpResult.getString("world")),
+                            warpResult.getDouble("x"),
+                            warpResult.getDouble("y"),
+                            warpResult.getDouble("z")
+                        )
+                    )
                     warp.name = warpResult.getString("name")
                     warp.icon = this.deserialize(warpResult.getBytes("icon"))
                     warp.visits = warpResult.getInt("visits")
@@ -326,7 +346,8 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
                  * variable, This comment is entirely to section out everything because I feel like
                  * im gonna die with how cluttered this is.
                  */
-                val settingsQuery = "SELECT name, public, mobSpawning, animalSpawning, biome, bans FROM ${this.tablePrefix}settings WHERE key = ?"
+                val settingsQuery =
+                    "SELECT name, public, mobSpawning, animalSpawning, biome, bans FROM ${this.tablePrefix}settings WHERE key = ?"
                 val settingsState = it.prepareStatement(settingsQuery)
                 settingsState.setInt(1, island.key)
                 val settingsResult = settingsState.executeQuery()
@@ -343,7 +364,7 @@ class DataManager(rosePlugin: RosePlugin) : AbstractDataManager(rosePlugin) {
                     island.settings = settings
                 }
 
-                val memberQuery = "SELECT player, role, border FROM ${this.tablePrefix}members WHERE key = ?"
+                val memberQuery = "SELECT * FROM ${this.tablePrefix}members WHERE key = ?"
                 val members = mutableListOf<Member>()
                 val memberState = it.prepareStatement(memberQuery)
                 memberState.setInt(1, island.key)

@@ -1,7 +1,7 @@
 package xyz.oribuin.skyblock.island
 
-import java.util.*
 import org.bukkit.block.Biome
+import java.util.*
 
 class Settings(val key: Int) {
     var name: String = "Unknown" // The name of the island

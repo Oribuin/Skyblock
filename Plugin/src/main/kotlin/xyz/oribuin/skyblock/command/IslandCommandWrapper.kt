@@ -7,7 +7,7 @@ class IslandCommandWrapper(rosePlugin: RosePlugin?) : RoseCommandWrapper(rosePlu
 
     override fun getDefaultName(): String = "island"
 
-    override fun getDefaultAliases(): MutableList<String>  = mutableListOf("is", "sb", "skyblock")
+    override fun getDefaultAliases(): MutableList<String> = mutableListOf("is", "sb", "skyblock")
 
     override fun getCommandPackages(): MutableList<String> = mutableListOf("xyz.oribuin.skyblock.command.command")
 

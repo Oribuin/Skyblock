@@ -11,7 +11,8 @@ import xyz.oribuin.skyblock.command.command.sub.invite.DenyCommand
 import xyz.oribuin.skyblock.command.command.sub.invite.SendCommand
 
 @Suppress("unused")
-class InviteCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseCommand(rosePlugin, parent,
+class InviteCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseCommand(
+    rosePlugin, parent,
     AcceptCommand::class.java,
     DenyCommand::class.java,
     SendCommand::class.java

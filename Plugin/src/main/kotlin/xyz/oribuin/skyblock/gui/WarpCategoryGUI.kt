@@ -10,11 +10,7 @@ import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.island.Warp
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.manager.MenuManager
-import xyz.oribuin.skyblock.util.ItemBuilder
-import xyz.oribuin.skyblock.util.cache
-import xyz.oribuin.skyblock.util.color
-import xyz.oribuin.skyblock.util.formatEnum
-import xyz.oribuin.skyblock.util.getManager
+import xyz.oribuin.skyblock.util.*
 
 class WarpCategoryGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
@@ -32,7 +28,7 @@ class WarpCategoryGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             island.cache(this.rosePlugin)
 
             val placeholders = StringPlaceholders.builder("setting", "Warp Category")
-                .addPlaceholder("value", island.warp.category.formatted())
+                .add("value", island.warp.category.formatted())
                 .build()
 
             this.manager.sendMembersMessage(island, "island-warp-settings-changed", placeholders)
@@ -58,15 +54,15 @@ class WarpCategoryGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
             description.addAll(listOf(" &f|", " &f| &7Click to switch category"))
 
             val item = ItemBuilder(it.icon)
-                .name("#a6b2fc&l${it.name.formatEnum()}".color())
+                .name("#a6b2fc&l${it.format()}".color())
                 .lore(description.color())
-                .glow(activeCategories.types.contains(it))
+                .glow(activeCategories.types.contains(it.name))
                 .build()
 
             gui.setItem(it.slot, GuiItem(item) { _ ->
 
-                if (!activeCategories.names.remove(it.name))
-                    activeCategories.names.add(it.name)
+                if (!activeCategories.types.remove(it.name))
+                    activeCategories.types.add(it.name)
 
                 this.categories[island.key] = activeCategories
                 this.setupCategories(gui, island)

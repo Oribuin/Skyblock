@@ -43,8 +43,9 @@ class VaultHook {
          * @param player The player to get the group for.
          * @return The group name.
          */
-        fun getRankCapital(worldName: String, player: OfflinePlayer): String = this.permission.getPrimaryGroup(worldName, player)
-            .replaceFirstChar { it.uppercase() }
+        fun getRankCapital(worldName: String, player: OfflinePlayer): String =
+            this.permission.getPrimaryGroup(worldName, player)
+                .replaceFirstChar { it.uppercase() }
 
         /**
          * Get the player's active prefix
@@ -77,7 +78,8 @@ class VaultHook {
          * @param player The player to withdraw from.
          * @param amount The amount to withdraw.
          */
-        fun withdraw(player: OfflinePlayer, amount: Double): Boolean = this.economy.withdrawPlayer(player, amount).transactionSuccess()
+        fun withdraw(player: OfflinePlayer, amount: Double): Boolean =
+            this.economy.withdrawPlayer(player, amount).transactionSuccess()
 
         /**
          * Deposit money to a player.
@@ -85,7 +87,8 @@ class VaultHook {
          * @param player The player to deposit to.
          * @param amount The amount to deposit.
          */
-        fun deposit(player: OfflinePlayer, amount: Double): Boolean = this.economy.depositPlayer(player, amount).transactionSuccess()
+        fun deposit(player: OfflinePlayer, amount: Double): Boolean =
+            this.economy.depositPlayer(player, amount).transactionSuccess()
     }
 
     init {

@@ -10,6 +10,7 @@ data class ChunkLayer(val startLayer: Int, val endLayer: Int, val material: Mate
      *
      * @param chunkData The data to fill the chunk with
      */
-    fun fill(chunkData: ChunkGenerator.ChunkData) = chunkData.setRegion(0, this.startLayer, 0, 16, this.endLayer + 1, 16, this.material)
+    fun fill(chunkData: ChunkGenerator.ChunkData) =
+        chunkData.setRegion(0, this.startLayer, 0, 16, this.endLayer + 1, 16, this.material)
 
 }

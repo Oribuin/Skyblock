@@ -7,8 +7,6 @@ import dev.triumphteam.gui.guis.BaseGui
 import dev.triumphteam.gui.guis.Gui
 import dev.triumphteam.gui.guis.GuiItem
 import dev.triumphteam.gui.guis.PaginatedGui
-import java.io.File
-import java.util.function.Consumer
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -16,6 +14,8 @@ import org.bukkit.inventory.ItemStack
 import xyz.oribuin.skyblock.hook.PAPI
 import xyz.oribuin.skyblock.util.color
 import xyz.oribuin.skyblock.util.getItemStack
+import java.io.File
+import java.util.function.Consumer
 
 abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
 
@@ -145,7 +145,13 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param placeholders  The placeholders to use
      * @param eventConsumer The event consumer
      */
-    protected fun put(gui: BaseGui, itemPath: String, viewer: Player, placeholders: StringPlaceholders, eventConsumer: Consumer<InventoryClickEvent> = Consumer { }) {
+    protected fun put(
+        gui: BaseGui,
+        itemPath: String,
+        viewer: Player,
+        placeholders: StringPlaceholders,
+        eventConsumer: Consumer<InventoryClickEvent> = Consumer { }
+    ) {
         if (!this.get("$itemPath.enabled", true))
             return
 
@@ -212,7 +218,11 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param placeholders The placeholders to replace
      * @return The formatted string
      */
-    private fun format(player: Player, text: String, placeholders: StringPlaceholders = StringPlaceholders.empty()): Component {
+    private fun format(
+        player: Player,
+        text: String,
+        placeholders: StringPlaceholders = StringPlaceholders.empty()
+    ): Component {
         return Component.text(PAPI.apply(player, placeholders.apply(text)).color())
     }
 
@@ -224,7 +234,11 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param placeholders The placeholders to replace
      * @return The formatted string
      */
-    protected fun formatString(player: Player, text: String, placeholders: StringPlaceholders = StringPlaceholders.empty()): String {
+    protected fun formatString(
+        player: Player,
+        text: String,
+        placeholders: StringPlaceholders = StringPlaceholders.empty()
+    ): String {
         return PAPI.apply(player, placeholders.apply(text)).color()
     }
 
@@ -265,10 +279,10 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      */
     protected fun getPagePlaceholders(gui: PaginatedGui): StringPlaceholders {
         return StringPlaceholders.builder()
-            .addPlaceholder("page", gui.currentPageNum)
-            .addPlaceholder("total", gui.pagesNum.coerceAtLeast(1))
-            .addPlaceholder("next", gui.nextPageNum)
-            .addPlaceholder("previous", gui.prevPageNum)
+            .add("page", gui.currentPageNum)
+            .add("total", gui.pagesNum.coerceAtLeast(1))
+            .add("next", gui.nextPageNum)
+            .add("previous", gui.prevPageNum)
             .build()
     }
 

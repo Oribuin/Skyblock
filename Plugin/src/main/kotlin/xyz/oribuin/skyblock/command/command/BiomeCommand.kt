@@ -35,5 +35,4 @@ class BiomeCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseCom
     override fun isPlayerOnly(): Boolean = true
 
 
-
 }

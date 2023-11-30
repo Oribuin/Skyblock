@@ -45,5 +45,5 @@ class CreateCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseCo
 
     override fun getDescriptionKey(): String = "command-create-description"
 
-    override fun getRequiredPermission(): String = "skyblock.create"
+    override fun getRequiredPermission(): String = "skyblock.command.create"
 }

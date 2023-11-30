@@ -9,7 +9,8 @@ import xyz.oribuin.skyblock.util.getManager
 
 class ConfigurationManager(rosePlugin: RosePlugin) : AbstractConfigurationManager(rosePlugin, Setting::class.java) {
 
-    enum class Setting(private val key: String, private val defaultValue: Any, private vararg val comments: String) : RoseSetting {
+    enum class Setting(private val key: String, private val defaultValue: Any, private vararg val comments: String) :
+        RoseSetting {
         WORLDNAMES_NORMAL("world-names.NORMAL", "islands_normal", "The name for the main island world"),
         WORLDNAMES_NETHER("world-names.NETHER", "islands_nether", "The name for the nether island world"),
         WORLDNAMES_END("world-names.THE_END", "islands_end", "The name for the end island world"),
@@ -56,7 +57,8 @@ class ConfigurationManager(rosePlugin: RosePlugin) : AbstractConfigurationManage
             this.value = value
         }
 
-        override fun getBaseConfig(): CommentedFileConfiguration = SkyblockPlugin.instance.getManager<ConfigurationManager>().config
+        override fun getBaseConfig(): CommentedFileConfiguration =
+            SkyblockPlugin.instance.getManager<ConfigurationManager>().config
 
     }
 

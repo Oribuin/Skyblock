@@ -6,22 +6,8 @@ import dev.rosewood.rosegarden.config.CommentedConfigurationSection
 import dev.rosewood.rosegarden.manager.Manager
 import dev.rosewood.rosegarden.utils.HexUtils
 import dev.rosewood.rosegarden.utils.StringPlaceholders
-import java.io.File
-import java.nio.file.Files
-import java.util.*
-import kotlin.math.floor
-import kotlin.math.max
-import kotlin.math.sqrt
-import kotlin.reflect.KClass
-import me.clip.placeholderapi.PlaceholderAPI
-import org.apache.commons.lang3.text.WordUtils
-import org.bukkit.Bukkit
-import org.bukkit.Color
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
-import org.bukkit.OfflinePlayer
-import org.bukkit.World
+import org.apache.commons.lang3.StringUtils
+import org.bukkit.*
 import org.bukkit.command.CommandSender
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
@@ -34,6 +20,13 @@ import xyz.oribuin.skyblock.manager.DataManager
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.manager.LocaleManager
 import xyz.oribuin.skyblock.manager.MenuManager
+import java.io.File
+import java.nio.file.Files
+import java.util.*
+import kotlin.math.floor
+import kotlin.math.max
+import kotlin.math.sqrt
+import kotlin.reflect.KClass
 
 
 inline fun <reified T : Manager> RosePlugin.getManager(): T = this.getManager(T::class.java)
@@ -59,31 +52,6 @@ fun RosePlugin.copyResourceTo(resourcePath: String, output: File) {
 fun String.color(): String = HexUtils.colorify(this)
 
 fun List<String>.color(): List<String> = this.map { HexUtils.colorify(it) }
-
-/**
- * Format a location into a readable String.
- *
- * @return The formatted Location.
- */
-fun Location.format(): String {
-    return this.blockX.toString() + ", " + this.blockY + ", " + this.blockZ
-}
-
-/**
- * Get the block location of the location.;
- *
- * @return The block location
- */
-fun Location.block(): Location {
-    return Location(
-        this.world,
-        this.blockX.toDouble(),
-        this.blockY.toDouble(),
-        this.blockZ.toDouble(),
-        this.yaw,
-        this.pitch
-    )
-}
 
 /**
  * Get a bukkit color from a hex code
@@ -114,14 +82,16 @@ fun getSpareSlots(player: Player): Int {
         .toInt()
 }
 
-/**
- * Gets a location as a string key
- *
- * @return the location as a string key
- * @author Esophose
- */
-fun Location.asKey(): String {
-    return String.format("%s-%.2f-%.2f-%.2f", this.world?.name, this.x, this.y, this.z)
+
+fun <T : Enum<T>> next(enum: T): T {
+    val values = enum.javaClass.enumConstants
+
+    // if the enum is the last one, return the first one
+    if (enum.ordinal == values.size - 1)
+        return values[0]
+
+    // return the next enum
+    return values[enum.ordinal + 1]
 }
 
 /**
@@ -174,39 +144,13 @@ fun getNextIslandLocation(locationId: Int, world: World?, islandDistance: Int): 
  * @return The enum if found.
  */
 fun <T : Enum<T>> parseEnum(enum: KClass<T>, value: String): T {
+
     try {
-        return enum.java.enumConstants.first { it.name.equals(value, true) } ?: error("")
+        return java.lang.Enum.valueOf(enum.java, value.uppercase())
     } catch (ex: Exception) {
         error("Invalid ${enum.simpleName} specified: $value")
     }
 }
-
-fun String.formatEnum(): String = WordUtils.capitalizeFully(this.lowercase().replace("_", " "))
-
-fun List<String>.format(): String {
-    val builder = StringBuilder()
-    for (i in this.indices) {
-        builder.append(this[i])
-        if (i != this.size - 1)
-            builder.append(", ")
-    }
-
-    return builder.toString()
-}
-
-/**
- * Check if the server is using Paper
- *
- * @return True if the server can find paper.
- */
-val usingPaper: Boolean
-    get() = try {
-        Class.forName("com.destroystokyo.paper.util.VersionFetcher")
-        true
-    } catch (ex: ClassNotFoundException) {
-        false
-    }
-
 
 fun numRange(start: Int, end: Int): List<Int> {
     val list = mutableListOf<Int>()
@@ -214,16 +158,6 @@ fun numRange(start: Int, end: Int): List<Int> {
         list.add(i)
 
     return list
-}
-
-fun Location.center() =
-    Location(this.world, this.blockX + 0.5, this.blockY + 0.0, this.blockZ + 0.5, this.yaw, this.pitch)
-
-fun apply(sender: OfflinePlayer?, text: String): String {
-    return if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
-        PlaceholderAPI.setPlaceholders(if (sender is Player) sender else null, text)
-    else
-        text;
 }
 
 /**
@@ -241,7 +175,8 @@ fun getItemStack(
     player: Player,
     placeholders: StringPlaceholders = StringPlaceholders.empty()
 ): ItemStack {
-    val material = Material.getMaterial(config.getString("$path.material") ?: "STONE") ?: return ItemStack(Material.STONE)
+    val material =
+        Material.getMaterial(config.getString("$path.material") ?: "STONE") ?: return ItemStack(Material.STONE)
 
     // Format the item lore
     val lore = config.getStringList("$path.lore").map { format(player, it, placeholders) }
@@ -339,3 +274,9 @@ fun <T : PluginGUI> RosePlugin.getMenu(kclass: KClass<T>): T = this.getManager<M
 fun CommandContext.asPlayer(): Player = this.sender as Player
 
 fun CommandContext.asMember(rosePlugin: RosePlugin): Member = (this.sender as Player).asMember(rosePlugin)
+
+fun Enum<*>.format(): String = StringUtils.capitalize(this.name.replace("_", " "))
+
+fun String.formatEnum(): String = StringUtils.capitalize(this.replace("_", " "))
+
+fun Location.format(): String = "${this.blockX}, ${this.blockY}, ${this.blockZ}"

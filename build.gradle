@@ -1,6 +1,6 @@
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.1.0' apply false
-    id 'org.jetbrains.kotlin.jvm' version '1.7.20' apply false
+    id 'org.jetbrains.kotlin.jvm' version '1.9.0' apply false
 }
 
 allprojects {
@@ -11,8 +11,11 @@ allprojects {
     group 'xyz.oribuin.skyblock'
     version '1.0'
 
-    targetCompatibility = JavaVersion.VERSION_18
-    sourceCompatibility = JavaVersion.VERSION_18
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
 
     repositories {
         mavenCentral()
@@ -23,32 +26,37 @@ allprojects {
         maven { url "https://repo.rosewooddev.io/repository/public/" }
         maven { url "https://maven.enginehub.org/repo/" }
         maven { url "https://repo.md-5.net/content/repositories/public/" }
-        maven { url "https://repo.codemc.org/repository/maven-public" }
+        maven { url "https://repo.codemc.org/repository/maven-public/" }
         maven { url "https://repo.aikar.co/content/groups/aikar/" }
         maven { url "https://repo.extendedclip.com/content/repositories/placeholderapi/" }
-        maven { url "https://jitpack.io" }
+        maven { url "https://jitpack.io/" }
+    }
 
+    dependencies {
+        compileOnly "org.jetbrains:annotations:24.0.1"
+
+        api "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     }
 }
 
 dependencies {
-    implementation project(':Plugin')
-    implementation project(':NMS:Wrapper')
-    implementation project(path: ':NMS:v1_18_R1', configuration: 'remapped')
-    implementation project(path: ':NMS:v1_18_R2', configuration: 'remapped')
-    implementation project(path: ':NMS:v1_19_R1', configuration: 'remapped')
+    api project(':Plugin')
+    api project(':NMS:Wrapper')
+    api project(path: ':NMS:v1_20_R1', configuration: 'remapped')
+    api project(path: ':NMS:v1_20_R2', configuration: 'remapped')
 }
 
 shadowJar {
     archiveClassifier.set(null)
-    relocate("org.jetbrains", "${project.group}.libs.jetbrains")
-    relocate("org.intellij", "${project.group}.libs.intellij")
-    relocate("net.kyori", "${project.group}.libs.kyori")
-    relocate("net.wesjd", "${project.group}.libs.wesjd")
-    relocate("kotlin", "${project.group}.libs.kotlin")
-    relocate("io.github.bananapuncher714", "${project.group}.libs.bananapuncher714")
-    relocate("dev.triumphteam", "${project.group}.libs.triumphteam")
-    relocate("dev.rosewood", "${project.group}.libs.rosewood")
+
+    // TODO: Relocate everything
+
+    relocate("dev.rosewood.rosegarden", "${project.group}.libs.rosegarden")
+
 }
 
-tasks.getByName("build").dependsOn("shadowJar")
+tasks {
+    build {
+        dependsOn("shadowJar")
+    }
+}

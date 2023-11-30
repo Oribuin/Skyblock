@@ -1,30 +1,30 @@
 
 compileJava {
-    options.compilerArgs += ['-parameters']
+    options.compilerArgs += ["-parameters"]
     options.fork = true
-    options.encoding = 'UTF-8'
+    options.encoding = "UTF-8"
 }
 
 dependencies {
-    implementation project(':NMS:Wrapper')
+    implementation project(":NMS:Wrapper")
 
     // Spigot Dependencies
-    compileOnly 'io.papermc.paper:paper-api:1.19.1-R0.1-SNAPSHOT'
-    compileOnly 'com.mojang:authlib:1.5.21'
+    compileOnly "io.papermc.paper:paper-api:${spigotVersion}-R0.1-SNAPSHOT"
+    compileOnly "com.mojang:authlib:1.5.21"
 
     // Plugin APIs
-    compileOnly 'me.clip:placeholderapi:2.10.10'
-    compileOnly 'com.sk89q.worldedit:worldedit-bukkit:7.2.12-SNAPSHOT'
-    compileOnly('com.github.MilkBowl:VaultAPI:1.7') {
-        exclude group: 'org.bukkit'
+    compileOnly "me.clip:placeholderapi:2.11.3"
+    compileOnly "com.sk89q.worldedit:worldedit-bukkit:7.3.0-SNAPSHOT"
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7") {
+        exclude group: "org.bukkit"
     }
 
     // Frameworks
-    api 'dev.rosewood:rosegarden:1.1.0.48-SNAPSHOT' // https://github.com/Rosewood-Development/RoseGarden
-    api 'io.github.bananapuncher714:nbteditor:7.18.2' // https://github.com/BananaPuncher714/NBTEditor
-    api 'net.wesjd:anvilgui:1.5.3-SNAPSHOT'// https://github.com/WesJD/AnvilGUI
-    api('dev.triumphteam:triumph-gui:3.1.3') { // https://github.com/TriumphTeam/triumph-gui/
-        exclude group: 'com.google.code.gson', module: 'gson' // Already included in spigot-api
+    api "dev.rosewood:rosegarden:${gardenVersion}" // https://github.com/Rosewood-Development/RoseGarden
+    api "net.wesjd:anvilgui:1.9.0-SNAPSHOT"// https://github.com/WesJD/AnvilGUI
+    api("dev.triumphteam:triumph-gui:3.1.7") {  // https://mf.mattstudios.me/triumph-gui/introduction
+        exclude group: "com.google.code.gson", module: "gson" // Remove GSON, Already included in spigot api
+        exclude group: "net.kyori", module: "*" // Remove kyori, we"re using plugin.yml libraries
     }
 
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk8"

@@ -4,28 +4,22 @@ import dev.rosewood.rosegarden.RosePlugin
 import dev.rosewood.rosegarden.utils.StringPlaceholders
 import dev.triumphteam.gui.guis.GuiItem
 import dev.triumphteam.gui.guis.PaginatedGui
-import java.util.*
 import xyz.oribuin.skyblock.enums.FilterType
 import xyz.oribuin.skyblock.enums.SortType
 import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.manager.MenuManager
-import xyz.oribuin.skyblock.util.FilterOption
-import xyz.oribuin.skyblock.util.ItemBuilder
-import xyz.oribuin.skyblock.util.SortOption
-import xyz.oribuin.skyblock.util.color
-import xyz.oribuin.skyblock.util.format
-import xyz.oribuin.skyblock.util.formatEnum
-import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.skyblock.util.send
+import xyz.oribuin.skyblock.util.*
+import java.util.*
 
 
 class WarpsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
     private val manager = this.rosePlugin.getManager<IslandManager>()
     private val menuManager = this.rosePlugin.getManager<MenuManager>()
-    private val sortMap = mutableMapOf<UUID, SortOption>()
-    private val filterMap = mutableMapOf<UUID, FilterOption>()
+
+    private val sortMap = mutableMapOf<UUID, SortType>()
+    private val filterMap = mutableMapOf<UUID, FilterType>()
 
     fun openMenu(member: Member) {
         val player = member.onlinePlayer ?: return
@@ -62,28 +56,17 @@ class WarpsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
     private fun setDynamicItems(gui: PaginatedGui, member: Member) {
         val player = member.onlinePlayer ?: return
 
-        val sortType = sortMap[member.uuid] ?: SortOption()
+        val sortType = this.sortMap[member.uuid] ?: SortType.VOTES_DESCENDING
+        val filterType = this.filterMap[member.uuid] ?: FilterType.NONE
 
-        this.put(gui, "sort-item", player, StringPlaceholders.single("value", sortType.sort.display)) {
-
-            if (!sortType.iterator.hasNext())
-                sortType.iterator = SortType.values().iterator()
-
-            sortType.sort = sortType.iterator.next()
-            this.sortMap += member.uuid to sortType
-
+        this.put(gui, "sort-item", player, StringPlaceholders.of("value", sortType.display)) {
+            this.sortMap += member.uuid to next(sortType)
             this.setDynamicItems(gui, member)
             this.loadWarps(gui, member)
         }
 
-        val filterType = filterMap[member.uuid] ?: FilterOption()
-
-        this.put(gui, "filter-item", player, StringPlaceholders.single("value", filterType.filter.name.formatEnum())) {
-            if (!filterType.iterator.hasNext())
-                filterType.iterator = FilterType.values().iterator()
-
-            filterType.filter = filterType.iterator.next()
-            this.filterMap += member.uuid to filterType
+        this.put(gui, "filter-item", player, StringPlaceholders.of("value", filterType.format())) {
+            this.filterMap += member.uuid to next(filterType)
             this.setDynamicItems(gui, member)
             this.loadWarps(gui, member)
         }
@@ -100,16 +83,16 @@ class WarpsGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
         gui.clearPageItems()
         var islands = manager.getIslands().toMutableList()
 
-        islands = (filterMap[member.uuid] ?: FilterOption(FilterType.NONE)).filter.filter(islands) // Filter the list
-        islands = (sortMap[member.uuid] ?: SortOption(SortType.NONE)).sort.sort(islands) // Sort the list
+        islands = (filterMap[member.uuid] ?: FilterType.NONE).filter(islands) // Filter the list
+        islands = (sortMap[member.uuid] ?: SortType.VOTES_ASCENDING).sort(islands) // Sort the list
 
         this.async {
             islands.filter { !it.warp.disabled && it.settings.public }.forEach {
                 val warp = it.warp
                 val placeholders = StringPlaceholders.builder("votes", warp.votes)
-                    .addPlaceholder("category", warp.category.types.map { type -> type.name.formatEnum() }.format())
-                    .addPlaceholder("visits", warp.visits)
-                    .addPlaceholder("owner", it.ownerMember.offlinePlayer.name)
+                    .add("category", warp.category.formatted())
+                    .add("visits", warp.visits)
+                    .add("owner", it.ownerMember.offlinePlayer.name)
                     .build()
 
                 var lore = listOf(

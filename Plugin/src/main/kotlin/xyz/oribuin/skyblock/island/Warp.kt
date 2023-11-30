@@ -1,11 +1,11 @@
 package xyz.oribuin.skyblock.island
 
-import java.util.*
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import xyz.oribuin.skyblock.util.formatEnum
 import xyz.oribuin.skyblock.util.parseEnum
+import java.util.*
 
 data class Warp(val key: Int, var location: Location) {
     var name: String = "" // The name of the warp
@@ -19,24 +19,44 @@ data class Warp(val key: Int, var location: Location) {
     val votedUsers = mutableListOf<UUID>() // Cache users who have upvoted the island
     val visitUsers = mutableListOf<UUID>() // Cache the users who have tp'd to the island already
 
-    data class Category(var names: MutableList<String> = mutableListOf("GENERAL")) {
+    data class Category(var types: MutableList<String> = mutableListOf("GENERAL")) {
 
-        var types: MutableList<Type> = this.names.map { parseEnum(Type::class, it) }.toMutableList()
+        fun asEnum(): MutableList<Type> = this.types.map { parseEnum(Type::class, it) }.toMutableList()
 
         fun formatted(): String {
-            val sortedNames = this.names.toMutableList()
+            val sortedNames = this.types.toMutableList()
             sortedNames.sortBy { it }
             return sortedNames.joinToString(", ") { it.formatEnum() }
         }
 
-        fun clone() = Category(this.names)
+        fun clone() = Category(this.types)
 
         enum class Type(val icon: Material, val desc: List<String>, val slot: Int) {
-            GENERAL(Material.NAME_TAG, listOf(" &f| &7General islands with", " &f| &7multiple purposes."), 12), // A vague island category
-            FARMS(Material.DIAMOND_HOE, listOf(" &f| &7Islands with public farms", " &f| &7for anyone to use."), 13), // Islands dedicated to farming, XP, Crops, Mob Loot, Etc
-            PARKOUR(Material.FEATHER, listOf(" &f| &7Islands with a focus", " &f| &7on their fun parkour"), 14), // Islands with parkour
-            SHOPS(Material.SPRUCE_SIGN, listOf(" &f| &7Islands with shops for", " &f| &7anyone to buy/sell at."), 15), // Islands with shops
-            DESIGN(Material.PINK_TULIP, listOf(" &f| &7Islands that are focused", " &f| &7on their design aesthetic"), 16) // Islands focus on their design and look.
+            GENERAL(
+                Material.NAME_TAG,
+                listOf(" &f| &7General islands with", " &f| &7multiple purposes."),
+                12
+            ), // A vague island category
+            FARMS(
+                Material.DIAMOND_HOE,
+                listOf(" &f| &7Islands with public farms", " &f| &7for anyone to use."),
+                13
+            ), // Islands dedicated to farming, XP, Crops, Mob Loot, Etc
+            PARKOUR(
+                Material.FEATHER,
+                listOf(" &f| &7Islands with a focus", " &f| &7on their fun parkour"),
+                14
+            ), // Islands with parkour
+            SHOPS(
+                Material.SPRUCE_SIGN,
+                listOf(" &f| &7Islands with shops for", " &f| &7anyone to buy/sell at."),
+                15
+            ), // Islands with shops
+            DESIGN(
+                Material.PINK_TULIP,
+                listOf(" &f| &7Islands that are focused", " &f| &7on their design aesthetic"),
+                16
+            ) // Islands focus on their design and look.
         }
     }
 

@@ -10,12 +10,7 @@ import xyz.oribuin.skyblock.hook.VaultHook
 import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.manager.MenuManager
-import xyz.oribuin.skyblock.util.ItemBuilder
-import xyz.oribuin.skyblock.util.cache
-import xyz.oribuin.skyblock.util.color
-import xyz.oribuin.skyblock.util.getIsland
-import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.skyblock.util.send
+import xyz.oribuin.skyblock.util.*
 
 class BiomesGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
@@ -74,7 +69,11 @@ class BiomesGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
                     island.cache(this.rosePlugin)
 
                     island.members.mapNotNull { member -> member.onlinePlayer }.forEach { member ->
-                        this.rosePlugin.send(member, "command-biome-success", StringPlaceholders.single("biome", biomeName))
+                        this.rosePlugin.send(
+                            member,
+                            "command-biome-success",
+                            StringPlaceholders.of("biome", biomeName)
+                        )
                     }
                 }
 

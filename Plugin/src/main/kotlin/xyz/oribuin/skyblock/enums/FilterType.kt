@@ -22,7 +22,7 @@ enum class FilterType {
         if (this == NONE)
             return islands
 
-        islands.removeIf { !it.warp.category.names.contains(this.name) }
+        islands.removeIf { !it.warp.category.types.contains(this.name) }
         return islands
     }
 

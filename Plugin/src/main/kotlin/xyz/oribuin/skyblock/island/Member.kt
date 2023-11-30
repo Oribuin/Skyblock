@@ -1,10 +1,10 @@
 package xyz.oribuin.skyblock.island
 
-import java.util.*
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import xyz.oribuin.skyblock.nms.BorderColor
+import java.util.*
 
 data class Member(val uuid: UUID) {
     var username: String = "Unknown" // The username of the player
