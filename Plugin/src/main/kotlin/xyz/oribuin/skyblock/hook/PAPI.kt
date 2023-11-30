@@ -4,11 +4,14 @@ import dev.rosewood.rosegarden.RosePlugin
 import me.clip.placeholderapi.PlaceholderAPI
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.entity.Player
+import xyz.oribuin.skyblock.manager.ConfigurationManager.Setting
 import xyz.oribuin.skyblock.util.formatEnum
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class PAPI(private val rosePlugin: RosePlugin) : PlaceholderExpansion() {
 
+    private val updateSpeed = TimeUnit.SECONDS.toMillis(Setting.PLACEHOLDER_UPDATE_SPEED.long)
     private val userData = mutableMapOf<UUID, PlaceholderUser>()
 
     override fun getIdentifier(): String = "Skyblock"
@@ -35,7 +38,7 @@ class PAPI(private val rosePlugin: RosePlugin) : PlaceholderExpansion() {
 
         // check if it has been more than 5 minutes since the last update
 
-        if (placeholderUser == null || (System.currentTimeMillis() - placeholderUser.updateTime) > 300000) {
+        if (placeholderUser == null || (System.currentTimeMillis() - placeholderUser.updateTime) > this.updateSpeed) {
             placeholderUser = PlaceholderUser.update(this.rosePlugin, player)
             this.userData[player.uniqueId] = placeholderUser
         }

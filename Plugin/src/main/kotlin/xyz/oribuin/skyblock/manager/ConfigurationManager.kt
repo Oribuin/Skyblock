@@ -9,8 +9,7 @@ import xyz.oribuin.skyblock.util.getManager
 
 class ConfigurationManager(rosePlugin: RosePlugin) : AbstractConfigurationManager(rosePlugin, Setting::class.java) {
 
-    enum class Setting(private val key: String, private val defaultValue: Any, private vararg val comments: String) :
-        RoseSetting {
+    enum class Setting(private val key: String, private val defaultValue: Any, private vararg val comments: String) : RoseSetting {
         WORLDNAMES_NORMAL("world-names.NORMAL", "islands_normal", "The name for the main island world"),
         WORLDNAMES_NETHER("world-names.NETHER", "islands_nether", "The name for the nether island world"),
         WORLDNAMES_END("world-names.THE_END", "islands_end", "The name for the end island world"),
@@ -19,6 +18,8 @@ class ConfigurationManager(rosePlugin: RosePlugin) : AbstractConfigurationManage
         ISLAND_SIZE("island-size", 150, "The size of the island"),
         MAX_MEMBERS("max-members", 5, "The maximum amount of members per island"),
         NULL_PLACEHOLDER("null-placeholder", "Unknown", "The PAPI placeholder value when the object is null"),
+
+        PLACEHOLDER_UPDATE_SPEED("placeholder-update-speed", 60, "The amount of seconds between PAPI placeholder updates"),
 
         // Server Spawn
 //        SPAWN_X("server-spawn.x", 0.0),
