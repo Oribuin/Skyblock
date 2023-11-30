@@ -1,52 +1,53 @@
 package xyz.oribuin.skyblock.manager
 
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
+import dev.rosewood.rosegarden.RosePlugin
+import dev.rosewood.rosegarden.config.CommentedFileConfiguration
+import dev.rosewood.rosegarden.manager.Manager
 import org.bukkit.*
-import org.bukkit.configuration.file.FileConfiguration
-import org.bukkit.configuration.file.YamlConfiguration
-import xyz.oribuin.orilibrary.manager.Manager
-import xyz.oribuin.orilibrary.util.FileUtils
-import xyz.oribuin.skyblock.SkyblockPlugin
+import xyz.oribuin.skyblock.util.copyResourceTo
 import xyz.oribuin.skyblock.util.parseEnum
 import xyz.oribuin.skyblock.world.IslandSchematic
-import xyz.oribuin.skyblock.world.VoidGenerator
+import xyz.oribuin.skyblock.world.LayeredChunkGenerator
 import java.io.File
 
-class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
+class WorldManager(rosePlugin: RosePlugin) : Manager(rosePlugin) {
 
-    private val worlds = mutableMapOf<World.Environment, World>()
+    val worlds = mutableMapOf<World.Environment, World>()
     val schematics = mutableMapOf<String, IslandSchematic>()
-    private lateinit var schemConfig: FileConfiguration
+    private lateinit var schemConfig: CommentedFileConfiguration
+    private lateinit var schemFolder: File
 
-    override fun enable() {
-        val section = this.plugin.config.getConfigurationSection("world-names")
+    override fun reload() {
+        val section = this.rosePlugin.config.getConfigurationSection("world-names")
 
         // Check if the world names are defined.
         if (section == null || section.getKeys(false).isEmpty()) {
-            this.plugin.logger.severe("World Names weren't defined, cannot continue.")
-            this.plugin.disablePlugin()
+            this.rosePlugin.logger.severe("World Names weren't defined, cannot continue.")
+            Bukkit.getPluginManager().disablePlugin(this.rosePlugin)
             return
         }
 
         section.getKeys(false).forEach {
             // Match the island name
-            val enviroment = World.Environment.values().find { env -> env.name.equals(it, true) } ?: return
+            val environment = World.Environment.entries.find { env -> env.name.equals(it, true) } ?: return
             // Create the worlds.
-            val world = this.createWorld(section.getString(it) ?: ("islands_" + enviroment.name.lowercase()), enviroment)
-            this.worlds[enviroment] = world
+            val world = this.createWorld(section.getString(it) ?: ("islands_" + environment.name.lowercase()), environment)
+            this.worlds[environment] = world
         }
 
-        val schemFolder = File(this.plugin.dataFolder, "schematics")
-        var schemFile = File(this.plugin.dataFolder, "schematics.yml")
-
-        if (!schemFile.exists())
-            schemFile = FileUtils.createFile(this.plugin, "schematics.yml")
-
-        this.schemConfig = YamlConfiguration.loadConfiguration(schemFile)
-
-        if (!schemFolder.exists()) {
+        val schemFolder = File(this.rosePlugin.dataFolder, "schematics")
+        if (!schemFolder.exists())
             schemFolder.mkdir()
-            FileUtils.createFile(plugin, "schematics", "plains.schem")
+
+        val schemFile = File(this.rosePlugin.dataFolder, "schematics.yml")
+        val exists = schemFile.exists()
+
+        this.schemConfig = CommentedFileConfiguration.loadConfiguration(schemFile)
+        if (!exists) {
+            val defaultFile = File(this.rosePlugin.dataFolder, "default.schem")
+            this.rosePlugin.copyResourceTo("default.schem",defaultFile)
+            this.saveDefaults(this.schemConfig, defaultFile)
         }
 
         val schemFiles = schemFolder.listFiles() ?: error("Schematics folder does not exist.")
@@ -54,11 +55,11 @@ class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
             val keyFile = schemFiles.find { it.nameWithoutExtension.equals(key, true) }
 
             if (keyFile == null) {
-                this.plugin.logger.severe("Could not fine the $key schematic in the schematics folder.")
+                this.rosePlugin.logger.severe("Could not fine the $key schematic in the schematics folder.")
                 return@forEach
             }
-            if (ClipboardFormats.findByFile(keyFile) != null) {
 
+            if (ClipboardFormats.findByFile(keyFile) != null) {
                 val schemSection = schemConfig.getConfigurationSection(key) ?: error(key)
 
                 val displayName = schemSection.getString("name") ?: error("$key.name")
@@ -68,24 +69,28 @@ class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
                 return@forEach
             }
 
-            this.plugin.logger.severe("File located in the schems folder is not a valid file. $keyFile")
+            this.rosePlugin.logger.severe("File located in the schems folder is not a valid file. $keyFile")
         }
+    }
+
+    override fun disable() {
+        // Unused
     }
 
     /**
      * Get or create the island world.
      *
      * @param name The name of the world
-     * @param enviroment The world enviroment
+     * @param environment The world environment
      * @return The world.
      */
-    private fun createWorld(name: String, enviroment: World.Environment): World {
+    private fun createWorld(name: String, environment: World.Environment): World {
         return Bukkit.getWorld(name) ?: WorldCreator.name(name)
             .type(WorldType.FLAT)
-            .environment(enviroment)
+            .environment(environment)
             .generateStructures(false)
-            .generator(VoidGenerator())
-            .createWorld()!!
+            .generator(LayeredChunkGenerator())
+            .createWorld() ?: throw Error("Couldn't create the world.")
     }
 
     /**
@@ -96,6 +101,24 @@ class WorldManager(private val plugin: SkyblockPlugin) : Manager(plugin) {
      */
     fun isIslandWorld(world: World): Boolean {
         return this.worlds.values.map { it.name }.contains(world.name)
+    }
+
+    /**
+     * Save the default schematics.
+     *
+     * @param config The config to save to.
+     */
+    private fun saveDefaults(config: CommentedFileConfiguration, file: File) {
+        val section = config.createSection("plains")
+        section["name"] = "#a6b2fc&lPlains"
+        section["icon"] = "GRASS_BLOCK"
+        section["lore"] = listOf(
+            " &f| &7This is the main starter",
+            " &f| &7set in the plains biome!",
+            " &f|", " &f| &7Click to create this island."
+        )
+
+        config.save(file);
     }
 
     val overworld: World

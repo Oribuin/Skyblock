@@ -46,6 +46,7 @@ class BlockListeners(private val plugin: SkyblockPlugin) : Listener {
             this.isCancelled = false
     }
 
+
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun SignChangeEvent.onSignChange() {
         if (!worldManager.isIslandWorld(this.block.world))

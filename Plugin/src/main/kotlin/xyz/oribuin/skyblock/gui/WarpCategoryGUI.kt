@@ -1,96 +1,105 @@
 package xyz.oribuin.skyblock.gui
 
+import dev.rosewood.rosegarden.RosePlugin
+import dev.rosewood.rosegarden.utils.StringPlaceholders
+import dev.triumphteam.gui.guis.Gui
+import dev.triumphteam.gui.guis.GuiItem
 import org.bukkit.Material
-import org.bukkit.entity.Player
-import org.bukkit.event.Event
-import xyz.oribuin.gui.Gui
-import xyz.oribuin.gui.Item
-import xyz.oribuin.orilibrary.util.StringPlaceholders
-import xyz.oribuin.skyblock.SkyblockPlugin
 import xyz.oribuin.skyblock.island.Island
 import xyz.oribuin.skyblock.island.Member
 import xyz.oribuin.skyblock.island.Warp
-import xyz.oribuin.skyblock.manager.DataManager
+import xyz.oribuin.skyblock.manager.IslandManager
+import xyz.oribuin.skyblock.manager.MenuManager
 import xyz.oribuin.skyblock.util.*
 
-class WarpCategoryGUI(private val plugin: SkyblockPlugin, private val island: Island) {
+class WarpCategoryGUI(rosePlugin: RosePlugin) : PluginGUI(rosePlugin) {
 
-    private val data = this.plugin.getManager<DataManager>()
-    private lateinit var activeCategories: MutableList<Warp.Categories.Type>
+    private val categories = mutableMapOf<Int, Warp.Category>()
+    private val manager = this.rosePlugin.getManager<IslandManager>()
 
-    fun create(member: Member) {
-        this.activeCategories = island.warp.categories.types
-        val player = member.offlinePlayer.player ?: return
+    fun openMenu(member: Member, island: Island) {
+        val player = member.onlinePlayer ?: return
 
-        val gui = Gui(27, "Island Category")
-        gui.setDefaultClickFunction {
-            it.isCancelled = true
-            it.result = Event.Result.DENY
-            (it.whoClicked as Player).updateInventory()
+        val gui = this.createGUI(player)
+        gui.setCloseGuiAction {
+            val cachedCategories = this.categories[island.key] ?: return@setCloseGuiAction
+
+            island.warp.category = cachedCategories
+            island.cache(this.rosePlugin)
+
+            val placeholders = StringPlaceholders.builder("setting", "Warp Category")
+                .add("value", island.warp.category.formatted())
+                .build()
+
+            this.manager.sendMembersMessage(island, "island-warp-settings-changed", placeholders)
         }
 
-        gui.setPersonalClickAction { gui.defaultClickFunction.accept(it) }
-
-        gui.setCloseAction {
-            if (this.activeCategories != island.warp.categories.types) {
-                island.warp.categories.names = this.activeCategories.map { x -> x.name }.toMutableList()
-                data.saveIsland(island)
-
-                val placeholders = StringPlaceholders.builder("setting", "Category")
-                    .add("player", it.player.name)
-                    .add("value", this.activeCategories.map { category -> category.name.formatEnum() }.toList().format())
-                    .build()
-
-                this.sendSettingMessage(placeholders)
-                return@setCloseAction
-            }
+        this.put(gui, "border-item", player)
+        this.put(gui, "category-info", player) {
+            this.rosePlugin.getManager<MenuManager>()[WarpSettingsGUI::class].openMenu(member)
         }
 
-        gui.setItems(numRange(0, 26), Item.filler(Material.BLACK_STAINED_GLASS_PANE))
-        gui.setItem(10, Item.Builder(Material.OAK_SIGN).setName("#a6b2fc&lWarp Category".color()).setLore(infoLore).create()) {
-            (it.whoClicked as Player).chat("/is warp settings")
-        }
+        this.addExtraItems(gui, player)
 
-        this.setItems(gui)
+
         gui.open(player)
+        this.setupCategories(gui, island)
     }
 
-    private fun setItems(gui: Gui) {
-        Warp.Categories.Type.values().forEach {
+    private fun setupCategories(gui: Gui, island: Island) {
+        val activeCategories = island.warp.category.clone()
+        Warp.Category.Type.values().forEach {
 
-            val desc = it.desc.toMutableList()
-            desc.add(" &f|")
-            desc.add(" &f| &7Click to switch category")
+            val description = it.desc.toMutableList()
+            description.addAll(listOf(" &f|", " &f| &7Click to switch category"))
 
-            val item = Item.Builder(it.icon)
-                .setName("#a6b2fc&l${it.name.formatEnum()}".color())
-                .setLore(desc.color())
-                .glow(this.activeCategories.contains(it))
-                .create()
+            val item = ItemBuilder(it.icon)
+                .name("#a6b2fc&l${it.format()}".color())
+                .lore(description.color())
+                .glow(activeCategories.types.contains(it.name))
+                .build()
 
-            gui.setItem(it.slot, item) { _ ->
-                if (!this.activeCategories.remove(it))
-                    this.activeCategories.add(it)
+            gui.setItem(it.slot, GuiItem(item) { _ ->
 
-                this.setItems(gui)
-                gui.update()
-            }
+                if (!activeCategories.types.remove(it.name))
+                    activeCategories.types.add(it.name)
+
+                this.categories[island.key] = activeCategories
+                this.setupCategories(gui, island)
+            })
         }
+
+        gui.update()
     }
 
-    private fun sendSettingMessage(placeholders: StringPlaceholders) {
-        island.members.mapNotNull { it.offlinePlayer.player }
-            .forEach { this.plugin.send(it, "changed-warp", placeholders) }
-    }
+    override val menuName: String
+        get() = "warp-category"
 
-    private val infoLore: List<String>
-        get() = listOf(
-            "&f | &7Click on icons to change",
-            "&f | &7your island warp category!",
-            "&f |",
-            "&f | &7This allows users to find",
-            "&f | &7your warp easier!",
-            "&f |",
-            "&f | #a6b2fcLeft-Click &7to go back."
-        ).color()
+    override val defaultValues: Map<String, Any>
+        get() = mapOf(
+            "#0" to "GUI Settings",
+            "gui-settings.title" to "Island Category",
+            "gui-settings.rows" to 3,
+
+            "#1" to "Border Item",
+            "border-item.enabled" to true,
+            "border-item.material" to Material.BLACK_STAINED_GLASS_PANE.toString(),
+            "border-item.name" to " ",
+            "border-item.slots" to listOf("0-26"),
+
+            "#2" to "Category Info",
+            "category-info.enabled" to true,
+            "category-info.slot" to 10,
+            "category-info.material" to Material.OAK_SIGN.toString(),
+            "category-info.name" to "#a6b2fc&lCategory Info",
+            "category-info.lore" to listOf(
+                "&f | &7Click on icons to change",
+                "&f | &7your island warp category!",
+                "&f |",
+                "&f | &7This allows users to find",
+                "&f | &7your warp easier!",
+                "&f |",
+                "&f | #a6b2fcLeft-Click &7to go back."
+            )
+        )
 }

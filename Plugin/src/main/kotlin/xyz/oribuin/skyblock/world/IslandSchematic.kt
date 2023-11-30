@@ -6,9 +6,9 @@ import com.sk89q.worldedit.extent.clipboard.Clipboard
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import com.sk89q.worldedit.function.operation.Operations
 import com.sk89q.worldedit.session.ClipboardHolder
+import dev.rosewood.rosegarden.RosePlugin
 import org.bukkit.Location
 import org.bukkit.Material
-import xyz.oribuin.skyblock.SkyblockPlugin
 import java.io.File
 import java.io.FileInputStream
 
@@ -31,7 +31,7 @@ class IslandSchematic(
      * @param location The location of the schematic
      * @param callback The callback function for the paste task.
      */
-    fun paste(plugin: SkyblockPlugin, location: Location, callback: (() -> Unit)? = null) {
+    fun paste(plugin: RosePlugin, location: Location, callback: (() -> Unit)? = null) {
         val clipboard: Clipboard
         this.format.getReader(FileInputStream(this.file)).use { clipboard = it.read() }
 
@@ -52,7 +52,8 @@ class IslandSchematic(
             callback?.invoke()
         }
 
-        if (plugin.server.pluginManager.isPluginEnabled("FastAsyncWorldEdit") || plugin.server.pluginManager.isPluginEnabled("AsyncWorldEdit"))
+        val pluginManager = plugin.server.pluginManager
+        if (pluginManager.isPluginEnabled("FastAsyncWorldEdit") || pluginManager.isPluginEnabled("AsyncWorldEdit"))
             plugin.server.scheduler.runTaskAsynchronously(plugin, task)
         else
             task.run()

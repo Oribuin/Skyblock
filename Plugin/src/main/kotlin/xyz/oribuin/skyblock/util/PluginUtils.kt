@@ -1,29 +1,52 @@
 package xyz.oribuin.skyblock.util
 
-import org.apache.commons.lang.WordUtils
-import org.bukkit.Color
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.World
+import dev.rosewood.rosegarden.RosePlugin
+import dev.rosewood.rosegarden.command.framework.CommandContext
+import dev.rosewood.rosegarden.config.CommentedConfigurationSection
+import dev.rosewood.rosegarden.manager.Manager
+import dev.rosewood.rosegarden.utils.HexUtils
+import dev.rosewood.rosegarden.utils.StringPlaceholders
+import org.apache.commons.lang3.StringUtils
+import org.bukkit.*
 import org.bukkit.command.CommandSender
-import org.bukkit.configuration.ConfigurationSection
-import org.bukkit.configuration.file.FileConfiguration
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
-import xyz.oribuin.orilibrary.OriPlugin
-import xyz.oribuin.orilibrary.manager.Manager
-import xyz.oribuin.orilibrary.util.HexUtils
-import xyz.oribuin.orilibrary.util.StringPlaceholders
-import xyz.oribuin.skyblock.SkyblockPlugin
-import xyz.oribuin.skyblock.manager.MessageManager
+import org.bukkit.inventory.ItemStack
+import xyz.oribuin.skyblock.gui.PluginGUI
+import xyz.oribuin.skyblock.hook.PAPI
+import xyz.oribuin.skyblock.island.Island
+import xyz.oribuin.skyblock.island.Member
+import xyz.oribuin.skyblock.manager.DataManager
+import xyz.oribuin.skyblock.manager.IslandManager
+import xyz.oribuin.skyblock.manager.LocaleManager
+import xyz.oribuin.skyblock.manager.MenuManager
+import java.io.File
+import java.nio.file.Files
+import java.util.*
 import kotlin.math.floor
+import kotlin.math.max
 import kotlin.math.sqrt
 import kotlin.reflect.KClass
 
 
-inline fun <reified T : Manager> OriPlugin.getManager(): T = this.getManager(T::class.java)
+inline fun <reified T : Manager> RosePlugin.getManager(): T = this.getManager(T::class.java)
 
-fun SkyblockPlugin.send(receiver: CommandSender, messageId: String, placeholders: StringPlaceholders = StringPlaceholders.empty()) {
-    this.getManager<MessageManager>().send(receiver, messageId, placeholders)
+fun RosePlugin.send(
+    receiver: CommandSender,
+    messageId: String,
+    placeholders: StringPlaceholders = StringPlaceholders.empty()
+) {
+    this.getManager<LocaleManager>().sendMessage(receiver, messageId, placeholders)
+}
+
+fun RosePlugin.copyResourceTo(resourcePath: String, output: File) {
+    output.parentFile.mkdirs();
+
+    val resource = this.getResource(resourcePath)
+    requireNotNull(resource) { "Resource not found: $resourcePath" }
+
+    Files.copy(resource, output.toPath())
+
 }
 
 fun String.color(): String = HexUtils.colorify(this)
@@ -31,61 +54,19 @@ fun String.color(): String = HexUtils.colorify(this)
 fun List<String>.color(): List<String> = this.map { HexUtils.colorify(it) }
 
 /**
- * Format a location into a readable String.
- *
- * @return The formatted Location.
- */
-fun Location.format(): String {
-    return this.blockX.toString() + ", " + this.blockY + ", " + this.blockZ
-}
-
-/**
- * Get the block location of the location.;
- *
- * @return The block location
- */
-fun Location.block(): Location {
-    return Location(this.world, this.blockX.toDouble(), this.blockY.toDouble(), this.blockZ.toDouble(), this.yaw, this.pitch)
-}
-
-/**
  * Get a bukkit color from a hex code
  *
  * @return The bukkit color
  */
-fun String.toColor(): Color {
+fun String?.toColor(): Color {
+    this ?: return Color.BLACK
+
     val color: java.awt.Color = try {
         java.awt.Color.decode(this)
     } catch (ex: NumberFormatException) {
         return Color.BLACK
     }
     return Color.fromRGB(color.red, color.green, color.blue)
-}
-
-/**
- * Get a configuration value or default from the file config
- *
- * @param config The configuration file.
- * @param path   The path to the value
- * @param def    The default value if the original value doesnt exist
- * @return The config value or default value.
- */
-@Suppress("UNCHECKED_CAST")
-fun <T> get(config: FileConfiguration, path: String, def: T): T {
-    return (config.get(path) as T) ?: def
-}
-
-/**
- * Get a value from a configuration section.
- *
- * @param section The configuration section
- * @param path    The path to the option.
- * @param def     The default value for the option.
- * @return The config option or the default.
- */
-@Suppress("UNCHECKED_CAST")
-fun <T> get(section: ConfigurationSection, path: String, def: T): T {
-    return (section.get(path) as T) ?: def
 }
 
 /**
@@ -101,14 +82,16 @@ fun getSpareSlots(player: Player): Int {
         .toInt()
 }
 
-/**
- * Gets a location as a string key
- *
- * @return the location as a string key
- * @author Esophose
- */
-fun Location.asKey(): String {
-    return String.format("%s-%.2f-%.2f-%.2f", this.world?.name, this.x, this.y, this.z)
+
+fun <T : Enum<T>> next(enum: T): T {
+    val values = enum.javaClass.enumConstants
+
+    // if the enum is the last one, return the first one
+    if (enum.ordinal == values.size - 1)
+        return values[0]
+
+    // return the next enum
+    return values[enum.ordinal + 1]
 }
 
 /**
@@ -133,14 +116,17 @@ fun getNextIslandLocation(locationId: Int, world: World?, islandDistance: Int): 
             x = a - r
             z = -r
         }
+
         1 -> {
             x = r
             z = (a % en) - r
         }
+
         2 -> {
             x = r - (a % en)
             z = r
         }
+
         3 -> {
             x = -r
             z = r - (a % en)
@@ -158,39 +144,13 @@ fun getNextIslandLocation(locationId: Int, world: World?, islandDistance: Int): 
  * @return The enum if found.
  */
 fun <T : Enum<T>> parseEnum(enum: KClass<T>, value: String): T {
+
     try {
-        return enum.java.enumConstants.first { it.name.equals(value, true) } ?: error("")
+        return java.lang.Enum.valueOf(enum.java, value.uppercase())
     } catch (ex: Exception) {
         error("Invalid ${enum.simpleName} specified: $value")
     }
 }
-
-fun String.formatEnum(): String = WordUtils.capitalizeFully(this.lowercase().replace("_", " "))
-
-fun List<String>.format(): String {
-    val builder = StringBuilder()
-    for (i in this.indices) {
-        builder.append(this[i])
-        if (i != this.size - 1)
-            builder.append(", ")
-    }
-
-    return builder.toString()
-}
-
-/**
- * Check if the server is using Paper
- *
- * @return True if the server can find paper.
- */
-val usingPaper: Boolean
-    get() = try {
-        Class.forName("com.destroystokyo.paper.util.VersionFetcher")
-        true
-    } catch (ex: ClassNotFoundException) {
-        false
-    }
-
 
 fun numRange(start: Int, end: Int): List<Int> {
     val list = mutableListOf<Int>()
@@ -200,4 +160,123 @@ fun numRange(start: Int, end: Int): List<Int> {
     return list
 }
 
-fun Location.center() = Location(this.world, this.blockX + 0.5, this.blockY + 0.0, this.blockZ + 0.5, this.yaw, this.pitch)
+/**
+ * Get ItemStack from CommentedFileSection path
+ *
+ * @param config       The CommentedFileSection
+ * @param path         The path to the item
+ * @param player       The player
+ * @param placeholders The placeholders
+ * @return The itemstack
+ */
+fun getItemStack(
+    config: CommentedConfigurationSection,
+    path: String,
+    player: Player,
+    placeholders: StringPlaceholders = StringPlaceholders.empty()
+): ItemStack {
+    val material =
+        Material.getMaterial(config.getString("$path.material") ?: "STONE") ?: return ItemStack(Material.STONE)
+
+    // Format the item lore
+    val lore = config.getStringList("$path.lore").map { format(player, it, placeholders) }
+
+//    // Get item flags
+//    val flags = config.getStringList("$path.flags")
+//        .stream()
+//        .map { it.uppercase() }
+//        .map { ItemFlag.valueOf(it) }
+//        .toArray<ItemFlag>()
+//        .toArray<ItemFlag>(::arrayOfNulls)
+
+    // Build the item stack
+    val builder = ItemBuilder(material)
+        .name(format(player, config.getString("$path.name") ?: "Unknown", placeholders))
+        .lore(lore)
+        .amount(max(config.getInt("$path.amount"), 1))
+//        .flags(flags)
+        .texture(config.getString("$path.texture") ?: "")
+        .potionColor(config.getString("$path.potion-color", null).toColor())
+        .model(config.getInt("$path.model-data"))
+        .glow(config.getBoolean("$path.glow"))
+
+    val owner = config.getString("$path.owner")
+    if (owner != null) {
+        if (owner.equals("self", true)) {
+            builder.owner(player)
+        } else {
+            Bukkit.getOfflinePlayer(UUID.fromString(owner)).let { builder.owner(it) }
+        }
+    }
+
+    // Get item enchantments
+    val enchants = config.getConfigurationSection("$path.enchants")
+    enchants?.getKeys(false)?.forEach { key ->
+        val enchant = Enchantment.getByKey(NamespacedKey.minecraft(key)) ?: return@forEach
+        val level = enchants.getInt("$key.level")
+        builder.enchant(enchant, level)
+    }
+
+    return builder.build()
+}
+
+/**
+ * Format a string with placeholders and color codes
+ *
+ * @param player The player to format the string for
+ * @param text   The string to format
+ * @return The formatted string
+ */
+fun format(player: Player?, text: String): String {
+    return format(player, text, StringPlaceholders.empty())
+}
+
+/**
+ * Format a string with placeholders and color codes
+ *
+ * @param player       The player to format the string for
+ * @param text         The text to format
+ * @param placeholders The placeholders to replace
+ * @return The formatted string
+ */
+fun format(player: Player?, text: String, placeholders: StringPlaceholders?): String {
+    return (placeholders?.apply(text)?.let { PAPI.apply(player, it) })?.color() ?: text
+}
+
+/**
+ * A simple method to get a player as a member
+ *
+ * @param player The player to get
+ * @return The member
+ */
+fun Player.asMember(rosePlugin: RosePlugin): Member = rosePlugin.getManager<IslandManager>().getMember(this)
+
+
+/**
+ * Get the player's island
+ *
+ * @param player The player
+ * @return The island
+ */
+fun Player.getIsland(rosePlugin: RosePlugin): Island? = rosePlugin.getManager<IslandManager>().getIsland(this)
+
+/**
+ * Get a member's island
+ * @param member The member
+ * @return The island
+ */
+fun Member.getIsland(rosePlugin: RosePlugin): Island? = rosePlugin.getManager<IslandManager>().getIsland(this)
+
+fun Island.cache(rosePlugin: RosePlugin) = rosePlugin.getManager<DataManager>().cacheIsland(this)
+
+fun <T : PluginGUI> RosePlugin.getMenu(kclass: KClass<T>): T = this.getManager<MenuManager>()[kclass]
+
+fun CommandContext.asPlayer(): Player = this.sender as Player
+
+fun CommandContext.asMember(rosePlugin: RosePlugin): Member = (this.sender as Player).asMember(rosePlugin)
+
+fun Enum<*>.format(): String = StringUtils.capitalize(this.name.replace("_", " "))
+
+fun String.formatEnum(): String = StringUtils.capitalize(this.replace("_", " "))
+
+fun Location.format(): String = "${this.blockX}, ${this.blockY}, ${this.blockZ}"
