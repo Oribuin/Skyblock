@@ -1,9 +1,9 @@
 name: Skyblock
 main: xyz.oribuin.skyblock.SkyblockPlugin
 version: '1.0'
-api-version: '1.13'
+api-version: '1.20'
 authors: [ 'Oribuin' ]
-description: A custom made skyblock plugin for GoliMC.
+description: custom skyblock plugin :-)
 libraries:
   - "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0"
   - "net.kyori:adventure-api:4.11.0"
@@ -18,61 +18,61 @@ softdepend:
   - AsyncWorldEdit
   - Vault
 permissions:
-  skyblock.command.use:
+  skyblock.use:
     description: Allows the player to use the skyblock command.
     default: op
-  skyblock.command.biome:
+  skyblock.biome:
     description: Allows the player to change the biome of their island.
     default: op
-  skyblock.command.border:
+  skyblock.border:
     description: Allows the player to change the border of their island.
     default: op
-  skyblock.command.create:
+  skyblock.create:
     description: Allows the player to create an island.
     default: op
-  skyblock.command.invite:
+  skyblock.invite:
     description: Allows the player to invite other players to their island.
     default: op
     children:
-      skyblock.command.invite.accept:
+      skyblock.invite.accept:
         description: Allows the player to accept an island invite.
-      skyblock.command.invite.deny:
+      skyblock.invite.deny:
         description: Allows the player to deny an island invite.
         default: op
-      skyblock.command.send:
+      skyblock.send:
         description: Allows the player to teleport to other players islands.
         default: op
-    skyblock.command.leave:
+    skyblock.leave:
       description: Allows the player to leave their island.
       default: op
-  skyblock.command.lock:
+  skyblock.lock:
     description: Allows the player to lock their island.
     default: op
-  skyblock.command.members:
+  skyblock.members:
     description: Allows the player to view the members of their island.
     default: op
-  skyblock.command.teleport:
+  skyblock.teleport:
     description: Allows the player to teleport to their island.
     default: op
-  skyblock.command.warp:
+  skyblock.warp:
     description: Allows the player to warp to their island.
     default: op
     children:
-      skyblock.command.warp.category:
+      skyblock.warp.category:
         description: Allows the player to change the category of their island.
         default: op
-      skyblock.command.warp.icon:
+      skyblock.warp.icon:
         description: Allows the player to change the icon of their island.
         default: op
-      skyblock.command.warp.name:
+      skyblock.warp.name:
         description: Allows the player to change the name of their island.
         default: op
-      skyblock.command.warp.settings:
+      skyblock.warp.settings:
         description: Allows the player to change the settings of their island.
         default: op
-      skyblock.command.warp.teleport:
+      skyblock.warp.teleport:
         description: Allows the player to teleport to other islands.
         default: op
-      skyblock.command.warp.upvote:
+      skyblock.warp.upvote:
         description: Allows the player to upvote other islands.
         default: op

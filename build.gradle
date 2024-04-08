@@ -1,12 +1,10 @@
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.1.0' apply false
-    id 'org.jetbrains.kotlin.jvm' version '1.9.0' apply false
 }
 
 allprojects {
     apply plugin: 'java-library'
     apply plugin: 'com.github.johnrengelman.shadow'
-    apply plugin: 'org.jetbrains.kotlin.jvm'
 
     group 'xyz.oribuin.skyblock'
     version '1.0'
@@ -34,16 +32,13 @@ allprojects {
 
     dependencies {
         compileOnly "org.jetbrains:annotations:24.0.1"
-        compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0"
     }
-
 }
 
 dependencies {
-    api project(':Plugin')
-    api project(':NMS:Wrapper')
-    api project(path: ':NMS:v1_20_R1', configuration: 'remapped')
-    api project(path: ':NMS:v1_20_R2', configuration: 'remapped')
+    implementation project(':Plugin')
+    implementation project(':NMS:Wrapper')
+    implementation project(path: ':NMS:v1_20_R3', configuration: 'remapped')
 }
 
 shadowJar {
