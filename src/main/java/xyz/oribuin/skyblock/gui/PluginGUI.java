@@ -1,20 +1,20 @@
-package xyz.oribuin.skyblock.gui
+package xyz.oribuin.skyblock.gui;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.config.CommentedFileConfiguration
-import dev.rosewood.rosegarden.utils.StringPlaceholders
-import dev.triumphteam.gui.guis.BaseGui
-import dev.triumphteam.gui.guis.Gui
-import dev.triumphteam.gui.guis.GuiItem
-import dev.triumphteam.gui.guis.PaginatedGui
-import net.kyori.adventure.text.Component
-import org.bukkit.entity.Player
-import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.inventory.ItemStack
-import xyz.oribuin.skyblock.util.color
-import xyz.oribuin.skyblock.util.deserialize
-import java.io.File
-import java.util.function.Consumer
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.config.CommentedFileConfiguration;
+import dev.rosewood.rosegarden.utils.StringPlaceholders;
+import dev.triumphteam.gui.guis.BaseGui;
+import dev.triumphteam.gui.guis.Gui;
+import dev.triumphteam.gui.guis.GuiItem;
+import dev.triumphteam.gui.guis.PaginatedGui;
+import net.kyori.adventure.text.Component;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
+import xyz.oribuin.skyblock.util.color;
+import xyz.oribuin.skyblock.util.deserialize;
+import java.io.File;
+import java.util.function.Consumer;
 
 abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
 

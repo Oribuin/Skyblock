@@ -1,15 +1,15 @@
-package xyz.oribuin.skyblock.gui
+package xyz.oribuin.skyblock.gui;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.utils.HexUtils
-import dev.rosewood.rosegarden.utils.StringPlaceholders
-import net.wesjd.anvilgui.AnvilGUI
-import org.bukkit.Material
-import xyz.oribuin.skyblock.island.member.Member
-import xyz.oribuin.skyblock.util.cache
-import xyz.oribuin.skyblock.util.send
-import java.util.*
-import java.util.function.Consumer
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.utils.HexUtils;
+import dev.rosewood.rosegarden.utils.StringPlaceholders;
+import net.wesjd.anvilgui.AnvilGUI;
+import org.bukkit.Material;
+import xyz.oribuin.skyblock.island.member.Member;
+import xyz.oribuin.skyblock.util.cache;
+import xyz.oribuin.skyblock.util.send;
+import java.util.*;
+import java.util.function.Consumer;
 
 class SettingsGUI(rosePlugin: RosePlugin) : xyz.oribuin.skyblock.gui.PluginGUI(rosePlugin) {
 

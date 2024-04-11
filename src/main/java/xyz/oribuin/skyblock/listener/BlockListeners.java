@@ -1,7 +1,7 @@
-package xyz.oribuin.skyblock.listener
+package xyz.oribuin.skyblock.listener;
 
-import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 
 class BlockListeners(private val plugin: xyz.oribuin.skyblock.SkyblockPlugin) : Listener {
 

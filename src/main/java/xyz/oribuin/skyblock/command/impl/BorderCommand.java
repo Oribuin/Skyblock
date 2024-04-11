@@ -1,13 +1,13 @@
-package xyz.oribuin.skyblock.command.impl
+package xyz.oribuin.skyblock.command.impl;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.command.framework.CommandContext
-import dev.rosewood.rosegarden.command.framework.RoseCommand
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper
-import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable
-import org.bukkit.entity.Player
-import xyz.oribuin.skyblock.gui.BorderGUI
-import xyz.oribuin.skyblock.util.getMenu
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.command.framework.CommandContext;
+import dev.rosewood.rosegarden.command.framework.RoseCommand;
+import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
+import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
+import org.bukkit.entity.Player;
+import xyz.oribuin.skyblock.gui.BorderGUI;
+import xyz.oribuin.skyblock.util.getMenu;
 
 class BorderCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseCommand(rosePlugin, parent) {
 

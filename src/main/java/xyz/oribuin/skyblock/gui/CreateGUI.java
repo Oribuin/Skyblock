@@ -1,9 +1,9 @@
-package xyz.oribuin.skyblock.gui
+package xyz.oribuin.skyblock.gui;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.utils.HexUtils.colorify
-import org.bukkit.Material
-import xyz.oribuin.skyblock.util.color
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.utils.HexUtils.colorify;
+import org.bukkit.Material;
+import xyz.oribuin.skyblock.util.color;
 
 class CreateGUI(rosePlugin: RosePlugin) : xyz.oribuin.skyblock.gui.PluginGUI(rosePlugin) {
 

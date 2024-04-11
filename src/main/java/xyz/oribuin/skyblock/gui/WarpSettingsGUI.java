@@ -1,15 +1,15 @@
-package xyz.oribuin.skyblock.gui
+package xyz.oribuin.skyblock.gui;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.utils.StringPlaceholders
-import net.wesjd.anvilgui.AnvilGUI
-import org.bukkit.Material
-import xyz.oribuin.skyblock.island.member.Member.Role
-import xyz.oribuin.skyblock.util.cache
-import xyz.oribuin.skyblock.util.format
-import xyz.oribuin.skyblock.util.formatEnum
-import xyz.oribuin.skyblock.util.getMenu
-import xyz.oribuin.skyblock.util.send
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.utils.StringPlaceholders;
+import net.wesjd.anvilgui.AnvilGUI;
+import org.bukkit.Material;
+import xyz.oribuin.skyblock.island.member.Member.Role;
+import xyz.oribuin.skyblock.util.cache;
+import xyz.oribuin.skyblock.util.format;
+import xyz.oribuin.skyblock.util.formatEnum;
+import xyz.oribuin.skyblock.util.getMenu;
+import xyz.oribuin.skyblock.util.send;
 
 class WarpSettingsGUI(rosePlugin: RosePlugin) : xyz.oribuin.skyblock.gui.PluginGUI(rosePlugin) {
 

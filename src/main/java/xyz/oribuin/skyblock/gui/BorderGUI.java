@@ -1,14 +1,14 @@
-package xyz.oribuin.skyblock.gui
+package xyz.oribuin.skyblock.gui;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.utils.StringPlaceholders
-import org.bukkit.Material
-import xyz.oribuin.skyblock.nms.BorderColor
-import xyz.oribuin.skyblock.util.deserialize
-import xyz.oribuin.skyblock.util.format
-import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.skyblock.util.send
-import java.util.*
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.utils.StringPlaceholders;
+import org.bukkit.Material;
+import xyz.oribuin.skyblock.nms.BorderColor;
+import xyz.oribuin.skyblock.util.deserialize;
+import xyz.oribuin.skyblock.util.format;
+import xyz.oribuin.skyblock.util.getManager;
+import xyz.oribuin.skyblock.util.send;
+import java.util.*;
 
 class BorderGUI(rosePlugin: RosePlugin) : xyz.oribuin.skyblock.gui.PluginGUI(rosePlugin) {
 

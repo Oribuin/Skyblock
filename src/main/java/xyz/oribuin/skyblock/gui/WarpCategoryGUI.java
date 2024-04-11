@@ -1,10 +1,10 @@
-package xyz.oribuin.skyblock.gui
+package xyz.oribuin.skyblock.gui;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.utils.StringPlaceholders
-import xyz.oribuin.skyblock.util.cache
-import xyz.oribuin.skyblock.util.color
-import xyz.oribuin.skyblock.util.format
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.utils.StringPlaceholders;
+import xyz.oribuin.skyblock.util.cache;
+import xyz.oribuin.skyblock.util.color;
+import xyz.oribuin.skyblock.util.format;
 
 class WarpCategoryGUI(rosePlugin: RosePlugin) : xyz.oribuin.skyblock.gui.PluginGUI(rosePlugin) {
 

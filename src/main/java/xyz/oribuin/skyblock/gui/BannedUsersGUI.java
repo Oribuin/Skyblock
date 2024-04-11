@@ -1,11 +1,11 @@
-package xyz.oribuin.skyblock.gui
+package xyz.oribuin.skyblock.gui;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.triumphteam.gui.guis.GuiItem
-import org.bukkit.Material
-import xyz.oribuin.skyblock.island.member.Member.Role
-import xyz.oribuin.skyblock.util.color
-import xyz.oribuin.skyblock.util.getIsland
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.triumphteam.gui.guis.GuiItem;
+import org.bukkit.Material;
+import xyz.oribuin.skyblock.island.member.Member.Role;
+import xyz.oribuin.skyblock.util.color;
+import xyz.oribuin.skyblock.util.getIsland;
 
 class BannedUsersGUI(rosePlugin: RosePlugin) : xyz.oribuin.skyblock.gui.PluginGUI(rosePlugin) {
 

@@ -1,16 +1,16 @@
-package xyz.oribuin.skyblock.command.impl.sub.warp
+package xyz.oribuin.skyblock.command.impl.sub.warp;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper
-import dev.rosewood.rosegarden.command.framework.RoseSubCommand
-import dev.rosewood.rosegarden.command.framework.annotation.Inject
-import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable
-import dev.rosewood.rosegarden.utils.StringPlaceholders
-import xyz.oribuin.skyblock.util.asMember
-import xyz.oribuin.skyblock.util.cache
-import xyz.oribuin.skyblock.util.getIsland
-import xyz.oribuin.skyblock.util.getManager
-import xyz.oribuin.skyblock.util.send
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
+import dev.rosewood.rosegarden.command.framework.RoseSubCommand;
+import dev.rosewood.rosegarden.command.framework.annotation.Inject;
+import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
+import dev.rosewood.rosegarden.utils.StringPlaceholders;
+import xyz.oribuin.skyblock.util.asMember;
+import xyz.oribuin.skyblock.util.cache;
+import xyz.oribuin.skyblock.util.getIsland;
+import xyz.oribuin.skyblock.util.getManager;
+import xyz.oribuin.skyblock.util.send;
 
 class WarpIconCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseSubCommand(rosePlugin, parent) {
 

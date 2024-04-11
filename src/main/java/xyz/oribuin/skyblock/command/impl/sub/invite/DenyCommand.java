@@ -1,12 +1,12 @@
-package xyz.oribuin.skyblock.command.impl.sub.invite
+package xyz.oribuin.skyblock.command.impl.sub.invite;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper
-import dev.rosewood.rosegarden.command.framework.RoseSubCommand
-import dev.rosewood.rosegarden.command.framework.annotation.Inject
-import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable
-import xyz.oribuin.skyblock.util.asPlayer
-import xyz.oribuin.skyblock.util.getManager
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
+import dev.rosewood.rosegarden.command.framework.RoseSubCommand;
+import dev.rosewood.rosegarden.command.framework.annotation.Inject;
+import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
+import xyz.oribuin.skyblock.util.asPlayer;
+import xyz.oribuin.skyblock.util.getManager;
 
 class DenyCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseSubCommand(rosePlugin, parent) {
 

@@ -1,14 +1,14 @@
-package xyz.oribuin.skyblock.command.impl
+package xyz.oribuin.skyblock.command.impl;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.command.framework.CommandContext
-import dev.rosewood.rosegarden.command.framework.RoseCommand
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper
-import dev.rosewood.rosegarden.command.framework.RoseSubCommand
-import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable
-import xyz.oribuin.skyblock.command.impl.sub.invite.AcceptCommand
-import xyz.oribuin.skyblock.command.impl.sub.invite.DenyCommand
-import xyz.oribuin.skyblock.command.impl.sub.invite.SendCommand
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.command.framework.CommandContext;
+import dev.rosewood.rosegarden.command.framework.RoseCommand;
+import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
+import dev.rosewood.rosegarden.command.framework.RoseSubCommand;
+import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
+import xyz.oribuin.skyblock.command.impl.sub.invite.AcceptCommand;
+import xyz.oribuin.skyblock.command.impl.sub.invite.DenyCommand;
+import xyz.oribuin.skyblock.command.impl.sub.invite.SendCommand;
 
 @Suppress("unused")
 class InviteCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseCommand(

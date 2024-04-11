@@ -1,14 +1,14 @@
-package xyz.oribuin.skyblock.command.impl.sub.warp
+package xyz.oribuin.skyblock.command.impl.sub.warp;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.command.framework.CommandContext
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper
-import dev.rosewood.rosegarden.command.framework.RoseSubCommand
-import dev.rosewood.rosegarden.command.framework.annotation.Inject
-import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable
-import xyz.oribuin.skyblock.gui.WarpSettingsGUI
-import xyz.oribuin.skyblock.util.asMember
-import xyz.oribuin.skyblock.util.getMenu
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.command.framework.CommandContext;
+import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
+import dev.rosewood.rosegarden.command.framework.RoseSubCommand;
+import dev.rosewood.rosegarden.command.framework.annotation.Inject;
+import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
+import xyz.oribuin.skyblock.gui.WarpSettingsGUI;
+import xyz.oribuin.skyblock.util.asMember;
+import xyz.oribuin.skyblock.util.getMenu;
 
 class WarpSettingsCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseSubCommand(rosePlugin, parent) {
 

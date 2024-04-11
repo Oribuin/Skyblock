@@ -1,4 +1,4 @@
-package xyz.oribuin.skyblock.command.impl.sub.admin
+package xyz.oribuin.skyblock.command.impl.sub.admin;
 
 class AdminJoinCommand {
 }

@@ -1,16 +1,16 @@
-package xyz.oribuin.skyblock.gui
+package xyz.oribuin.skyblock.gui;
 
-import dev.rosewood.rosegarden.RosePlugin
-import dev.triumphteam.gui.guis.GuiItem
-import dev.triumphteam.gui.guis.PaginatedGui
-import org.bukkit.Material
-import org.bukkit.inventory.ItemStack
-import xyz.oribuin.skyblock.island.member.Member
-import xyz.oribuin.skyblock.island.member.Member.Role
-import xyz.oribuin.skyblock.util.color
-import xyz.oribuin.skyblock.util.getIsland
-import xyz.oribuin.skyblock.util.getMenu
-import java.text.SimpleDateFormat
+import dev.rosewood.rosegarden.RosePlugin;
+import dev.triumphteam.gui.guis.GuiItem;
+import dev.triumphteam.gui.guis.PaginatedGui;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import xyz.oribuin.skyblock.island.member.Member;
+import xyz.oribuin.skyblock.island.member.Member.Role;
+import xyz.oribuin.skyblock.util.color;
+import xyz.oribuin.skyblock.util.getIsland;
+import xyz.oribuin.skyblock.util.getMenu;
+import java.text.SimpleDateFormat;
 
 class MembersGUI(rosePlugin: RosePlugin) : xyz.oribuin.skyblock.gui.PluginGUI(rosePlugin) {
 
