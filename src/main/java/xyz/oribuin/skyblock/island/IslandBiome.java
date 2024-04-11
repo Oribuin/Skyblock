@@ -3,9 +3,8 @@ package xyz.oribuin.skyblock.island;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import xyz.oribuin.skyblock.nms.NMSAdapter;
+import xyz.oribuin.skyblock.util.nms.NMSUtil;
 
 import java.util.List;
 
@@ -63,7 +62,7 @@ public class IslandBiome {
 
         // Send the update to the players on the island
         List<Player> players = island.getCenter().getNearbyPlayers(island.getSize()).stream().toList();
-        NMSAdapter.getHandler().sendChunks(chunks, players);
+        NMSUtil.sendChunks(chunks, players);
     }
 
     public Biome getBiome() {

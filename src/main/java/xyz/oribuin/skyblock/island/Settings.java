@@ -2,6 +2,10 @@ package xyz.oribuin.skyblock.island;
 
 import org.bukkit.block.Biome;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 public class Settings {
 
     private final int key;
@@ -10,6 +14,7 @@ public class Settings {
     private boolean mobSpawning;
     private boolean animalSpawning;
     private Biome biome;
+    private List<UUID> banned;
 
     /**
      * Create a new Settings instance
@@ -23,6 +28,7 @@ public class Settings {
         this.mobSpawning = true;
         this.animalSpawning = true;
         this.biome = Biome.PLAINS;
+        this.banned = new ArrayList<>();
     }
 
     public int getKey() {
@@ -67,6 +73,14 @@ public class Settings {
 
     public void setBiome(Biome biome) {
         this.biome = biome;
+    }
+
+    public List<UUID> getBanned() {
+        return banned;
+    }
+
+    public void setBanned(List<UUID> banned) {
+        this.banned = banned;
     }
 
 }

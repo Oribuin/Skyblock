@@ -10,6 +10,7 @@ import org.bukkit.block.Biome;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.oribuin.skyblock.database.migration.CreateInitialTables;
 import xyz.oribuin.skyblock.island.Island;
@@ -20,6 +21,7 @@ import xyz.oribuin.skyblock.island.warp.Category;
 import xyz.oribuin.skyblock.island.warp.Warp;
 import xyz.oribuin.skyblock.nms.BorderColor;
 import xyz.oribuin.skyblock.util.SkyblockUtil;
+import xyz.oribuin.skyblock.util.serializer.UUIDSerialized;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,10 +29,12 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class DataManager extends AbstractDataManager {
 
@@ -40,25 +44,20 @@ public class DataManager extends AbstractDataManager {
 
     public DataManager(RosePlugin rosePlugin) {
         super(rosePlugin);
+
+        // Save any "dirty" islands every minute
+        Bukkit.getScheduler().runTaskTimerAsynchronously(rosePlugin, () -> this.islandCache.values()
+                        .stream()
+                        .filter(Island::isDirty)
+                        .forEach(this::saveIsland)
+                , 20 * 60, 20 * 60);
     }
 
     @Override
     public void reload() {
         super.reload();
-
-
         this.async(() -> this.databaseConnector.connect(connection -> {
             String selectMembers = "SELECT * FROM " + this.getTablePrefix() + "members";
-
-            // Load all the islands from the database
-            try (PreparedStatement statement = connection.prepareStatement(selectMembers)) {
-                ResultSet resultSet = statement.executeQuery();
-                while (resultSet.next()) {
-                    Member member = this.constructMember(resultSet);
-                    if (member == null) return;
-                    this.userCache.put(member.getUUID(), member);
-                }
-            }
 
             // Load all the islands from the database
             String selectIslands = "SELECT * FROM " + this.getTablePrefix() + "islands";
@@ -67,10 +66,29 @@ public class DataManager extends AbstractDataManager {
                 while (resultSet.next()) {
                     Island island = this.constructIsland(resultSet);
                     if (island == null) return;
+                    island.setDirty(false);
                     this.islandCache.put(island.getKey(), island);
                 }
             }
 
+            // Load all the players and put them in their associated island
+            try (PreparedStatement statement = connection.prepareStatement(selectMembers)) {
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    Member member = this.constructMember(resultSet);
+                    if (member == null) return;
+
+                    if (member.getIsland() > -1) {
+                        Island island = this.islandCache.get(member.getIsland());
+                        if (island != null) {
+                            island.getMembers().add(member.getUUID());
+                            this.islandCache.put(island.getKey(), island);
+                        }
+                    }
+
+                    this.userCache.put(member.getUUID(), member);
+                }
+            }
             // Load all the warps from the database
             String selectWarps = "SELECT * FROM " + this.getTablePrefix() + "warps";
             try (PreparedStatement statement = connection.prepareStatement(selectWarps)) {
@@ -118,23 +136,166 @@ public class DataManager extends AbstractDataManager {
                     }
                 }
             }
-
-            // Move all the members to their associated islands
-            Member member = 
-            this.islandCache.forEach((key, island) -> {
-                island.getMembers().forEach(member -> {
-                    Member member1 = this.userCache.get(member);
-                    if (member1 != null) {
-                        member1.setIsland(key);
-                        island.getMembers().add(member1.getUUID());
-                    }
-                });
-            });
         }));
     }
 
     /**
-     * Construct a location from a resultset
+     * Get an island from the island key
+     *
+     * @param key The island key
+     * @return The island
+     */
+    @Nullable
+    public Island getIsland(int key) {
+        return this.islandCache.get(key);
+    }
+
+    /**
+     * Get an island from its owner
+     *
+     * @param owner The island owner
+     * @return The island
+     */
+    @Nullable
+    public Island getIsland(@NotNull UUID owner) {
+        return this.islandCache.values()
+                .stream()
+                .filter(island -> island.getOwner().equals(owner))
+                .findFirst()
+                .orElseThrow(null);
+    }
+
+    /**
+     * Get island by the location using chunk pdc
+     *
+     * @param location The location
+     * @return The island if available
+     */
+    @Nullable
+    public Island getIsland(@NotNull Location location) {
+        return this.islandCache.values()
+                .stream()
+                .filter(island -> island.isWithinBounds(location))
+                .findFirst()
+                .orElseThrow(null);
+    }
+
+    /**
+     * Create a brand-new island in the plugin database
+     *
+     * @param owner  The owner of the island
+     * @param center The center of the island
+     */
+    public void createIsland(UUID owner, Location center, Consumer<Island> result) {
+        this.async(() -> this.databaseConnector.connect(connection -> {
+            String createIsland = "INSERT INTO " + this.getTablePrefix() + "islands (owner, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement statement = connection.prepareStatement(createIsland, Statement.RETURN_GENERATED_KEYS)) {
+                statement.setString(1, owner.toString());
+                statement.setDouble(2, center.getX());
+                statement.setDouble(3, center.getY());
+                statement.setDouble(4, center.getZ());
+                statement.setFloat(5, center.getYaw());
+                statement.setFloat(6, center.getPitch());
+                statement.setString(7, center.getWorld().getName());
+                statement.executeUpdate();
+
+                ResultSet keys = statement.getGeneratedKeys();
+                if (keys.next()) {
+                    int key = keys.getInt(1);
+                    Island island = new Island(key, center, owner);
+
+                    this.saveIsland(island, result);
+                    result.accept(island);
+                }
+            }
+        }));
+    }
+
+    /**
+     * Save an island into the database and cache with no callback
+     *
+     * @param island The island to save
+     */
+    public void saveIsland(Island island) {
+        this.saveIsland(island, x -> {
+            // now what if this did something
+        });
+    }
+
+    /**
+     * Save an island into the database
+     *
+     * @param island   The island to save
+     * @param callback The result of the saving
+     */
+    public void saveIsland(Island island, Consumer<Island> callback) {
+        island.setDirty(false);
+        this.islandCache.put(island.getKey(), island);
+
+        this.async(() -> this.databaseConnector.connect(connection -> {
+            // Update Primary Data
+
+            String replaceIsland = "REPLACE INTO " + this.getTablePrefix() + "islands (`key`, owner, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement updateIsland = connection.prepareStatement(replaceIsland)) {
+                updateIsland.setInt(1, island.getKey());
+                updateIsland.setString(2, island.getOwner().toString());
+                updateIsland.setDouble(3, island.getCenter().getBlockX());
+                updateIsland.setDouble(4, island.getCenter().getBlockY());
+                updateIsland.setDouble(5, island.getCenter().getBlockZ());
+                updateIsland.setFloat(6, island.getCenter().getYaw());
+                updateIsland.setFloat(7, island.getCenter().getPitch());
+                updateIsland.setString(8, island.getCenter().getWorld().getName());
+                updateIsland.executeUpdate();
+            }
+
+            // Update Island Settings
+            String replaceSettings = "REPLACE INTO " + this.getTablePrefix() + "settings (`key`, `name`, `public`, mobSpawning, animalSpawning, biome, bans) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement updateSettings = connection.prepareStatement(replaceSettings)) {
+                updateSettings.setInt(1, island.getKey());
+                updateSettings.setString(1, island.getSettings().getIslandName());
+                updateSettings.setBoolean(3, island.getSettings().isPublicIsland());
+                updateSettings.setBoolean(4, island.getSettings().isMobSpawning());
+                updateSettings.setBoolean(5, island.getSettings().isAnimalSpawning());
+                updateSettings.setString(6, island.getSettings().getBiome().name());
+                updateSettings.setString(7, GSON.toJson(new UUIDSerialized(island.getSettings().getBanned())));
+                updateSettings.executeUpdate();
+            }
+
+            // Update Island warp
+            String replaceWarp = "REPLACE INTO " + this.getTablePrefix() + "warps (`key`, `name`, icon, category, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement updateWarp = connection.prepareStatement(replaceWarp)) {
+                updateWarp.setInt(1, island.getKey());
+                updateWarp.setString(2, island.getWarp().getName());
+                updateWarp.setBytes(3, serializeItem(island.getWarp().getIcon()));
+                updateWarp.setString(4, island.getWarp().getCategory().name());
+                updateWarp.setDouble(5, island.getWarp().getLocation().getX());
+                updateWarp.setDouble(6, island.getWarp().getLocation().getY());
+                updateWarp.setDouble(7, island.getWarp().getLocation().getZ());
+                updateWarp.setFloat(8, island.getWarp().getLocation().getYaw());
+                updateWarp.setFloat(9, island.getWarp().getLocation().getPitch());
+                updateWarp.setString(10, island.getWarp().getLocation().getWorld().getName());
+                updateWarp.executeUpdate();
+            }
+
+
+            String replaceHome = "REPLACE INTO " + this.getTablePrefix() + "homes (`key`, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement updateHome = connection.prepareStatement(replaceHome)) {
+                updateHome.setInt(1, island.getKey());
+                updateHome.setDouble(2, island.getWarp().getLocation().getX());
+                updateHome.setDouble(3, island.getWarp().getLocation().getY());
+                updateHome.setDouble(4, island.getWarp().getLocation().getZ());
+                updateHome.setFloat(5, island.getWarp().getLocation().getYaw());
+                updateHome.setFloat(6, island.getWarp().getLocation().getPitch());
+                updateHome.setString(7, island.getWarp().getLocation().getWorld().getName());
+                updateHome.executeUpdate();
+            }
+
+            callback.accept(island);
+        }));
+    }
+
+    /**
+     * Construct a location from a result set
      *
      * @param resultSet The result set
      * @return The location
@@ -175,110 +336,11 @@ public class DataManager extends AbstractDataManager {
      * @throws SQLException If an error occurs
      */
     public Island constructIsland(ResultSet resultSet) throws SQLException {
-
-        //            this.databaseConnector.connect {
-//                val islandQuery = "SELECT owner, x, y, z, world FROM ${this.tablePrefix}islands WHERE key = ?"
-//                val islandStatement = it.prepareStatement(islandQuery)
-//                islandStatement.setInt(1, key)
-//                val islandResult = islandStatement.executeQuery()
-//
-//                var island: xyz.oribuin.skyblock.island.Island? = null
-//                if (islandResult.next()) {
-//                    val owner = islandResult.getString("owner")
-//                    val world = islandResult.getString("world")
-//                    val x = islandResult.getDouble("x")
-//                    val y = islandResult.getDouble("y")
-//                    val z = islandResult.getDouble("z")
-//                    island = xyz.oribuin.skyblock.island.Island(key, UUID.fromString(owner), Location(Bukkit.getWorld(world), x, y, z))
-//                }
-//
-//                if (island == null)
-//                    return@connect
-//
-//                val warpQuery =
-//                    "SELECT name, icon, visits, votes, x, y, z, yaw, pitch, world, category FROM ${this.tablePrefix}warps WHERE key = ?"
-//                val warpStatement = it.prepareStatement(warpQuery)
-//                warpStatement.setInt(1, island.key)
-//                val warpResult = warpStatement.executeQuery()
-//
-//                // Get the island warp if it exists.
-//                if (warpResult.next()) {
-//                    val warp = skyblock.island.Warp(
-//                        island.key,
-//                        Location(
-//                            Bukkit.getWorld(warpResult.getString("world")),
-//                            warpResult.getDouble("x"),
-//                            warpResult.getDouble("y"),
-//                            warpResult.getDouble("z")
-//                        )
-//                    )
-//                    warp.name = warpResult.getString("name")
-//                    warp.icon = this.deserialize(warpResult.getBytes("icon"))
-//                    warp.visits = warpResult.getInt("visits")
-//                    warp.votes = warpResult.getInt("votes")
-//                    warp.category = gson.fromJson(warpResult.getString("category"), skyblock.island.Warp.Category::class.java)
-//                    island.warp = warp
-//                }
-//
-//                /**
-//                 * This is where we get all the island settings and assign it to the island
-//                 * variable, This comment is entirely to section out everything because I feel like
-//                 * im gonna die with how cluttered this is.
-//                 */
-//                val settingsQuery = "SELECT name, public, mobSpawning, animalSpawning, biome, bans FROM ${this.tablePrefix}settings WHERE key = ?"
-//                val settingsState = it.prepareStatement(settingsQuery)
-//                settingsState.setInt(1, island.key)
-//                val settingsResult = settingsState.executeQuery()
-//
-//                // Get any island settings if they exist.
-//                if (settingsResult.next()) {
-//                    val settings = _root_ide_package_.xyz.oribuin.skyblock.island.Settings(key)
-//                    settings.name = settingsResult.getString("name")
-//                    settings.public = settingsResult.getBoolean("public")
-//                    settings.mobSpawning = settingsResult.getBoolean("mobSpawning")
-//                    settings.animalSpawning = settingsResult.getBoolean("animalSpawning")
-//                    settings.biome = skyblock.util.parseEnum(Biome::class, settingsResult.getString("biome") ?: "PLAINS")
-//                    settings.banned = gson.fromJson(settingsResult.getString("bans"), _root_ide_package_.xyz.oribuin.skyblock.island.Settings.Banned::class.java)
-//                    island.settings = settings
-//                }
-//
-//                val memberQuery = "SELECT * FROM ${this.tablePrefix}members WHERE key = ?"
-//                val members = mutableListOf<xyz.oribuin.skyblock.island.member.Member>()
-//                val memberState = it.prepareStatement(memberQuery)
-//                memberState.setInt(1, island.key)
-//                val result = memberState.executeQuery()
-//
-//                // Get all the members for that island.
-//                while (result.next()) {
-//                    val player = UUID.fromString(result.getString("player"))
-//                    val newMember = xyz.oribuin.skyblock.island.member.Member(player)
-//                    newMember.island = island.key
-//                    newMember.username = result.getString("username")
-//                    newMember.role = xyz.oribuin.skyblock.island.member.Member.Role.valueOf(result.getString("role").uppercase())
-//                    newMember.border = BorderColor.valueOf(result.getString("border").uppercase())
-//                    this.userCache[player] = newMember
-//                    members.add(newMember)
-//                }
-//
-//                island.members = members
-//
-//                val homesQuery = "SELECT x, y, z, world, yaw, pitch FROM ${this.tablePrefix}homes WHERE key = ?"
-//                val homesState = it.prepareStatement(homesQuery)
-//                homesState.setInt(1, key)
-//                val homesResult = homesState.executeQuery()
-//                if (homesResult.next()) {
-//                    val world = Bukkit.getWorld(homesResult.getString("world"))
-//                    val x = homesResult.getDouble("x")
-//                    val y = homesResult.getDouble("y")
-//                    val z = homesResult.getDouble("z")
-//                    val yaw = homesResult.getFloat("yaw")
-//                    val pitch = homesResult.getFloat("pitch")
-//                    island.home = Location(world, x, y, z, yaw, pitch)
-//                }
-//
-//                this.islandCache[key] = island
-//            }
-        return null;
+        return new Island(
+                resultSet.getInt("key"),
+                constructLocation(resultSet),
+                UUID.fromString(resultSet.getString("owner"))
+        );
     }
 
     /**

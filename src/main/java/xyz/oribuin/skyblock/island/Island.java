@@ -4,11 +4,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import xyz.oribuin.skyblock.SkyblockPlugin;
 import xyz.oribuin.skyblock.island.warp.Warp;
 import xyz.oribuin.skyblock.manager.ConfigurationManager.Setting;
+import xyz.oribuin.skyblock.manager.WorldManager;
+import xyz.oribuin.skyblock.util.SkyblockUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +33,7 @@ public class Island {
     private List<UUID> members;
     private List<UUID> trusted;
     private int size;
+    private boolean dirty;
 
     /**
      * Create a new island instance with the owner
@@ -48,6 +52,21 @@ public class Island {
         this.members = new ArrayList<>(List.of(owner));
         this.trusted = new ArrayList<>();
         this.size = Setting.ISLAND_SIZE.getInt();
+        this.dirty = true;
+    }
+
+    /**
+     * Create a new island with a randomly assigned location
+     * @param key The island id
+     * @param owner The island owner
+     *
+     */
+    public Island(int key, UUID owner) {
+        this(key, SkyblockUtil.getNextIslandLocation(key, SkyblockPlugin
+                .get()
+                .getManager(WorldManager.class)
+                .getWorld(World.Environment.NORMAL)
+        ), owner);
     }
 
     /**
@@ -285,4 +304,12 @@ public class Island {
         this.size = size;
     }
 
-};
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
+}

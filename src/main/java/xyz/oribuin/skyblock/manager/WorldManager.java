@@ -87,6 +87,17 @@ public class WorldManager extends Manager {
                 .createWorld();
     }
 
+
+    /**
+     * Get a world from the environment
+     *
+     * @param environment the environment
+     * @return the world
+     */
+    public World getWorld(World.Environment environment) {
+        return Bukkit.getWorld(this.worlds.getOrDefault(environment, ""));
+    }
+
     /**
      * Check if a location is inside an island world or not
      *

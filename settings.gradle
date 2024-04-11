@@ -2,11 +2,8 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven { url = 'https://repo.rosewooddev.io/repository/public/' }
+        maven { url = 'https://repo.papermc.io/repository/maven-public/'}
     }
 }
 
 rootProject.name = 'Skyblock'
-
-include('Plugin')
-include('NMS:Wrapper')
-include('NMS:v1_20_R3')

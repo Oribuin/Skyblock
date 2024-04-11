@@ -1,6 +1,8 @@
 package xyz.oribuin.skyblock.util;
 
 import dev.rosewood.rosegarden.RosePlugin;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -82,6 +84,40 @@ public final class SkyblockUtil {
         }
 
         return file;
+    }
+
+    public static Location getNextIslandLocation(int locationId, World islandWorld) {
+        if (locationId == 0)
+            return new Location(islandWorld, 0.0, 65, 0.0);
+
+        int n = locationId - 1;
+        double r = Math.floor((Math.sqrt(n + 1.0) - 1) / 2) + 1;
+        double p = (8 * r * (r - 1)) / 2;
+        double en = r * 2;
+        double a = (1 + n - p) % (r * 8);
+
+        double x = 0.0;
+        double z = 0.0;
+        switch ((int) Math.floor(a / (r * 2))) {
+            case 0 -> {
+                x = a - r;
+                z = -r;
+            }
+            case 1 -> {
+                x = r;
+                z = (a % en) - r;
+            }
+            case 2 -> {
+                x = r - (a % en);
+                z = r;
+            }
+            case 3 -> {
+                x = -r;
+                z = r - (a % en);
+            }
+        }
+
+        return new Location(islandWorld, x * 1200, 65, z * 1200);
     }
 
 }

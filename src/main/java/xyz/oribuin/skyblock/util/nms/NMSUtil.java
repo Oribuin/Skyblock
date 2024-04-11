@@ -1,4 +1,4 @@
-package xyz.oribuin.skyblock.nms.v1_20_R3;
+package xyz.oribuin.skyblock.util.nms;
 
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
@@ -14,12 +14,11 @@ import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import xyz.oribuin.skyblock.nms.BorderColor;
-import xyz.oribuin.skyblock.nms.NMSHandler;
+import xyz.oribuin.skyblock.island.member.BorderColor;
 
 import java.util.List;
 
-public class NMSHandlerImpl implements NMSHandler {
+public final class NMSUtil {
 
     /**
      * Send a worldborder to the center of a location to a specific player
@@ -29,8 +28,8 @@ public class NMSHandlerImpl implements NMSHandler {
      * @param size   The size of the worldborder
      * @param center The center location of the border.
      */
-    @Override
-    public void sendWorldBorder(Player player, BorderColor color, Double size, Location center) {
+
+    public static void sendWorldBorder(Player player, BorderColor color, Double size, Location center) {
         WorldBorder worldBorder = new WorldBorder();
         worldBorder.setWarningBlocks(0);
         worldBorder.setWarningTime(0);
@@ -52,8 +51,8 @@ public class NMSHandlerImpl implements NMSHandler {
      * @param chunks  the chunk being updated
      * @param players The players the chunk is being updated for
      */
-    @Override
-    public void sendChunks(List<Chunk> chunks, List<Player> players) {
+
+    public static void sendChunks(List<Chunk> chunks, List<Player> players) {
         List<ServerPlayer> nmsPlayers = players.stream().map(player -> ((CraftPlayer) player).getHandle()).toList();
         for (Chunk chunk : chunks) {
             ChunkAccess access = ((CraftChunk) chunk).getHandle(ChunkStatus.BIOMES);
@@ -80,8 +79,8 @@ public class NMSHandlerImpl implements NMSHandler {
      * @param value The key value
      * @return The modified itemstack.
      */
-    @Override
-    public ItemStack setString(ItemStack item, String key, String value) {
+
+    public static ItemStack setString(ItemStack item, String key, String value) {
         net.minecraft.world.item.ItemStack craftItemStack = CraftItemStack.asNMSCopy(item);
         craftItemStack.getOrCreateTag().putString(key, value);
         return CraftItemStack.asBukkitCopy(craftItemStack);
@@ -95,8 +94,8 @@ public class NMSHandlerImpl implements NMSHandler {
      * @param value The key value
      * @return The modified itemstack.
      */
-    @Override
-    public ItemStack setInt(ItemStack item, String key, int value) {
+
+    public static ItemStack setInt(ItemStack item, String key, int value) {
         net.minecraft.world.item.ItemStack craftItemStack = CraftItemStack.asNMSCopy(item);
         craftItemStack.getOrCreateTag().putInt(key, value);
         return CraftItemStack.asBukkitCopy(craftItemStack);
@@ -110,8 +109,8 @@ public class NMSHandlerImpl implements NMSHandler {
      * @param value The key value
      * @return The modified itemstack.
      */
-    @Override
-    public ItemStack setLong(ItemStack item, String key, long value) {
+
+    public static ItemStack setLong(ItemStack item, String key, long value) {
         net.minecraft.world.item.ItemStack craftItemStack = CraftItemStack.asNMSCopy(item);
         craftItemStack.getOrCreateTag().putLong(key, value);
         return CraftItemStack.asBukkitCopy(craftItemStack);
@@ -125,8 +124,8 @@ public class NMSHandlerImpl implements NMSHandler {
      * @param value The key value
      * @return The modified itemstack.
      */
-    @Override
-    public ItemStack setDouble(ItemStack item, String key, double value) {
+
+    public static ItemStack setDouble(ItemStack item, String key, double value) {
         net.minecraft.world.item.ItemStack craftItemStack = CraftItemStack.asNMSCopy(item);
         craftItemStack.getOrCreateTag().putDouble(key, value);
         return CraftItemStack.asBukkitCopy(craftItemStack);
@@ -140,8 +139,8 @@ public class NMSHandlerImpl implements NMSHandler {
      * @param value The key value
      * @return The modified itemstack.
      */
-    @Override
-    public ItemStack setBoolean(ItemStack item, String key, boolean value) {
+
+    public static ItemStack setBoolean(ItemStack item, String key, boolean value) {
         net.minecraft.world.item.ItemStack craftItemStack = CraftItemStack.asNMSCopy(item);
         craftItemStack.getOrCreateTag().putBoolean(key, value);
         return CraftItemStack.asBukkitCopy(craftItemStack);
