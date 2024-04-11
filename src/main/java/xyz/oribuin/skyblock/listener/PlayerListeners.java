@@ -6,6 +6,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import xyz.oribuin.skyblock.island.Island;
 import xyz.oribuin.skyblock.island.member.Member;
@@ -13,6 +14,7 @@ import xyz.oribuin.skyblock.manager.DataManager;
 import xyz.oribuin.skyblock.manager.WorldManager;
 import xyz.oribuin.skyblock.util.nms.NMSUtil;
 
+import java.security.SignedObject;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,7 +29,6 @@ public class PlayerListeners implements Listener {
         this.manager = this.plugin.getManager(DataManager.class);
         this.worldService = this.plugin.getManager(WorldManager.class);
     }
-
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onTeleport(PlayerTeleportEvent event) {
@@ -77,22 +78,23 @@ public class PlayerListeners implements Listener {
     }
 
     // TODO: Add Other Events :3
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onShear(PlayerShearEntityEvent event) {
+        if (!this.worldService.isIslandWorld(event.getEntity().getLocation())) return;
+
+        if (event.getPlayer().hasPermission("skyblock.island.bypass")) return;
+
+        event.setCancelled(true);
+        Island island = this.manager.getIsland(event.getEntity().getLocation());
+        if (island == null) return;
+
+        if (!island.isMember(event.getPlayer()) && !island.isTrusted(event.getPlayer())) {
+            event.setCancelled(true);
+        }
+    }
+
 }
-//    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-//    fun PlayerShearEntityEvent.onShear() {
-//        if (!worldManager.isIslandWorld(this.entity.world))
-//            return
-//
-//        if (this.player.hasPermission("skyblock.island.bypass"))
-//            return
-//
-//        this.isCancelled = true
-//        val island = islandManager.getIslandFromLoc(this.entity.location) ?: return
-//
-//        if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
-//            this.isCancelled = false
-//    }
-//
+
 //    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
 //    fun PlayerInteractEvent.onInteract() {
 //        val block = this.clickedBlock ?: return

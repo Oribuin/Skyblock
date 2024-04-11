@@ -1,61 +1,71 @@
 package xyz.oribuin.skyblock.listener;
 
+import dev.rosewood.rosegarden.RosePlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.SignChangeEvent;
+import xyz.oribuin.skyblock.island.Island;
+import xyz.oribuin.skyblock.manager.DataManager;
+import xyz.oribuin.skyblock.manager.WorldManager;
 
-class BlockListeners(private val plugin: xyz.oribuin.skyblock.SkyblockPlugin) : Listener {
+public class BlockListeners implements Listener {
 
-    private val islandManager = this.plugin.getManager<skyblock.manager.IslandManager>()
-    private val worldManager = this.plugin.getManager<skyblock.manager.WorldManager>()
+    private final RosePlugin plugin;
+    private final DataManager manager;
+    private final WorldManager worldService;
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun BlockBreakEvent.onBreak() {
-        if (!worldManager.isIslandWorld(this.block.world))
-            return
-
-        if (this.player.hasPermission("skyblock.island.bypass"))
-            return
-
-        this.isCancelled = true
-        val island = islandManager.getIslandFromLoc(block.location) ?: return
-
-        if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
-            this.isCancelled = false
+    public BlockListeners(RosePlugin plugin) {
+        this.plugin = plugin;
+        this.manager = this.plugin.getManager(DataManager.class);
+        this.worldService = this.plugin.getManager(WorldManager.class);
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun BlockPlaceEvent.onPlace() {
-        if (!worldManager.isIslandWorld(this.block.world))
-            return
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    public void onBreak(BlockBreakEvent event) {
+        if (!this.worldService.isIslandWorld(event.getBlock().getLocation())) return;
 
-        if (this.player.hasPermission("skyblock.island.bypass"))
-            return
+        Island island = this.manager.getIsland(event.getBlock().getLocation());
+        if (island == null) return;
 
-        this.isCancelled = true
-        val island = islandManager.getIslandFromLoc(block.location) ?: return
+        if (event.getPlayer().hasPermission("skyblock.island.bypass")) return;
 
-        if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
-            this.isCancelled = false
+        if (island.isMember(event.getPlayer()) || island.isTrusted(event.getPlayer()))
+            return;
+
+        event.setCancelled(true);
     }
 
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    public void onPlace(BlockPlaceEvent event) {
+        if (!this.worldService.isIslandWorld(event.getBlock().getLocation())) return;
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun SignChangeEvent.onSignChange() {
-        if (!worldManager.isIslandWorld(this.block.world))
-            return
+        Island island = this.manager.getIsland(event.getBlock().getLocation());
+        if (island == null) return;
 
-        if (this.player.hasPermission("skyblock.island.bypass"))
-            return
+        if (event.getPlayer().hasPermission("skyblock.island.bypass")) return;
 
-        this.isCancelled = true
-        val island = islandManager.getIslandFromLoc(block.location) ?: return
+        if (island.isMember(event.getPlayer()) || island.isTrusted(event.getPlayer()))
+            return;
 
-        if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
-            this.isCancelled = false
+        event.setCancelled(true);
     }
 
-    init {
-        this.plugin.server.pluginManager.registerEvents(this, this.plugin)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+    public void onSignChange(SignChangeEvent event) {
+        if (!this.worldService.isIslandWorld(event.getBlock().getLocation())) return;
+
+        Island island = this.manager.getIsland(event.getBlock().getLocation());
+        if (island == null) return;
+
+        if (event.getPlayer().hasPermission("skyblock.island.bypass")) return;
+
+        if (island.isMember(event.getPlayer()) || island.isTrusted(event.getPlayer()))
+            return;
+
+        event.setCancelled(true);
     }
 
 }

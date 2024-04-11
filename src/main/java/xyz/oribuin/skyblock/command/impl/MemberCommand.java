@@ -1,36 +1,38 @@
 package xyz.oribuin.skyblock.command.impl;
 
 import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.command.framework.BaseRoseCommand;
 import dev.rosewood.rosegarden.command.framework.CommandContext;
-import dev.rosewood.rosegarden.command.framework.RoseCommand;
 import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
-import xyz.oribuin.skyblock.gui.MembersGUI;
-import xyz.oribuin.skyblock.util.asMember;
-import xyz.oribuin.skyblock.util.getIsland;
-import xyz.oribuin.skyblock.util.getMenu;
-import xyz.oribuin.skyblock.util.send;
+import org.bukkit.entity.Player;
+import xyz.oribuin.skyblock.island.Island;
+import xyz.oribuin.skyblock.manager.DataManager;
 
-class MemberCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseCommand(rosePlugin, parent) {
+public class MemberCommand extends BaseRoseCommand {
 
-    @RoseExecutable
-    fun execute(context: CommandContext) {
-        val member = context.asMember(this.rosePlugin)
-        val island = member.getIsland(this.rosePlugin)
-
-        if (island == null) {
-            member.onlinePlayer?.let { this.rosePlugin.send(it, "no-island") }
-            return
-        }
-
-        this.rosePlugin.getMenu(xyz.oribuin.skyblock.gui.MembersGUI::class).openMenu(member)
+    public MemberCommand(RosePlugin rosePlugin) {
+        super(rosePlugin);
     }
 
-    override fun getDefaultName(): String = "members"
+    @RoseExecutable
+    public void execute(CommandContext context) {
+        DataManager manager = this.rosePlugin.getManager(DataManager.class);
+        Player player = (Player) context.getSender();
+        Island island = manager.getIsland(player.getUniqueId());
 
-    override fun getDescriptionKey(): String = "command-members-description"
+        if (island == null) {
+            // TODO: Locale
+            player.sendMessage("No Island");
+            return;
+        }
 
-    override fun getRequiredPermission(): String = "skyblock..members"
+        // TODO: Open Menu
+        island.getMembers()
+                .stream()
+                .map(manager::getMember)
+                .map(member -> String.format("| %s | %s | %s |", member.getUsername(), member.getRole().name(), member.getBorder().name()))
+                .forEach(player::sendMessage);
+    }
 
-    override fun isPlayerOnly(): Boolean = true
 }

@@ -4,14 +4,15 @@ import dev.rosewood.rosegarden.RosePlugin;
 import dev.rosewood.rosegarden.command.framework.BaseRoseCommand;
 import dev.rosewood.rosegarden.command.framework.CommandContext;
 import dev.rosewood.rosegarden.command.framework.CommandInfo;
+import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
 import org.bukkit.entity.Player;
-import xyz.oribuin.skyblock.island.Island;
+import xyz.oribuin.skyblock.island.member.Member;
 import xyz.oribuin.skyblock.manager.DataManager;
 
-public class SettingsCommand extends BaseRoseCommand {
+public class BaseCommand extends BaseRoseCommand {
 
-    public SettingsCommand(RosePlugin rosePlugin) {
+    public BaseCommand(RosePlugin rosePlugin) {
         super(rosePlugin);
     }
 
@@ -19,22 +20,23 @@ public class SettingsCommand extends BaseRoseCommand {
     public void execute(CommandContext context) {
         DataManager manager = this.rosePlugin.getManager(DataManager.class);
         Player player = (Player) context.getSender();
-        Island island = manager.getIsland(player.getUniqueId());
+        Member member = manager.getMember(player.getUniqueId());
 
-        if (island == null) {
-            // TODO: Locale
-            player.sendMessage("No Island");
+        if (!member.hasIsland()) {
+            // TODO: Create new island
+            player.sendMessage("create new island wooooooooo");
             return;
         }
 
-        player.sendMessage("imagine the settings gui opened (" + island.getSettings().toString() + ")");
+        player.sendMessage("open the island menu");
+
     }
 
     @Override
     protected CommandInfo createCommandInfo() {
-        return CommandInfo.builder("settings")
-                .descriptionKey("command-settings-description")
-                .permission("skyblock.warp.settings")
+        return CommandInfo.builder("island")
+                .descriptionKey("command-island-description")
+                .permission("skyblock.island")
                 .playerOnly(true)
                 .build();
     }

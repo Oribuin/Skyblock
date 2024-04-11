@@ -1,72 +1,85 @@
 package xyz.oribuin.skyblock.listener;
 
+import dev.rosewood.rosegarden.RosePlugin;
+import io.papermc.paper.event.entity.EntityMoveEvent;
+import org.bukkit.Chunk;
+import org.bukkit.entity.Animals;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.persistence.PersistentDataType;
+import xyz.oribuin.skyblock.island.Island;
+import xyz.oribuin.skyblock.manager.DataManager;
+import xyz.oribuin.skyblock.manager.WorldManager;
 
-class EntityListeners(private val plugin: xyz.oribuin.skyblock.SkyblockPlugin) : Listener {
+import java.util.List;
 
-    private val islandManager = this.plugin.getManager<skyblock.manager.IslandManager>()
-    private val worldManager = this.plugin.getManager<skyblock.manager.WorldManager>()
+public class EntityListeners implements Listener {
 
-    private val islandId = NamespacedKey(plugin, "islandId")
+    private final RosePlugin plugin;
+    private final DataManager manager;
+    private final WorldManager worldService;
 
-    private val spawnReasons = mutableListOf(
-        CreatureSpawnEvent.SpawnReason.NATURAL,
-        CreatureSpawnEvent.SpawnReason.ENDER_PEARL,
-        CreatureSpawnEvent.SpawnReason.NETHER_PORTAL,
-        CreatureSpawnEvent.SpawnReason.RAID,
-        CreatureSpawnEvent.SpawnReason.SILVERFISH_BLOCK,
-        CreatureSpawnEvent.SpawnReason.PATROL,
-        CreatureSpawnEvent.SpawnReason.JOCKEY,
-    )
+    public EntityListeners(RosePlugin plugin) {
+        this.plugin = plugin;
+        this.manager = this.plugin.getManager(DataManager.class);
+        this.worldService = this.plugin.getManager(WorldManager.class);
+    }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun CreatureSpawnEvent.onSpawn() {
-        if (!worldManager.isIslandWorld(this.entity.world))
-            return
+    private final List<SpawnReason> spawnReasons = List.of(
+            SpawnReason.NATURAL,
+            SpawnReason.ENDER_PEARL,
+            SpawnReason.NETHER_PORTAL,
+            SpawnReason.RAID,
+            SpawnReason.SILVERFISH_BLOCK,
+            SpawnReason.PATROL,
+            SpawnReason.JOCKEY
+    );
 
-        val island = islandManager.getIslandFromLoc(this.location) ?: return
 
-        if (!island.settings.mobSpawning) {
-            if (entity is Monster && spawnReasons.contains(this.spawnReason)) {
-                this.isCancelled = true
-            }
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onSpawn(CreatureSpawnEvent event) {
+        if (!this.worldService.isIslandWorld(event.getLocation())) return;
+        if (!this.spawnReasons.contains(event.getSpawnReason())) return;
+
+        Island island = this.manager.getIsland(event.getLocation());
+        if (island == null) return;
+
+        // Disable Animal Spawning if enabled
+        if (!island.getSettings().isAnimalSpawning() && event.getEntity() instanceof Animals) {
+            event.setCancelled(true);
+            return;
         }
 
-        if (!island.settings.animalSpawning) {
-            if (entity is Animals && spawnReasons.contains(this.spawnReason)) {
-                this.isCancelled = true
-            }
-        }
-
-        if (!this.isCancelled) {
-            this.entity.persistentDataContainer.set(islandId, PersistentDataType.INTEGER, island.key)
+        // Disable Monster Spawning if enabled
+        if (!island.getSettings().isMobSpawning() && event.getEntity() instanceof Monster) {
+            event.setCancelled(true);
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun EntityMoveEvent.onMove() {
-        if (!worldManager.isIslandWorld(this.entity.world))
-            return
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onMove(EntityMoveEvent event) {
+        if (!this.worldService.isIslandWorld(event.getTo())) return;
 
-        val toIsland = islandManager.getIslandFromLoc(this.to) ?: return
-        val cont = this.entity.persistentDataContainer
+        Chunk fromChunk = event.getFrom().getChunk();
+        Chunk toChunk = event.getTo().getChunk();
 
-        if (cont.has(islandId)) {
-            val mobIsland = cont.getOrDefault(islandId, PersistentDataType.INTEGER, -1)
-            if (toIsland.key != mobIsland) {
-                this.isCancelled = true
-                entity.remove()
-            }
+        // Make sure they swapped chunk locations
+        if (fromChunk.getX() == toChunk.getX() && fromChunk.getZ() == toChunk.getZ()) return;
+
+        Island fromIsland = this.manager.getIsland(event.getFrom());
+        Island toIsland = this.manager.getIsland(event.getTo());
+        if (fromIsland == null || toIsland == null) return;
+
+        if (fromIsland.getKey() != toIsland.getKey()) {
+            event.setCancelled(true);
+            event.getEntity().remove();
         }
 
-    }
-
-
-    init {
-        this.plugin.server.pluginManager.registerEvents(this, this.plugin)
     }
 
 }

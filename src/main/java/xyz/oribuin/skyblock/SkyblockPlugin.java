@@ -37,14 +37,15 @@ public class SkyblockPlugin extends RosePlugin {
 
     @Override
     public void enable() {
+
+        PluginManager pluginManager = this.getServer().getPluginManager();
         List<String> worldeditPlugins = List.of("WorldEdit", "FastAsyncWorldEdit", "AsyncWorldEdit");
-        if (worldeditPlugins.stream().map(this.getServer().getPluginManager()::getPlugin).allMatch(Objects::isNull)) {
+        if (worldeditPlugins.stream().map(pluginManager::getPlugin).allMatch(Objects::isNull)) {
             this.getLogger().severe("You need to install WorldEdit or FastAsyncWorldEdit to use this plugin.");
             this.getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
-        PluginManager pluginManager = this.getServer().getPluginManager();
         pluginManager.registerEvents(new BlockListeners(this), this);
         pluginManager.registerEvents(new EntityListeners(this), this);
         pluginManager.registerEvents(new PlayerListeners(this), this);
@@ -62,7 +63,6 @@ public class SkyblockPlugin extends RosePlugin {
     protected List<Class<? extends Manager>> getManagerLoadPriority() {
         return List.of(
                 WorldManager.class,
-                IslandManager.class,
                 MenuManager.class
         );
     }

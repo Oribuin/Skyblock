@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.persistence.PersistentDataType;
 import xyz.oribuin.skyblock.SkyblockPlugin;
 import xyz.oribuin.skyblock.island.warp.Warp;
@@ -99,9 +100,14 @@ public class Island {
      * @return If the player was successfully teleported
      */
     public boolean teleport(Player player) {
-        // TOOD: If player is banned from island, return false
-        // TODO: Teleport the player to the island
-        return true;
+        // Player is banned from the isladn
+        if (this.isBanned(player)) return false;
+
+        // Island is private
+        if (!this.settings.isPublicIsland() && !this.isMember(player) && !this.isTrusted(player)) return false;
+
+        // Teleport the player to island home
+        return player.teleportAsync(this.home, PlayerTeleportEvent.TeleportCause.PLUGIN).isDone();
     }
 
     /**

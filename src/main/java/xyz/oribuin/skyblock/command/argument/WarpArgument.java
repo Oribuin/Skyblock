@@ -4,9 +4,13 @@ import dev.rosewood.rosegarden.command.framework.Argument;
 import dev.rosewood.rosegarden.command.framework.ArgumentHandler;
 import dev.rosewood.rosegarden.command.framework.CommandContext;
 import dev.rosewood.rosegarden.command.framework.InputIterator;
+import xyz.oribuin.skyblock.SkyblockPlugin;
+import xyz.oribuin.skyblock.island.Island;
 import xyz.oribuin.skyblock.island.warp.Warp;
+import xyz.oribuin.skyblock.manager.DataManager;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class WarpArgument extends ArgumentHandler<Warp> {
 
@@ -16,13 +20,29 @@ public class WarpArgument extends ArgumentHandler<Warp> {
 
     @Override
     public Warp handle(CommandContext context, Argument argument, InputIterator inputIterator) throws HandledArgumentException {
-        return null;
+        String input = inputIterator.next();
+
+        return SkyblockPlugin.get().getManager(DataManager.class)
+                .getIslandCache()
+                .values()
+                .stream()
+                .filter(island -> island.getWarp().getName().equalsIgnoreCase(input) && island.getSettings().isPublicIsland())
+                .map(Island::getWarp)
+                .findFirst()
+                .orElseThrow(() -> new HandledArgumentException("argument-handler-warp-option"));
     }
 
     @Override
     public List<String> suggest(CommandContext context, Argument argument, String[] args) {
-        return null;
+        return SkyblockPlugin.get().getManager(DataManager.class)
+                .getIslandCache()
+                .values()
+                .stream()
+                .filter(island -> island.getSettings().isPublicIsland())
+                .map(island -> island.getWarp().getName())
+                .collect(Collectors.toList());
     }
+
 }
 
 //import dev.rosewood.rosegarden.RosePlugin

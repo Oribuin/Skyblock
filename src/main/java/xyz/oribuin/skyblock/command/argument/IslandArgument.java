@@ -16,6 +16,7 @@ public class IslandArgument extends ArgumentHandler<Island> {
 
     @Override
     public Island handle(CommandContext context, Argument argument, InputIterator inputIterator) throws HandledArgumentException {
+        String input = inputIterator.next();
         // get island by owner name :3
         return null;
     }

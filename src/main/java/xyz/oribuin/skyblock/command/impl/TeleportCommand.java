@@ -1,39 +1,61 @@
 package xyz.oribuin.skyblock.command.impl;
 
 import dev.rosewood.rosegarden.RosePlugin;
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
-import dev.rosewood.rosegarden.command.framework.annotation.Optional;
+import dev.rosewood.rosegarden.command.argument.ArgumentHandlers;
+import dev.rosewood.rosegarden.command.framework.ArgumentsDefinition;
+import dev.rosewood.rosegarden.command.framework.BaseRoseCommand;
+import dev.rosewood.rosegarden.command.framework.CommandContext;
+import dev.rosewood.rosegarden.command.framework.CommandInfo;
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
-import xyz.oribuin.skyblock.util.asMember;
-import xyz.oribuin.skyblock.util.asPlayer;
-import xyz.oribuin.skyblock.util.getManager;
+import org.bukkit.entity.Player;
+import xyz.oribuin.skyblock.island.Island;
+import xyz.oribuin.skyblock.island.member.Member;
+import xyz.oribuin.skyblock.manager.DataManager;
 
-class TeleportCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseCommand(rosePlugin, parent) {
+public class TeleportCommand extends BaseRoseCommand {
 
-    @RoseExecutable
-    fun execute(context: CommandContext, @Optional player: Player?) {
-
-        val manager = this.rosePlugin.getManager<skyblock.manager.IslandManager>()
-        val target = (player ?: context.asPlayer()).asMember(this.rosePlugin)
-        val island = manager.getIsland(target)
-
-        if (island == null) {
-            this.rosePlugin.getManager<skyblock.manager.MenuManager>()[xyz.oribuin.skyblock.gui.CreateGUI::class].openMenu(target)
-            return
-        }
-
-        manager.teleport(target, island.home)
-
+    public TeleportCommand(RosePlugin plugin) {
+        super(plugin);
     }
 
-    override fun getDefaultName(): String = "teleport"
+    @RoseExecutable
+    public void execute(CommandContext context, Player player) {
+        DataManager manager = this.rosePlugin.getManager(DataManager.class);
+        Player target = player != null ? player : (Player) context.getSender();
 
-    override fun getDefaultAliases(): List<String> = listOf("tp", "home", "go", "spawn")
+        Island island = manager.getIsland(target.getUniqueId());
 
-    override fun getDescriptionKey(): String = "command-teleport-description"
+        if (island == null) {
+            // TODO: Locale
+            context.getSender().sendMessage("No Island");
+            return;
+        }
 
-    override fun getRequiredPermission() = "skyblock..teleport"
+        if (island.teleport((Player) context.getSender())) {
+            // TODO: Locale
+            context.getSender().sendMessage("Teleporting to Island");
+            return;
+        }
 
-    override fun isPlayerOnly(): Boolean = true
+        // TODO: Locale
+        context.getSender().sendMessage("Failed to teleport to Island");
+    }
+
+    @Override
+    protected CommandInfo createCommandInfo() {
+        return CommandInfo.builder("teleport")
+                .aliases("home", "tp", "go")
+                .descriptionKey("command-teleport-description")
+                .permission("skyblock.teleport")
+                .playerOnly(true)
+                .build();
+    }
+
+    @Override
+    protected ArgumentsDefinition createArgumentsDefinition() {
+        return ArgumentsDefinition.builder()
+                .optional("target", ArgumentHandlers.PLAYER)
+                .build();
+    }
 
 }

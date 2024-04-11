@@ -161,16 +161,16 @@ public class DataManager extends AbstractDataManager {
     }
 
     /**
-     * Get an island from its owner
+     * Get an island from its member
      *
-     * @param owner The island owner
+     * @param member The island owner
      * @return The island
      */
     @Nullable
-    public Island getIsland(@NotNull UUID owner) {
+    public Island getIsland(@NotNull UUID member) {
         return this.islandCache.values()
                 .stream()
-                .filter(island -> island.getOwner().equals(owner))
+                .filter(island -> island.getMembers().contains(member))
                 .findFirst()
                 .orElseThrow(null);
     }
@@ -196,8 +196,9 @@ public class DataManager extends AbstractDataManager {
      * @param uuid The player's uuid
      * @return the member
      */
+    @NotNull
     public Member getMember(UUID uuid) {
-        return this.userCache.get(uuid);
+        return this.userCache.getOrDefault(uuid, new Member(uuid));
     }
 
     /**

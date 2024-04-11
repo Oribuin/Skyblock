@@ -27,6 +27,15 @@ public class Member {
     }
 
     /**
+     * Check if a member has an island
+     *
+     * @return If the member has an island
+     */
+    public boolean hasIsland() {
+        return this.island <= 0;
+    }
+
+    /**
      * Get the player as an offline player
      *
      * @return The player object
