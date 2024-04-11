@@ -15,11 +15,11 @@ import org.jetbrains.annotations.Nullable;
 import xyz.oribuin.skyblock.database.migration.CreateInitialTables;
 import xyz.oribuin.skyblock.island.Island;
 import xyz.oribuin.skyblock.island.Settings;
+import xyz.oribuin.skyblock.island.member.BorderColor;
 import xyz.oribuin.skyblock.island.member.Member;
 import xyz.oribuin.skyblock.island.member.Role;
 import xyz.oribuin.skyblock.island.warp.Category;
 import xyz.oribuin.skyblock.island.warp.Warp;
-import xyz.oribuin.skyblock.nms.BorderColor;
 import xyz.oribuin.skyblock.util.SkyblockUtil;
 import xyz.oribuin.skyblock.util.serializer.UUIDSerialized;
 
@@ -181,6 +181,16 @@ public class DataManager extends AbstractDataManager {
     }
 
     /**
+     * Get a member from the database
+     *
+     * @param uuid The player's uuid
+     * @return the member
+     */
+    public Member getMember(UUID uuid) {
+        return this.userCache.get(uuid);
+    }
+
+    /**
      * Create a brand-new island in the plugin database
      *
      * @param owner  The owner of the island
@@ -291,6 +301,27 @@ public class DataManager extends AbstractDataManager {
             }
 
             callback.accept(island);
+        }));
+    }
+
+    /**
+     * Save the member to the database
+     *
+     * @param member The member
+     */
+    public void saveMember(Member member) {
+        this.userCache.put(member.getUUID(), member);
+
+        this.async(() -> this.databaseConnector.connect(connection -> {
+            String insert = "REPLACE INTO " + this.getTablePrefix() + "members (`player`, `username`, `key`, `role`, `border`) VALUES (?, ?, ?, ?, ?);";
+            try (PreparedStatement statement = connection.prepareStatement(insert)) {
+                statement.setString(1, member.getUUID().toString());
+                statement.setString(2, member.getUsername());
+                statement.setInt(3, member.getIsland());
+                statement.setString(4, member.getRole().name());
+                statement.setString(5, member.getBorder().name());
+                statement.executeUpdate();
+            }
         }));
     }
 
