@@ -7,6 +7,7 @@ import dev.rosewood.rosegarden.manager.AbstractDataManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Biome;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class DataManager extends AbstractDataManager {
@@ -139,6 +141,14 @@ public class DataManager extends AbstractDataManager {
         }));
     }
 
+    @Override
+    public void disable() {
+        CompletableFuture.runAsync(() -> {
+            this.islandCache.values().forEach(this::saveIsland);
+            this.userCache.values().forEach(this::saveMember);
+        }).thenAccept(x -> super.disable());
+    }
+
     /**
      * Get an island from the island key
      *
@@ -193,26 +203,21 @@ public class DataManager extends AbstractDataManager {
     /**
      * Create a brand-new island in the plugin database
      *
-     * @param owner  The owner of the island
-     * @param center The center of the island
+     * @param owner The owner of the island
      */
-    public void createIsland(UUID owner, Location center, Consumer<Island> result) {
+    public void createIsland(Player owner, Consumer<Island> result) {
         this.async(() -> this.databaseConnector.connect(connection -> {
-            String createIsland = "INSERT INTO " + this.getTablePrefix() + "islands (owner, x, y, z, yaw, pitch, world) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String createIsland = "INSERT INTO " + this.getTablePrefix() + "islands (owner) VALUES (?)";
+
             try (PreparedStatement statement = connection.prepareStatement(createIsland, Statement.RETURN_GENERATED_KEYS)) {
+
                 statement.setString(1, owner.toString());
-                statement.setDouble(2, center.getX());
-                statement.setDouble(3, center.getY());
-                statement.setDouble(4, center.getZ());
-                statement.setFloat(5, center.getYaw());
-                statement.setFloat(6, center.getPitch());
-                statement.setString(7, center.getWorld().getName());
                 statement.executeUpdate();
 
                 ResultSet keys = statement.getGeneratedKeys();
                 if (keys.next()) {
                     int key = keys.getInt(1);
-                    Island island = new Island(key, center, owner);
+                    Island island = new Island(key, owner.getUniqueId());
 
                     this.saveIsland(island, result);
                     result.accept(island);
@@ -305,6 +310,15 @@ public class DataManager extends AbstractDataManager {
     }
 
     /**
+     * Save a member from the cache using their uuid
+     *
+     * @param uuid The Player UUID
+     */
+    public void saveMember(UUID uuid) {
+        this.saveMember(this.userCache.getOrDefault(uuid, new Member(uuid)));
+    }
+
+    /**
      * Save the member to the database
      *
      * @param member The member
@@ -321,6 +335,27 @@ public class DataManager extends AbstractDataManager {
                 statement.setString(4, member.getRole().name());
                 statement.setString(5, member.getBorder().name());
                 statement.executeUpdate();
+            }
+        }));
+    }
+
+    /**
+     * Load a member from the database and cache them.
+     *
+     * @param uuid The UUID to load
+     */
+    public void loadMember(UUID uuid) {
+        this.async(() -> this.databaseConnector.connect(connection -> {
+            String select = "SELECT * FROM " + this.getTablePrefix() + "members WHERE player = ?";
+            try (PreparedStatement statement = connection.prepareStatement(select)) {
+                statement.setString(1, uuid.toString());
+                ResultSet resultSet = statement.executeQuery();
+                if (resultSet.next()) {
+                    Member member = this.constructMember(resultSet);
+                    if (member == null) member = new Member(uuid);
+
+                    this.userCache.put(uuid, member);
+                }
             }
         }));
     }
@@ -403,6 +438,7 @@ public class DataManager extends AbstractDataManager {
         settings.setMobSpawning(resultSet.getBoolean("mobSpawning"));
         settings.setAnimalSpawning(resultSet.getBoolean("animalSpawning"));
         settings.setBiome(SkyblockUtil.getEnum(Biome.class, resultSet.getString("biome"), Biome.PLAINS));
+        settings.setBanned(GSON.fromJson(resultSet.getString("bans"), UUIDSerialized.class).result());
         return settings;
     }
 
@@ -454,6 +490,14 @@ public class DataManager extends AbstractDataManager {
     @Override
     public List<Class<? extends DataMigration>> getDataMigrations() {
         return List.of(CreateInitialTables.class);
+    }
+
+    public Map<Integer, Island> getIslandCache() {
+        return islandCache;
+    }
+
+    public Map<UUID, Member> getUserCache() {
+        return userCache;
     }
 
 }

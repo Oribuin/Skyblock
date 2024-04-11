@@ -3,12 +3,9 @@ package xyz.oribuin.skyblock.gui
 import dev.rosewood.rosegarden.RosePlugin
 import dev.rosewood.rosegarden.utils.HexUtils
 import dev.rosewood.rosegarden.utils.StringPlaceholders
-import dev.triumphteam.gui.guis.Gui
 import net.wesjd.anvilgui.AnvilGUI
 import org.bukkit.Material
-import org.bukkit.entity.Player
 import xyz.oribuin.skyblock.island.member.Member
-import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.util.cache
 import xyz.oribuin.skyblock.util.send
 import java.util.*

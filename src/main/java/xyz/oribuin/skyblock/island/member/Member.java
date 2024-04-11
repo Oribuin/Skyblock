@@ -2,7 +2,6 @@ package xyz.oribuin.skyblock.island.member;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import xyz.oribuin.skyblock.nms.BorderColor;
 
 import java.util.UUID;
 

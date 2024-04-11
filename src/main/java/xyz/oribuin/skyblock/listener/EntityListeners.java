@@ -1,15 +1,9 @@
-package xyz.oribuin.skyblock.listener
+package xyz.oribuin.skyblock.listener;
 
-import io.papermc.paper.event.entity.EntityMoveEvent
-import org.bukkit.NamespacedKey
-import org.bukkit.entity.Animals
-import org.bukkit.entity.Monster
-import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
-import org.bukkit.event.Listener
-import org.bukkit.event.entity.CreatureSpawnEvent
-import org.bukkit.persistence.PersistentDataType
-import xyz.oribuin.skyblock.manager.IslandManager
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.persistence.PersistentDataType;
 
 class EntityListeners(private val plugin: xyz.oribuin.skyblock.SkyblockPlugin) : Listener {
 

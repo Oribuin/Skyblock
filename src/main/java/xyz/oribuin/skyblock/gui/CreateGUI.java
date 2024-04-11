@@ -2,10 +2,7 @@ package xyz.oribuin.skyblock.gui
 
 import dev.rosewood.rosegarden.RosePlugin
 import dev.rosewood.rosegarden.utils.HexUtils.colorify
-import dev.triumphteam.gui.guis.GuiItem
 import org.bukkit.Material
-import xyz.oribuin.skyblock.island.member.Member
-import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.util.color
 
 class CreateGUI(rosePlugin: RosePlugin) : xyz.oribuin.skyblock.gui.PluginGUI(rosePlugin) {

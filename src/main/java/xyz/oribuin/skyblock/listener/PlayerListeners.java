@@ -1,155 +1,169 @@
-package xyz.oribuin.skyblock.listener
+package xyz.oribuin.skyblock.listener;
 
-import dev.rosewood.rosegarden.RosePlugin
-import org.bukkit.entity.Animals
-import org.bukkit.entity.ArmorStand
-import org.bukkit.entity.Hanging
-import org.bukkit.entity.Mob
-import org.bukkit.entity.Player
-import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
-import org.bukkit.event.Listener
-import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.bukkit.event.entity.PlayerDeathEvent
-import org.bukkit.event.player.PlayerInteractEntityEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.event.player.PlayerRespawnEvent
-import org.bukkit.event.player.PlayerShearEntityEvent
-import org.bukkit.event.player.PlayerTeleportEvent
-import org.bukkit.inventory.Merchant
-import xyz.oribuin.skyblock.island.member.Member
-import xyz.oribuin.skyblock.manager.IslandManager
-import xyz.oribuin.skyblock.util.asMember
-import xyz.oribuin.skyblock.util.cache
-import xyz.oribuin.skyblock.util.getIsland
+import dev.rosewood.rosegarden.RosePlugin;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import xyz.oribuin.skyblock.island.Island;
+import xyz.oribuin.skyblock.island.member.Member;
+import xyz.oribuin.skyblock.manager.DataManager;
+import xyz.oribuin.skyblock.manager.WorldManager;
+import xyz.oribuin.skyblock.util.nms.NMSUtil;
 
-class PlayerListeners(private val rosePlugin: RosePlugin) : Listener {
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
-    private val islandManager = this.rosePlugin.getManager<skyblock.manager.IslandManager>()
-    private val worldManager = this.rosePlugin.getManager<skyblock.manager.WorldManager>()
+public class PlayerListeners implements Listener {
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun PlayerTeleportEvent.onTeleport() {
-        if (!worldManager.isIslandWorld(this.to.world))
-            return
+    private final RosePlugin plugin;
+    private final DataManager manager;
+    private final WorldManager worldService;
 
-        val island = islandManager.getIslandFromLoc(this.to) ?: return
-
-        islandManager.createBorder(this.player.asMember(rosePlugin), island)
+    public PlayerListeners(RosePlugin plugin) {
+        this.plugin = plugin;
+        this.manager = this.plugin.getManager(DataManager.class);
+        this.worldService = this.plugin.getManager(WorldManager.class);
     }
 
-    @EventHandler
-    fun PlayerJoinEvent.onJoin() {
-        this.player.asMember(rosePlugin)
 
-        // we're getting the member again because the value above will still return null.
-        lateinit var member: Member
-        rosePlugin.server.scheduler.runTaskLaterAsynchronously(rosePlugin, Runnable {
-            member = this.player.asMember(rosePlugin)
-            member.getIsland(rosePlugin)
-        }, 2)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onTeleport(PlayerTeleportEvent event) {
+        if (!this.worldService.isIslandWorld(event.getTo())) return;
 
-        rosePlugin.server.scheduler.runTaskLater(rosePlugin, Runnable {
-            val island = islandManager.getIslandFromLoc(player.location) ?: return@Runnable
-            islandManager.createBorder(member, island)
-        }, 3)
-    }
+        Island island = this.manager.getIsland(event.getTo());
+        if (island == null) return;
 
-    @EventHandler
-    fun PlayerQuitEvent.onQuit() {
-        this.player.getIsland(rosePlugin)?.cache(rosePlugin)
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun PlayerShearEntityEvent.onShear() {
-        if (!worldManager.isIslandWorld(this.entity.world))
-            return
-
-        if (this.player.hasPermission("skyblock.island.bypass"))
-            return
-
-        this.isCancelled = true
-        val island = islandManager.getIslandFromLoc(this.entity.location) ?: return
-
-        if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
-            this.isCancelled = false
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun PlayerInteractEvent.onInteract() {
-        val block = this.clickedBlock ?: return
-        if (!worldManager.isIslandWorld(block.world))
-            return
-
-        if (this.player.hasPermission("skyblock.island.bypass"))
-            return
-
-        this.isCancelled = true
-        val island = islandManager.getIslandFromLoc(block.location) ?: return
-
-        if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
-            this.isCancelled = false
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun PlayerInteractEntityEvent.onInteract() {
-        if (!worldManager.isIslandWorld(this.rightClicked.world))
-            return
-
-        if (this.player.hasPermission("skyblock.island.bypass"))
-            return
-
-        if (this.rightClicked is Mob && this.rightClicked is Merchant)
-            return
-
-        this.isCancelled = true
-        val island = islandManager.getIslandFromLoc(this.rightClicked.location) ?: return
-
-        if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
-            this.isCancelled = false
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun EntityDamageByEntityEvent.onEntityAttack() {
-        if (this.damager !is Player)
-            return
-
-        val player = this.damager as Player
-        if (player.hasPermission("skyblock.island.bypass"))
-            return
-
-        if (entity is Animals || entity is Hanging || entity is ArmorStand) {
-            this.isCancelled = true
-            val island = islandManager.getIslandFromLoc(this.entity.location) ?: return
-
-            if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
-                this.isCancelled = false
+        if (island.isBanned(event.getPlayer()) && !event.getPlayer().hasPermission("skyblock.ban.bypass")) {
+            event.setCancelled(true);
+            // TODO: Add locale message
+            return;
         }
+
+        Member member = this.manager.getMember(event.getPlayer().getUniqueId());
+        if (member == null) return;
+
+        NMSUtil.sendWorldBorder(
+                event.getPlayer(),
+                member.getBorder(),
+                island.getSize(),
+                island.getCenter().toCenterLocation()
+        );
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun PlayerDeathEvent.onDeath() {
-        if (!worldManager.isIslandWorld(this.entity.world))
-            return
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onLogin(PlayerJoinEvent event) {
+        CompletableFuture.runAsync(() -> this.manager.loadMember(event.getPlayer().getUniqueId()))
+                .thenRun(() -> {
+                    Island island = manager.getIsland(event.getPlayer().getLocation());
+                    Member member = manager.getMember(event.getPlayer().getUniqueId());
+                    if (island == null || member == null) return;
 
-        this.keepInventory = true
-        this.keepLevel = true
-        @Suppress("deprecation")
-        this.deathMessage = null
-
-        islandManager.getIslandFromLoc(this.entity.location)?.let { this.entity.teleport(it.home) }
-
+                    NMSUtil.sendWorldBorder(
+                            event.getPlayer(),
+                            member.getBorder(),
+                            island.getSize(),
+                            island.getCenter().toCenterLocation()
+                    );
+                });
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun PlayerRespawnEvent.onRespawn() {
-        if (!worldManager.isIslandWorld(this.player.location.world))
-            return
-
-        val island = islandManager.getIslandFromLoc(this.player.location) ?: return
-        this.respawnLocation = island.home
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        CompletableFuture.runAsync(() -> this.manager.saveMember(uuid)).thenRun(() -> this.manager.getUserCache().remove(uuid));
     }
 
+    // TODO: Add Other Events :3
 }
+//    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+//    fun PlayerShearEntityEvent.onShear() {
+//        if (!worldManager.isIslandWorld(this.entity.world))
+//            return
+//
+//        if (this.player.hasPermission("skyblock.island.bypass"))
+//            return
+//
+//        this.isCancelled = true
+//        val island = islandManager.getIslandFromLoc(this.entity.location) ?: return
+//
+//        if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
+//            this.isCancelled = false
+//    }
+//
+//    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+//    fun PlayerInteractEvent.onInteract() {
+//        val block = this.clickedBlock ?: return
+//        if (!worldManager.isIslandWorld(block.world))
+//            return
+//
+//        if (this.player.hasPermission("skyblock.island.bypass"))
+//            return
+//
+//        this.isCancelled = true
+//        val island = islandManager.getIslandFromLoc(block.location) ?: return
+//
+//        if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
+//            this.isCancelled = false
+//    }
+//
+//    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+//    fun PlayerInteractEntityEvent.onInteract() {
+//        if (!worldManager.isIslandWorld(this.rightClicked.world))
+//            return
+//
+//        if (this.player.hasPermission("skyblock.island.bypass"))
+//            return
+//
+//        if (this.rightClicked is Mob && this.rightClicked is Merchant)
+//            return
+//
+//        this.isCancelled = true
+//        val island = islandManager.getIslandFromLoc(this.rightClicked.location) ?: return
+//
+//        if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
+//            this.isCancelled = false
+//    }
+//
+//    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+//    fun EntityDamageByEntityEvent.onEntityAttack() {
+//        if (this.damager !is Player)
+//            return
+//
+//        val player = this.damager as Player
+//        if (player.hasPermission("skyblock.island.bypass"))
+//            return
+//
+//        if (entity is Animals || entity is Hanging || entity is ArmorStand) {
+//            this.isCancelled = true
+//            val island = islandManager.getIslandFromLoc(this.entity.location) ?: return
+//
+//            if (island.members.map { it.uuid }.contains(player.uniqueId) || island.trusted.contains(player.uniqueId))
+//                this.isCancelled = false
+//        }
+//    }
+//
+//    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+//    fun PlayerDeathEvent.onDeath() {
+//        if (!worldManager.isIslandWorld(this.entity.world))
+//            return
+//
+//        this.keepInventory = true
+//        this.keepLevel = true
+//        @Suppress("deprecation")
+//        this.deathMessage = null
+//
+//        islandManager.getIslandFromLoc(this.entity.location)?.let { this.entity.teleport(it.home) }
+//
+//    }
+//
+//    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+//    fun PlayerRespawnEvent.onRespawn() {
+//        if (!worldManager.isIslandWorld(this.player.location.world))
+//            return
+//
+//        val island = islandManager.getIslandFromLoc(this.player.location) ?: return
+//        this.respawnLocation = island.home
+//    }

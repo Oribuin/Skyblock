@@ -1,13 +1,10 @@
 package xyz.oribuin.skyblock.command.impl.sub.admin
 
 import dev.rosewood.rosegarden.RosePlugin
-import dev.rosewood.rosegarden.command.framework.CommandContext
 import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper
 import dev.rosewood.rosegarden.command.framework.RoseSubCommand
 import dev.rosewood.rosegarden.command.framework.annotation.Inject
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable
-import xyz.oribuin.skyblock.island.Island
-import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.util.getManager
 import xyz.oribuin.skyblock.util.send
 

@@ -2,8 +2,6 @@ package xyz.oribuin.skyblock.gui
 
 import dev.rosewood.rosegarden.RosePlugin
 import org.bukkit.Material
-import xyz.oribuin.skyblock.island.member.Member
-import xyz.oribuin.skyblock.manager.IslandManager
 
 class PanelGUI(rosePlugin: RosePlugin) : xyz.oribuin.skyblock.gui.PluginGUI(rosePlugin) {
 

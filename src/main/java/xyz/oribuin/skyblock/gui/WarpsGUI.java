@@ -2,10 +2,7 @@ package xyz.oribuin.skyblock.gui
 
 import dev.rosewood.rosegarden.RosePlugin
 import dev.rosewood.rosegarden.utils.StringPlaceholders
-import dev.triumphteam.gui.guis.GuiItem
-import dev.triumphteam.gui.guis.PaginatedGui
 import xyz.oribuin.skyblock.island.member.Member
-import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.util.color
 import xyz.oribuin.skyblock.util.format
 import xyz.oribuin.skyblock.util.next

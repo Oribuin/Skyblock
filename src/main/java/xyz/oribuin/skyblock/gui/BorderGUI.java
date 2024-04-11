@@ -2,12 +2,7 @@ package xyz.oribuin.skyblock.gui
 
 import dev.rosewood.rosegarden.RosePlugin
 import dev.rosewood.rosegarden.utils.StringPlaceholders
-import dev.triumphteam.gui.guis.Gui
-import dev.triumphteam.gui.guis.GuiItem
 import org.bukkit.Material
-import org.bukkit.entity.Player
-import xyz.oribuin.skyblock.manager.DataManager
-import xyz.oribuin.skyblock.manager.IslandManager
 import xyz.oribuin.skyblock.nms.BorderColor
 import xyz.oribuin.skyblock.util.deserialize
 import xyz.oribuin.skyblock.util.format

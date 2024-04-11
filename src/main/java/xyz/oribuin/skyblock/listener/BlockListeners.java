@@ -2,11 +2,6 @@ package xyz.oribuin.skyblock.listener
 
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
-import org.bukkit.event.Listener
-import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.event.block.BlockPlaceEvent
-import org.bukkit.event.block.SignChangeEvent
-import xyz.oribuin.skyblock.manager.IslandManager
 
 class BlockListeners(private val plugin: xyz.oribuin.skyblock.SkyblockPlugin) : Listener {
 

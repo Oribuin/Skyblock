@@ -10,14 +10,17 @@ import org.bukkit.persistence.PersistentDataType;
 import xyz.oribuin.skyblock.SkyblockPlugin;
 import xyz.oribuin.skyblock.island.warp.Warp;
 import xyz.oribuin.skyblock.manager.ConfigurationManager.Setting;
+import xyz.oribuin.skyblock.manager.DataManager;
 import xyz.oribuin.skyblock.manager.WorldManager;
 import xyz.oribuin.skyblock.util.SkyblockUtil;
+import xyz.oribuin.skyblock.world.IslandSchematic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class Island {
 
@@ -57,9 +60,9 @@ public class Island {
 
     /**
      * Create a new island with a randomly assigned location
-     * @param key The island id
-     * @param owner The island owner
      *
+     * @param key   The island id
+     * @param owner The island owner
      */
     public Island(int key, UUID owner) {
         this(key, SkyblockUtil.getNextIslandLocation(key, SkyblockPlugin
@@ -70,33 +73,23 @@ public class Island {
     }
 
     /**
-     * Get island chunks within the bounds of the island
+     * Create a brand new island and paste the schematic into the world
      *
-     * @return List of chunks
+     * @param owner     The island owner
+     * @param schematic The schematic to paste
+     * @param consumer  The result
      */
-    public List<ChunkPosition> getChunks() {
-        List<ChunkPosition> positions = new ArrayList<>();
+    public static void create(Player owner, IslandSchematic schematic, Consumer<Island> consumer) {
+        DataManager manager = SkyblockPlugin.get().getManager(DataManager.class);
+        WorldManager worldManager = SkyblockPlugin.get().getManager(WorldManager.class);
+        World islandWorld = worldManager.getWorld(World.Environment.NORMAL);
+        if (islandWorld == null) return;
 
-        for (int x = -this.size; x <= this.size; x += 16) {
-            for (int z = -this.size; z <= this.size; z += 16) {
-                Chunk chunk = this.center.getWorld().getChunkAt(this.center.getBlockX() + x, this.center.getBlockZ() + z);
-                positions.add(new ChunkPosition(chunk));
-            }
-        }
-
-        return positions.stream().distinct().toList();
-    }
-
-    /**
-     * Check if an island is within the bounds of the island
-     *
-     * @param location The location to check
-     * @return If the location is within the bounds
-     */
-    public boolean isWithinBounds(Location location) {
-        return location.getChunk()
-                       .getPersistentDataContainer()
-                       .getOrDefault(KEY, PersistentDataType.INTEGER, -1) == this.key;
+        // Create the island in the database and paste it in
+        manager.createIsland(owner, island -> {
+            schematic.paste(SkyblockPlugin.get(), island.getCenter(), () -> owner.teleportAsync(island.home));
+            consumer.accept(island);
+        });
     }
 
     /**
@@ -227,6 +220,46 @@ public class Island {
     }
 
     /**
+     * Check if a player is banned from entering the island
+     *
+     * @param player The player who is trying to enter the island
+     * @return If the player can enter
+     */
+    public boolean isBanned(Player player) {
+        return this.settings.getBanned().contains(player.getUniqueId());
+    }
+
+    /**
+     * Get island chunks within the bounds of the island
+     *
+     * @return List of chunks
+     */
+    public List<ChunkPosition> getChunks() {
+        List<ChunkPosition> positions = new ArrayList<>();
+
+        for (int x = -this.size; x <= this.size; x += 16) {
+            for (int z = -this.size; z <= this.size; z += 16) {
+                Chunk chunk = this.center.getWorld().getChunkAt(this.center.getBlockX() + x, this.center.getBlockZ() + z);
+                positions.add(new ChunkPosition(chunk));
+            }
+        }
+
+        return positions.stream().distinct().toList();
+    }
+
+    /**
+     * Check if an island is within the bounds of the island
+     *
+     * @param location The location to check
+     * @return If the location is within the bounds
+     */
+    public boolean isWithinBounds(Location location) {
+        return location.getChunk()
+                       .getPersistentDataContainer()
+                       .getOrDefault(KEY, PersistentDataType.INTEGER, -1) == this.key;
+    }
+
+    /**
      * Marks the chunks within the bounds of the island as belonging to the island
      */
     public void markChunks() {
@@ -296,7 +329,7 @@ public class Island {
         this.trusted = trusted;
     }
 
-    public int getSize() {
+    public double getSize() {
         return size;
     }
 
