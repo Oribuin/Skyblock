@@ -6,7 +6,7 @@ gui-settings:
 # Previous Page
 previous-page:
   material: PAPER
-  name: <#a6b2fc><bold>Previous Page'
+  name: '<#a6b2fc><bold>Previous Page'
   lore:
     - ' <white>| #a6b2fcLeft Click<gray> to go to the previous page.'
   glow: true
@@ -15,7 +15,7 @@ previous-page:
 # Next Page
 next-page:
   material: PAPER
-  name: <#a6b2fc><bold>Next Page'
+  name: '<#a6b2fc><bold>Next Page'
   lore:
     - ' <white>| #a6b2fcLeft Click<gray> to go to the next page.'
   glow: true
@@ -34,9 +34,9 @@ extra-items:
       enabled: true
       slot: 4
       material: KNOWLEDGE_BOOK
-      name: <#a6b2fc><bold>Biome Info'
+      name: '<#a6b2fc><bold>Biome Info'
       lore:
         - ' <white>| <gray>Pay to change your entire island'
         - ' <white>| <gray>to the biome of your choosing'
-        - ' &| <gray>'
-        - ' <white>| &cYou must Shift Click to do this.'
+        - ' <white>| <gray>'
+        - ' <white>| <red>You must Shift Click to do this.'

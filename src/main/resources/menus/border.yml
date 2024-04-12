@@ -8,7 +8,7 @@ off-item:
   enabled: true
   slot: 12
   material: WHITE_DYE
-  name: <#a6b2fc><bold>Off'
+  name: '<#a6b2fc><bold>Off'
   lore:
     - ' <white>| <gray>Left-Click to switch your'
     - ' <white>| <gray>personal island border off'
@@ -55,7 +55,7 @@ extra-items:
     enabled: true
     slot: 10
     material: KNOWLEDGE_BOOK
-    name: <#a6b2fc><bold>Island Border'
+    name: '<#a6b2fc><bold>Island Border'
     lore:
       - ' <white>| <gray>Change your island border to'
       - ' <white>| <gray>whichever color you choose.'
