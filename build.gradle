@@ -1,9 +1,7 @@
-import org.apache.tools.ant.filters.ReplaceTokens
-
 plugins {
     id 'java-library'
     id 'com.github.johnrengelman.shadow' version '7.1.0'
-    id "io.papermc.paperweight.userdev" version  '1.5.13'
+    id "io.papermc.paperweight.userdev" version '1.5.13'
 }
 
 group = 'xyz.oribuin.skyblock'
@@ -69,5 +67,9 @@ shadowJar {
     relocate("dev.triumphteam.gui", "${project.group}.libs.triumphgui")
 }
 
-build.dependsOn shadowJar
-build.dependsOn reobfJar
+tasks {
+    build {
+        dependsOn("reobfJar")
+        dependsOn("shadowJar")
+    }
+}

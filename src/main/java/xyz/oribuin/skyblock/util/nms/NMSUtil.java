@@ -10,6 +10,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R3.CraftChunk;
+import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -29,17 +30,19 @@ public final class NMSUtil {
      * @param center The center location of the border.
      */
 
-    public static void sendWorldBorder(Player player, BorderColor color, Double size, Location center) {
+    public static void sendWorldBorder(Player player, BorderColor color, double size, Location center) {
         WorldBorder worldBorder = new WorldBorder();
+        worldBorder.world = ((CraftWorld) center.getWorld()).getHandle();
+        worldBorder.setCenter(center.getX(), center.getZ());
         worldBorder.setWarningBlocks(0);
         worldBorder.setWarningTime(0);
-        worldBorder.setCenter(center.getX(), center.getZ());
 
+        double newSize = size / 2;
         switch (color) {
             case OFF -> worldBorder.setSize(Double.MAX_VALUE);
-            case BLUE -> worldBorder.setSize(size);
-            case RED -> worldBorder.lerpSizeBetween(size, size - 1.0, 20000000L);
-            case GREEN -> worldBorder.lerpSizeBetween(size - 1.0, size, 20000000L);
+            case BLUE -> worldBorder.setSize(newSize);
+            case RED -> worldBorder.lerpSizeBetween(newSize, newSize - 1.0, 20000000L);
+            case GREEN -> worldBorder.lerpSizeBetween(newSize - 1.0, newSize, 20000000L);
         }
 
         ((CraftPlayer) player).getHandle().connection.send(new ClientboundInitializeBorderPacket(worldBorder));
@@ -62,7 +65,8 @@ public final class NMSUtil {
                     levelChunk,
                     levelChunk.getLevel().getLightEngine(),
                     null,
-                    null
+                    null,
+                    false
             );
 
             for (ServerPlayer player : nmsPlayers) {
