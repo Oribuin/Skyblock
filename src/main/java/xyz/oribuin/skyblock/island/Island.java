@@ -99,7 +99,7 @@ public class Island {
      * @param player The player to teleport
      * @return If the player was successfully teleported
      */
-    public boolean teleport(Player player) {
+    public boolean teleport(Player player, Location location) {
         // Player is banned from the isladn
         if (this.isBanned(player)) return false;
 
@@ -107,7 +107,17 @@ public class Island {
         if (!this.settings.isPublicIsland() && !this.isMember(player) && !this.isTrusted(player)) return false;
 
         // Teleport the player to island home
-        return player.teleportAsync(this.home, PlayerTeleportEvent.TeleportCause.PLUGIN).isDone();
+        return player.teleportAsync(location, PlayerTeleportEvent.TeleportCause.PLUGIN).isDone();
+    }
+
+    /**
+     * Teleport the player to the island home
+     *
+     * @param player The player to teleport
+     * @return If the player was successfully teleported
+     */
+    public boolean teleport(Player player) {
+        return this.teleport(player, this.home);
     }
 
     /**

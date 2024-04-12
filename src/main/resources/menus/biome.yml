@@ -1,0 +1,32 @@
+# GUI Settings,
+gui-settings:
+  title: Island Biomes
+  rows: 3
+
+# Previous Page
+previous-page:
+  material: PAPER
+  name: '#a6b2fc&lPrevious Page'
+  lore:
+    - ' &f| #a6b2fcLeft Click&7 to go to the previous page.'
+  glow: true
+  slot: 20
+
+# Next Page
+next-page:
+  material: PAPER
+  name: '#a6b2fc&lNext Page'
+  lore:
+    - ' &f| #a6b2fcLeft Click&7 to go to the next page.'
+  glow: true
+  slot: 24
+
+# Extra Items
+extra-items:
+  1:
+    border:
+      enabled: true
+      material: BLACK_STAINED_GLASS_PANE
+      name: ' '
+      slots: 0-35
+

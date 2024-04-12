@@ -1,0 +1,8 @@
+# Configure all the schematics available in /island create
+schematics:
+  default:
+    display-name: '&a&lDefault Island'
+    material: OAK_LOG
+    lore:
+      - ' &f| &7This is the default option'
+      - ' &f| &7for creating an island.'

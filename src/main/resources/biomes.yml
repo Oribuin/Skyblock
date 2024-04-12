@@ -1,0 +1,31 @@
+# Configure all the biomes that ap la yer can purchase in
+# /island biomes command.
+biomes:
+  PLAINS:
+    display-name: '&#a6b2fc&lPlains Biome'
+    material: SHORT_GRASS
+    cost: 1000.0
+  DESERT:
+    display-name: '&#a6b2fc&lDesert Biome'
+    material: SAND
+    cost: 1000.0
+  JUNGLE:
+    display-name: '&#a6b2fc&lJungle Biome'
+    material: JUNGLE_SAPLING
+    cost: 1000.0
+  TAIGA:
+    display-name: '&#a6b2fc&lTaiga Biome'
+    material: SPRUCE_SAPLING
+    cost: 1000.0
+  SWAMP:
+    display-name: '&#a6b2fc&lSwamp Biome'
+    material: LILY_PAD
+    cost: 1000.0
+  OCEAN:
+    display-name: '&#a6b2fc&lOcean Biome'
+    material: TROPICAL_FISH
+    cost: 1000.0
+  MUSHROOM_FIELDS:
+    display-name: '&#a6b2fc&lMooshroom Biome'
+    material: RED_MUSHROOM
+    cost: 1000.0

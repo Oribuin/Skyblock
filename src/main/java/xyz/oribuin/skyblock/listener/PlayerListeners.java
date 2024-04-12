@@ -43,8 +43,6 @@ public class PlayerListeners implements Listener {
         }
 
         Member member = this.manager.getMember(event.getPlayer().getUniqueId());
-        if (member == null) return;
-
         NMSUtil.sendWorldBorder(
                 event.getPlayer(),
                 member.getBorder(),

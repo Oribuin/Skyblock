@@ -79,4 +79,28 @@ public class IslandSchematic {
             task.run();
     }
 
+    public File getFile() {
+        return file;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public Material getIcon() {
+        return icon;
+    }
+
+    public List<String> getLore() {
+        return lore;
+    }
+
+    public ClipboardFormat getFormat() {
+        return format;
+    }
+
 }

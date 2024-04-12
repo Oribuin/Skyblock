@@ -10,6 +10,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
+import org.bukkit.block.Biome;
+import xyz.oribuin.skyblock.island.IslandBiome;
 import xyz.oribuin.skyblock.util.SkyblockUtil;
 import xyz.oribuin.skyblock.world.IslandSchematic;
 import xyz.oribuin.skyblock.world.LayeredChunkGenerator;
@@ -23,7 +25,9 @@ public class WorldManager extends Manager {
 
     private final Map<World.Environment, String> worlds = new HashMap<>();
     private final Map<String, IslandSchematic> schematics = new HashMap<>();
-    private CommentedFileConfiguration config;
+    private final Map<Biome, IslandBiome> biomes = new HashMap<>();
+    private CommentedFileConfiguration schemConfig;
+    private CommentedFileConfiguration biomeConfig;
 
     public WorldManager(RosePlugin rosePlugin) {
         super(rosePlugin);
@@ -31,12 +35,28 @@ public class WorldManager extends Manager {
 
     @Override
     public void reload() {
-        CommentedConfigurationSection worldSection = this.config.getConfigurationSection("world-names");
+        CommentedConfigurationSection worldSection = this.rosePlugin.getManager(ConfigurationManager.class)
+                .getConfig()
+                .getConfigurationSection("world-names");
+
         if (worldSection != null) {
             worldSection.getKeys(false).forEach(s -> {
                 World.Environment environment = World.Environment.valueOf(s.toUpperCase());
                 String name = worldSection.getString(s);
                 this.worlds.put(environment, name);
+            });
+        }
+
+        this.biomeConfig = CommentedFileConfiguration.loadConfiguration(SkyblockUtil.createFile(this.rosePlugin, "biomes.yml"));
+        CommentedConfigurationSection biomeSection = this.biomeConfig.getConfigurationSection("biomes");
+        if (biomeSection != null) {
+            biomeSection.getKeys(false).forEach(key -> {
+                Biome biome = SkyblockUtil.getEnum(Biome.class, key);
+                String displayName = biomeSection.getString(key + ".display-name", key);
+                Material icon = SkyblockUtil.getEnum(Material.class, biomeSection.getString(key + ".icon", "GRASS_BLOCK"));
+                double cost = biomeSection.getDouble(key + ".cost", 0.0);
+
+                this.biomes.put(SkyblockUtil.getEnum(Biome.class, key), new IslandBiome(biome, displayName, cost, icon));
             });
         }
 
@@ -48,8 +68,8 @@ public class WorldManager extends Manager {
             SkyblockUtil.createFile(this.rosePlugin, "schematics.yml");
         }
 
-        this.config = CommentedFileConfiguration.loadConfiguration(schemFile);
-        CommentedConfigurationSection schemSection = this.config.getConfigurationSection("schematics");
+        this.schemConfig = CommentedFileConfiguration.loadConfiguration(schemFile);
+        CommentedConfigurationSection schemSection = this.schemConfig.getConfigurationSection("schematics");
         if (schemSection != null) {
             schemSection.getKeys(false).forEach(key -> {
                 File file = new File(schemFolder, key + ".schem");
@@ -87,7 +107,6 @@ public class WorldManager extends Manager {
                 .createWorld();
     }
 
-
     /**
      * Get a world from the environment
      *
@@ -107,6 +126,19 @@ public class WorldManager extends Manager {
     public boolean isIslandWorld(Location location) {
         return this.worlds.containsValue(location.getWorld().getName());
     }
+
+    public Map<Biome, IslandBiome> getBiomes() {
+        return biomes;
+    }
+
+    public Map<World.Environment, String> getWorlds() {
+        return worlds;
+    }
+
+    public Map<String, IslandSchematic> getSchematics() {
+        return schematics;
+    }
+
 
     @Override
     public void disable() {

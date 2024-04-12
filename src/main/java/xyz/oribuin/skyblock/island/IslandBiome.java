@@ -11,6 +11,7 @@ import java.util.List;
 public class IslandBiome {
 
     private final Biome biome;
+    private String displayName;
     private double cost;
     private Material icon;
 
@@ -21,8 +22,9 @@ public class IslandBiome {
      * @param cost  The cost
      * @param icon  The icon
      */
-    public IslandBiome(Biome biome, double cost, Material icon) {
+    public IslandBiome(Biome biome, String displayName, double cost, Material icon) {
         this.biome = biome;
+        this.displayName = displayName;
         this.cost = cost;
         this.icon = icon;
     }
@@ -33,7 +35,7 @@ public class IslandBiome {
      * @param biome The biome
      */
     public IslandBiome(Biome biome) {
-        this(biome, 1000.0, Material.GRASS_BLOCK);
+        this(biome, biome.name(), 1000.0, Material.GRASS_BLOCK);
     }
 
     /**
@@ -67,6 +69,14 @@ public class IslandBiome {
 
     public Biome getBiome() {
         return this.biome;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public double getCost() {
