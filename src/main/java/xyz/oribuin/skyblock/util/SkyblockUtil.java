@@ -109,7 +109,7 @@ public final class SkyblockUtil {
     }
 
     public static Location getNextIslandLocation(int locationId, World islandWorld) {
-        if (locationId == 0)
+        if (locationId <= 1)
             return new Location(islandWorld, 0.0, 65, 0.0);
 
         int n = locationId - 1;
