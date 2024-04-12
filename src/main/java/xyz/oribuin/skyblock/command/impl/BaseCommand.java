@@ -4,7 +4,6 @@ import dev.rosewood.rosegarden.RosePlugin;
 import dev.rosewood.rosegarden.command.framework.BaseRoseCommand;
 import dev.rosewood.rosegarden.command.framework.CommandContext;
 import dev.rosewood.rosegarden.command.framework.CommandInfo;
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
 import org.bukkit.entity.Player;
 import xyz.oribuin.skyblock.island.member.Member;

@@ -1,30 +1,29 @@
 package xyz.oribuin.skyblock.command.impl.sub.warp;
 
 import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.command.framework.BaseRoseCommand;
 import dev.rosewood.rosegarden.command.framework.CommandContext;
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
-import dev.rosewood.rosegarden.command.framework.RoseSubCommand;
-import dev.rosewood.rosegarden.command.framework.annotation.Inject;
+import dev.rosewood.rosegarden.command.framework.CommandInfo;
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
-import xyz.oribuin.skyblock.gui.WarpSettingsGUI;
-import xyz.oribuin.skyblock.util.asMember;
-import xyz.oribuin.skyblock.util.getMenu;
 
-class WarpSettingsCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseSubCommand(rosePlugin, parent) {
+public class WarpSettingsCommand extends BaseRoseCommand {
 
-    @RoseExecutable
-    fun execute(@Inject context: CommandContext) {
-        this.rosePlugin.getMenu(xyz.oribuin.skyblock.gui.WarpSettingsGUI::class).openMenu(context.asMember(this.rosePlugin))
+    public WarpSettingsCommand(RosePlugin rosePlugin) {
+        super(rosePlugin);
     }
 
+    @RoseExecutable
+    public void execute(CommandContext context) {
+        context.getSender().sendMessage("Open the GUI");
+    }
 
-    override fun getDefaultName(): String = "settings"
-
-    override fun getDescriptionKey(): String = "command-warp-settings-description"
-
-    override fun getRequiredPermission(): String = "skyblock..warp.settings"
-
-    override fun isPlayerOnly(): Boolean = true
-
+    @Override
+    protected CommandInfo createCommandInfo() {
+        return CommandInfo.builder("settings")
+                .descriptionKey("command-warp-settings-description")
+                .permission("skyblock.warp.settings")
+                .playerOnly(true)
+                .build();
+    }
 
 }

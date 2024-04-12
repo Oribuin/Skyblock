@@ -11,26 +11,26 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import xyz.oribuin.skyblock.util.color;
-import xyz.oribuin.skyblock.util.deserialize;
+
 import java.io.File;
 import java.util.function.Consumer;
 
-abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
+abstract class PluginGUI(protected val rosePlugin:RosePlugin) {
 
-    protected lateinit var config: CommentedFileConfiguration
+    protected lateinit var
+    config:CommentedFileConfiguration
 
     /**
      * Get the default config values for the GUI
      *
      * @return The default config values
      */
-    protected abstract val defaultValues: Map<String, Any>
+    protected abstract val defaultValues:Map<String, Any>
 
     /**
      * @return The name of the GUI
      */
-    protected abstract val menuName: String
+    protected abstract val menuName:String
 
     /**
      * Get the config values for the GUI
@@ -40,8 +40,12 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param <T>  The type of the config value
     </T> */
     @Suppress("UNCHECKED_CAST")
-    protected fun <T : Any> get(path: String, def: T? = null): T {
-        return (this.config.get(path, def) ?: def) as T
+    protected fun<T :Any>
+
+    get(path:String, def:T?=null):
+
+    T {
+        return (this.config.get(path, def) ?:def)as T
     }
 
     /**
@@ -62,11 +66,12 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
         config = CommentedFileConfiguration.loadConfiguration(file)
 
         if (newFile) {
-            defaultValues.forEach { (path: String, `object`: Any) ->
+            defaultValues.forEach {
+                (path:String, `object`:Any) ->
                 if (path.startsWith("#"))
                     config.addPathedComments(path, `object`.toString())
                 else
-                    config.set(path, `object`)
+                config.set(path, `object`)
             }
         }
 
@@ -79,12 +84,14 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param player The player to create the GUI for
      * @return The created GUI
      */
-    protected fun createPagedGUI(player: Player): PaginatedGui {
+    protected fun createPagedGUI(player:Player):
+
+    PaginatedGui {
         return Gui.paginated()
-            .rows(this.get("gui-settings.rows", 6))
-            .title(this.format(player, this.get("gui-settings.title", menuName)))
-            .disableAllInteractions()
-            .create()
+                .rows(this.get("gui-settings.rows", 6))
+                .title(this.format(player, this.get("gui-settings.title", menuName)))
+                .disableAllInteractions()
+                .create()
     }
 
     /**
@@ -93,12 +100,14 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param player The player to create the GUI for
      * @return The created GUI
      */
-    protected fun createGUI(player: Player): Gui {
+    protected fun createGUI(player:Player):
+
+    Gui {
         return Gui.gui()
-            .rows(this.get("gui-settings.rows", 6))
-            .title(this.format(player, this.get("gui-settings.title", menuName)))
-            .disableAllInteractions()
-            .create()
+                .rows(this.get("gui-settings.rows", 6))
+                .title(this.format(player, this.get("gui-settings.title", menuName)))
+                .disableAllInteractions()
+                .create()
     }
 
     /**
@@ -108,7 +117,7 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param slot The Item Slot
      * @param item The Item
      */
-    protected fun put(gui: BaseGui, slot: Int, item: ItemStack) {
+    protected fun put(gui:BaseGui, slot:Int, item:ItemStack) {
         gui.setItem(slot, GuiItem(item))
     }
 
@@ -119,7 +128,7 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param itemPath The path to the item
      * @param player   The item viewer
      */
-    protected fun put(gui: BaseGui, itemPath: String, player: Player) {
+    protected fun put(gui:BaseGui, itemPath:String, player:Player) {
         this.put(gui, itemPath, player, StringPlaceholders.empty())
     }
 
@@ -131,7 +140,7 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param viewer        The item viewer
      * @param eventConsumer The event consumer
      */
-    protected fun put(gui: BaseGui, itemPath: String, viewer: Player, eventConsumer: Consumer<InventoryClickEvent>) {
+    protected fun put(gui:BaseGui, itemPath:String, viewer:Player, eventConsumer:Consumer<InventoryClickEvent>) {
         this.put(gui, itemPath, viewer, StringPlaceholders.empty(), eventConsumer)
     }
 
@@ -145,30 +154,34 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param eventConsumer The event consumer
      */
     protected fun put(
-        gui: BaseGui,
-        itemPath: String,
-        viewer: Player,
-        placeholders: StringPlaceholders,
-        eventConsumer: Consumer<InventoryClickEvent> = Consumer { }
-    ) {
+            gui:BaseGui,
+            itemPath:String,
+            viewer:Player,
+            placeholders:StringPlaceholders,
+            eventConsumer:Consumer<InventoryClickEvent>=Consumer {
+    }
+    )
+
+    {
         if (!this.get("$itemPath.enabled", true))
             return
 
-        val slot = this.config.get("$itemPath.slot")
-        if (slot != null && slot is Int) {
-            this.put(gui, slot, itemPath, viewer, placeholders, eventConsumer)
-            return
-        }
+                    val slot = this.config.get("$itemPath.slot")
+        if (slot != null && slot is Int){
+        this.put(gui, slot, itemPath, viewer, placeholders, eventConsumer)
+        return
+    }
 
         val slots = this.config.getList("$itemPath.slots")
         if (slots != null) {
-            slots.forEach { listSlot ->
-                if (listSlot is Int) {
+            slots.forEach {
+                listSlot ->
+                if (listSlot is Int){
                     this.put(gui, listSlot, itemPath, viewer, placeholders, eventConsumer)
                 }
 
                 if (listSlot is String)
-                    this.put(gui, this.parseStringToSlots(listSlot), itemPath, viewer, placeholders, eventConsumer)
+                this.put(gui, this.parseStringToSlots(listSlot), itemPath, viewer, placeholders, eventConsumer)
             }
             return
         }
@@ -176,13 +189,19 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
     }
 
     protected fun put(
-        gui: BaseGui,
-        slot: Int,
-        itemPath: String,
-        viewer: Player,
-        placeholders: StringPlaceholders = StringPlaceholders.empty(),
-        eventConsumer: Consumer<InventoryClickEvent> = Consumer { }
-    ) {
+            gui:BaseGui,
+            slot:Int,
+            itemPath:String,
+            viewer:Player,
+            placeholders:StringPlaceholders=StringPlaceholders.empty(),
+
+    eventConsumer:Consumer<InventoryClickEvent> =
+
+    Consumer {
+    }
+    )
+
+    {
         this.put(gui, listOf(slot), itemPath, viewer, placeholders, eventConsumer)
     }
 
@@ -197,16 +216,24 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param eventConsumer The event consumer
      */
     protected fun put(
-        gui: BaseGui,
-        slots: List<Int>,
-        itemPath: String,
-        viewer: Player,
-        placeholders: StringPlaceholders = StringPlaceholders.empty(),
-        eventConsumer: Consumer<InventoryClickEvent> = Consumer { }
-    ) {
+            gui:BaseGui,
+            slots:List<Int>,
+            itemPath:String,
+            viewer:Player,
+            placeholders:StringPlaceholders=StringPlaceholders.empty(),
 
-        val item = skyblock.util.deserialize(config, viewer, itemPath, placeholders) ?: return
-        gui.setItem(slots, GuiItem(item) { eventConsumer.accept(it) })
+    eventConsumer:Consumer<InventoryClickEvent> =
+
+    Consumer {
+    }
+    )
+
+    {
+
+        val item = skyblock.util.deserialize(config, viewer, itemPath, placeholders) ?:return
+            gui.setItem(slots, GuiItem(item) {
+        eventConsumer.accept(it)
+    })
     }
 
     /**
@@ -218,10 +245,12 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @return The formatted string
      */
     private fun format(
-        player: Player,
-        text: String,
-        placeholders: StringPlaceholders = StringPlaceholders.empty()
-    ): Component {
+            player:Player,
+            text:String,
+            placeholders:StringPlaceholders=StringPlaceholders.empty()
+    ):
+
+    Component {
         return Component.text(xyz.oribuin.skyblock.hook.PlaceholderProvider.apply(player, placeholders.apply(text)).color())
     }
 
@@ -234,19 +263,25 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @return The formatted string
      */
     protected fun formatString(
-        player: Player,
-        text: String,
-        placeholders: StringPlaceholders = StringPlaceholders.empty()
-    ): String {
+            player:Player,
+            text:String,
+            placeholders:StringPlaceholders=StringPlaceholders.empty()
+    ):
+
+    String {
         return xyz.oribuin.skyblock.hook.PlaceholderProvider.apply(player, placeholders.apply(text)).color()
     }
 
-    private fun parseStringToSlots(string: String): List<Int> {
-        val split = string.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+    private fun parseStringToSlots(string:String):List<Int>
+
+    {
+        val split = string.split("-".toRegex()).dropLastWhile {
+        it.isEmpty()
+    }.toTypedArray()
         if (split.size != 2) {
             try {
                 return listOf(string.toInt())
-            } catch (ignored: NumberFormatException) {
+            } catch (ignored:NumberFormatException){
             }
         }
         return getNumberRange(split[0].toInt(), split[1].toInt())
@@ -259,14 +294,16 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param end   The end of the range
      * @return A list of numbers
      */
-    protected fun getNumberRange(start: Int, end: Int): List<Int> {
+    protected fun getNumberRange(start:Int, end:Int):List<Int>
+
+    {
         if (start == end) {
             return listOf(start)
         }
-        val list = mutableListOf<Int>()
-        for (i in start..end) {
-            list.add(i)
-        }
+        val list = mutableListOf < Int > ()
+        for (i in start..end){
+        list.add(i)
+    }
         return list
     }
 
@@ -276,13 +313,15 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
      * @param gui The gui
      * @return The page placeholders
      */
-    protected fun getPagePlaceholders(gui: PaginatedGui): StringPlaceholders {
+    protected fun getPagePlaceholders(gui:PaginatedGui):
+
+    StringPlaceholders {
         return StringPlaceholders.builder()
-            .add("page", gui.currentPageNum)
-            .add("total", gui.pagesNum.coerceAtLeast(1))
-            .add("next", gui.nextPageNum)
-            .add("previous", gui.prevPageNum)
-            .build()
+                .add("page", gui.currentPageNum)
+                .add("total", gui.pagesNum.coerceAtLeast(1))
+                .add("next", gui.nextPageNum)
+                .add("previous", gui.prevPageNum)
+                .build()
     }
 
     // Create extension function from a basegui using <T : BaseGui>
@@ -290,11 +329,11 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
     /**
      * Add extra items to the gui
      *
-     * @param gui The gui
+     * @param gui    The gui
      * @param player The viewer
      */
-    protected fun addExtraItems(gui: BaseGui, player: Player) {
-        val extraItems = config.getConfigurationSection("extra-items") ?: return
+    protected fun addExtraItems(gui:BaseGui, player:Player) {
+        val extraItems = config.getConfigurationSection("extra-items") ?:return
 
         for (key in extraItems.getKeys(false)) {
             this.put(gui, "extra-items.$key", player)
@@ -302,5 +341,5 @@ abstract class PluginGUI(protected val rosePlugin: RosePlugin) {
 
     }
 
-    fun async(runnable: Runnable) = this.rosePlugin.server.scheduler.runTaskAsynchronously(this.rosePlugin, runnable)
+    fun async(runnable:Runnable) =this.rosePlugin.server.scheduler.runTaskAsynchronously(this.rosePlugin,runnable)
 }

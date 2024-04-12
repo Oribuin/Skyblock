@@ -1,34 +1,28 @@
 package xyz.oribuin.skyblock.command.impl;
 
 import dev.rosewood.rosegarden.RosePlugin;
-import dev.rosewood.rosegarden.command.framework.CommandContext;
-import dev.rosewood.rosegarden.command.framework.RoseCommand;
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
-import dev.rosewood.rosegarden.command.framework.RoseSubCommand;
-import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
-import xyz.oribuin.skyblock.command.impl.sub.invite.AcceptCommand;
-import xyz.oribuin.skyblock.command.impl.sub.invite.DenyCommand;
-import xyz.oribuin.skyblock.command.impl.sub.invite.SendCommand;
+import dev.rosewood.rosegarden.command.framework.ArgumentsDefinition;
+import dev.rosewood.rosegarden.command.framework.BaseRoseCommand;
+import dev.rosewood.rosegarden.command.framework.CommandInfo;
 
-@Suppress("unused")
-class InviteCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseCommand(
-    rosePlugin, parent,
-    xyz.oribuin.skyblock.command.impl.sub.invite.AcceptCommand::class.java,
-    xyz.oribuin.skyblock.command.impl.sub.invite.DenyCommand::class.java,
-    xyz.oribuin.skyblock.command.impl.sub.invite.SendCommand::class.java
-) {
+public class InviteCommand extends BaseRoseCommand {
 
-    @RoseExecutable
-    fun execute(context: CommandContext, subcommand: RoseSubCommand) {
-        // Unused
+    public InviteCommand(RosePlugin rosePlugin) {
+        super(rosePlugin);
     }
 
-    override fun getDefaultName(): String = "invite"
+    @Override
+    protected CommandInfo createCommandInfo() {
+        return CommandInfo.builder("invite")
+                .descriptionKey("command-invite-description")
+                .permission("skyblock.invite")
+                .playerOnly(true)
+                .build();
+    }
 
-    override fun getDescriptionKey(): String = "command-invite-description"
-
-    override fun getRequiredPermission(): String = "skyblock..invite"
-
-    override fun isPlayerOnly(): Boolean = true
+    @Override
+    protected ArgumentsDefinition createArgumentsDefinition() {
+        return ArgumentsDefinition.builder().requiredSub("command");
+    }
 
 }

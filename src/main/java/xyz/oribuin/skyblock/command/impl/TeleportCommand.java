@@ -9,7 +9,6 @@ import dev.rosewood.rosegarden.command.framework.CommandInfo;
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
 import org.bukkit.entity.Player;
 import xyz.oribuin.skyblock.island.Island;
-import xyz.oribuin.skyblock.island.member.Member;
 import xyz.oribuin.skyblock.manager.DataManager;
 
 public class TeleportCommand extends BaseRoseCommand {

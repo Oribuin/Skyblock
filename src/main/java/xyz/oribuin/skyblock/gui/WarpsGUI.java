@@ -127,8 +127,7 @@ PluginGUI(rosePlugin) {
 
     }
 
-    override val defaultValues:
-    Map<String, Any>
+    override val Map<String, Any>
     get() = mapOf(
             "#0"to"GUI Settings",
             "gui-settings.title"to"Island Warps",
@@ -218,8 +217,7 @@ PluginGUI(rosePlugin) {
     "settings-item.slot" to 43,
         )
 
-    override val menuName:
-    String
+    override val String
     get() = "warp-gui"
 
 }

@@ -1,55 +1,60 @@
 package xyz.oribuin.skyblock.command.impl.sub.warp;
 
 import dev.rosewood.rosegarden.RosePlugin;
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
-import dev.rosewood.rosegarden.command.framework.RoseSubCommand;
-import dev.rosewood.rosegarden.command.framework.annotation.Inject;
+import dev.rosewood.rosegarden.command.framework.BaseRoseCommand;
+import dev.rosewood.rosegarden.command.framework.CommandContext;
+import dev.rosewood.rosegarden.command.framework.CommandInfo;
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
 import dev.rosewood.rosegarden.utils.StringPlaceholders;
-import xyz.oribuin.skyblock.util.asMember;
-import xyz.oribuin.skyblock.util.cache;
-import xyz.oribuin.skyblock.util.getIsland;
-import xyz.oribuin.skyblock.util.getManager;
-import xyz.oribuin.skyblock.util.send;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import xyz.oribuin.skyblock.island.Island;
+import xyz.oribuin.skyblock.island.member.Member;
+import xyz.oribuin.skyblock.manager.DataManager;
 
-class WarpIconCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseSubCommand(rosePlugin, parent) {
+public class WarpIconCommand extends BaseRoseCommand {
 
-    @RoseExecutable
-    fun execute(@Inject context: CommandContext) {
-        val member = context.asMember(this.rosePlugin)
-        val island = member.getIsland(this.rosePlugin)
-
-        if (island == null) {
-            member.onlinePlayer?.let { this.rosePlugin.send(it, "no-island") }
-            return
-        }
-
-        val player = context.sender as Player
-        val item = player.inventory.itemInMainHand.clone()
-
-        if (item.type.isAir) {
-            this.rosePlugin.send(player, "island-warp-icon-invalid")
-            return
-        }
-
-        island.warp.icon = item
-        island.cache(this.rosePlugin)
-
-        val placeholders = StringPlaceholders.builder("setting", "Warp Icon")
-            .add("value", name)
-            .build()
-
-        this.rosePlugin.getManager<skyblock.manager.IslandManager>()
-            .sendMembersMessage(island, "island-warp-settings-changed", placeholders)
+    public WarpIconCommand(RosePlugin rosePlugin) {
+        super(rosePlugin);
     }
 
-    override fun getDefaultName(): String = "icon"
+    @RoseExecutable
+    public void execute(CommandContext context) {
+        DataManager manager = this.rosePlugin.getManager(DataManager.class);
+        Player player = (Player) context.getSender();
+        Member member = manager.getMember(player.getUniqueId());
+        if (!member.hasIsland()) {
+            context.getSender().sendMessage("No Island");
+            return;
+        }
 
-    override fun getDescriptionKey(): String = "command-warp-icon-description"
+        ItemStack item = player.getInventory().getItemInMainHand().clone();
 
-    override fun getRequiredPermission(): String = "skyblock..warp.icon"
+        if (item.getType().isAir()) {
+            player.sendMessage("Invalid Icon");
+            return;
+        }
 
-    override fun isPlayerOnly(): Boolean = true
+        Island island = manager.getIsland(member.getIsland());
+        if (island == null) return;
 
+        island.getWarp().setIcon(item);
+        manager.cache(island);
+
+        StringPlaceholders placeholders = StringPlaceholders.builder("setting", "Warp Icon")
+                .add("value", item.getType().name())
+                .build();
+
+        player.sendMessage("Warp Icon set to " + item.getType().name() + "!");
+    }
+
+    @Override
+    protected CommandInfo createCommandInfo() {
+        return CommandInfo.builder("icon")
+                .descriptionKey("command-warp-icon-description")
+                .permission("skyblock.warp.icon")
+                .playerOnly(true)
+                .build();
+    }
 
 }

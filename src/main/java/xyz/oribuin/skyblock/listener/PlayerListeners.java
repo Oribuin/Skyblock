@@ -14,7 +14,6 @@ import xyz.oribuin.skyblock.manager.DataManager;
 import xyz.oribuin.skyblock.manager.WorldManager;
 import xyz.oribuin.skyblock.util.nms.NMSUtil;
 
-import java.security.SignedObject;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 

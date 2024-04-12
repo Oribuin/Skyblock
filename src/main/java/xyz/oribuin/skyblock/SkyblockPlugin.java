@@ -4,8 +4,6 @@ import dev.rosewood.rosegarden.RosePlugin;
 import dev.rosewood.rosegarden.manager.Manager;
 import org.bukkit.plugin.PluginManager;
 import xyz.oribuin.skyblock.hook.PAPIProvider;
-import xyz.oribuin.skyblock.hook.PlaceholderProvider;
-import xyz.oribuin.skyblock.hook.VaultHook;
 import xyz.oribuin.skyblock.listener.BlockListeners;
 import xyz.oribuin.skyblock.listener.EntityListeners;
 import xyz.oribuin.skyblock.listener.PlayerListeners;
@@ -37,8 +35,8 @@ public class SkyblockPlugin extends RosePlugin {
 
     @Override
     public void enable() {
-
         PluginManager pluginManager = this.getServer().getPluginManager();
+
         List<String> worldeditPlugins = List.of("WorldEdit", "FastAsyncWorldEdit", "AsyncWorldEdit");
         if (worldeditPlugins.stream().map(pluginManager::getPlugin).allMatch(Objects::isNull)) {
             this.getLogger().severe("You need to install WorldEdit or FastAsyncWorldEdit to use this plugin.");

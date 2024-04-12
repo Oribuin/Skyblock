@@ -1,52 +1,60 @@
 package xyz.oribuin.skyblock.command.impl.sub.warp;
 
 import dev.rosewood.rosegarden.RosePlugin;
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
-import dev.rosewood.rosegarden.command.framework.RoseSubCommand;
-import dev.rosewood.rosegarden.command.framework.annotation.Inject;
+import dev.rosewood.rosegarden.command.argument.ArgumentHandlers;
+import dev.rosewood.rosegarden.command.framework.ArgumentsDefinition;
+import dev.rosewood.rosegarden.command.framework.BaseRoseCommand;
+import dev.rosewood.rosegarden.command.framework.CommandContext;
+import dev.rosewood.rosegarden.command.framework.CommandInfo;
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
-import dev.rosewood.rosegarden.utils.StringPlaceholders;
-import xyz.oribuin.skyblock.util.asMember;
-import xyz.oribuin.skyblock.util.cache;
-import xyz.oribuin.skyblock.util.getIsland;
-import xyz.oribuin.skyblock.util.getManager;
-import xyz.oribuin.skyblock.util.send;
+import org.bukkit.entity.Player;
+import xyz.oribuin.skyblock.island.Island;
+import xyz.oribuin.skyblock.island.member.Member;
+import xyz.oribuin.skyblock.manager.DataManager;
 
-class WarpNameCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseSubCommand(rosePlugin, parent) {
+public class WarpNameCommand extends BaseRoseCommand {
 
-    @RoseExecutable
-    fun execute(@Inject context: CommandContext, name: String) {
-        val member = context.asMember(this.rosePlugin)
-        val island = member.getIsland(this.rosePlugin)
-
-        if (island == null) {
-            member.onlinePlayer?.let { this.rosePlugin.send(it, "no-island") }
-            return
-        }
-
-        if (name.isEmpty() || name.length > 48) {
-            this.rosePlugin.send(context.sender, "command-warp-name-incorrect")
-            return
-        }
-
-        island.warp.name = name
-        island.cache(this.rosePlugin)
-
-        val placeholders = StringPlaceholders.builder("setting", "Warp Name")
-            .add("value", name)
-            .build()
-
-        this.rosePlugin.getManager<skyblock.manager.IslandManager>()
-            .sendMembersMessage(island, "island-warp-settings-changed", placeholders)
+    public WarpNameCommand(RosePlugin rosePlugin) {
+        super(rosePlugin);
     }
 
-    override fun getDefaultName(): String = "name"
+    @RoseExecutable
+    public void execute(CommandContext context, String name) {
+        DataManager manager = this.rosePlugin.getManager(DataManager.class);
+        Player player = (Player) context.getSender();
 
-    override fun getDescriptionKey(): String = "command-warp-name-description"
+        Member member = manager.getMember(player.getUniqueId());
+        Island island = manager.getIsland(member.getIsland());
+        if (island == null) {
+            player.sendMessage("No Island");
+            return;
+        }
 
-    override fun getRequiredPermission(): String = "skyblock..warp.name"
+        if (name.isEmpty() || name.length() > 48) {
+            player.sendMessage("Incorrect Name");
+            return;
+        }
 
-    override fun isPlayerOnly(): Boolean = true
+        island.getWarp().setName(name);
+        manager.cache(island);
 
+        player.sendMessage("Warp Name set to " + name + "!");
+    }
+
+    @Override
+    protected CommandInfo createCommandInfo() {
+        return CommandInfo.builder("name")
+                .descriptionKey("command-warp-name-description")
+                .permission("skyblock.warp.name")
+                .playerOnly(true)
+                .build();
+    }
+
+    @Override
+    protected ArgumentsDefinition createArgumentsDefinition() {
+        return ArgumentsDefinition.builder()
+                .optional("name", ArgumentHandlers.STRING)
+                .build();
+    }
 
 }

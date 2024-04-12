@@ -1,38 +1,42 @@
 package xyz.oribuin.skyblock.command.impl;
 
 import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.command.framework.BaseRoseCommand;
 import dev.rosewood.rosegarden.command.framework.CommandContext;
-import dev.rosewood.rosegarden.command.framework.RoseCommand;
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
+import dev.rosewood.rosegarden.command.framework.CommandInfo;
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
-import xyz.oribuin.skyblock.gui.BiomesGUI;
-import xyz.oribuin.skyblock.util.asMember;
-import xyz.oribuin.skyblock.util.asPlayer;
-import xyz.oribuin.skyblock.util.getMenu;
-import xyz.oribuin.skyblock.util.send;
+import org.bukkit.entity.Player;
+import xyz.oribuin.skyblock.island.member.Member;
+import xyz.oribuin.skyblock.manager.DataManager;
 
-class BiomeCommand(rosePlugin: RosePlugin, parent: RoseCommandWrapper) : RoseCommand(rosePlugin, parent) {
+public class BiomeCommand extends BaseRoseCommand {
 
-    @RoseExecutable
-    fun execute(context: CommandContext) {
-        val player = context.asPlayer()
-        val member = player.asMember(this.rosePlugin)
-
-        if (!member.hasIsland) {
-            this.rosePlugin.send(player, "no-island")
-            return
-        }
-
-        this.rosePlugin.getMenu(xyz.oribuin.skyblock.gui.BiomesGUI::class).openMenu(member)
+    public BiomeCommand(RosePlugin rosePlugin) {
+        super(rosePlugin);
     }
 
-    override fun getDefaultName(): String = "biome"
+    @RoseExecutable
+    public void execute(CommandContext context) {
+        DataManager manager = this.rosePlugin.getManager(DataManager.class);
+        Player player = (Player) context.getSender();
+        Member member = manager.getMember(player.getUniqueId());
+        // TODO: Locale
 
-    override fun getDescriptionKey(): String = "command-biome-description"
+        if (!member.hasIsland()) {
+            player.sendMessage("No Island");
+            return;
+        }
 
-    override fun getRequiredPermission(): String = "skyblock..biome"
+        player.sendMessage("Open the GUI");
+    }
 
-    override fun isPlayerOnly(): Boolean = true
-
+    @Override
+    protected CommandInfo createCommandInfo() {
+        return CommandInfo.builder("biome")
+                .descriptionKey("command-biome-description")
+                .permission("skyblock.biome")
+                .playerOnly(true)
+                .build();
+    }
 
 }

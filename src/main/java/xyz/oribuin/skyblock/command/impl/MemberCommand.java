@@ -3,7 +3,7 @@ package xyz.oribuin.skyblock.command.impl;
 import dev.rosewood.rosegarden.RosePlugin;
 import dev.rosewood.rosegarden.command.framework.BaseRoseCommand;
 import dev.rosewood.rosegarden.command.framework.CommandContext;
-import dev.rosewood.rosegarden.command.framework.RoseCommandWrapper;
+import dev.rosewood.rosegarden.command.framework.CommandInfo;
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
 import org.bukkit.entity.Player;
 import xyz.oribuin.skyblock.island.Island;
@@ -33,6 +33,11 @@ public class MemberCommand extends BaseRoseCommand {
                 .map(manager::getMember)
                 .map(member -> String.format("| %s | %s | %s |", member.getUsername(), member.getRole().name(), member.getBorder().name()))
                 .forEach(player::sendMessage);
+    }
+
+    @Override
+    protected CommandInfo createCommandInfo() {
+        return null;
     }
 
 }

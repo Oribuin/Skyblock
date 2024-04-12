@@ -202,6 +202,16 @@ public class DataManager extends AbstractDataManager {
     }
 
     /**
+     * Cache an island into the plugin
+     *
+     * @param island The island to cache
+     */
+    public void cache(Island island) {
+        island.setDirty(true);
+        this.islandCache.put(island.getKey(), island);
+    }
+
+    /**
      * Create a brand-new island in the plugin database
      *
      * @param owner The owner of the island

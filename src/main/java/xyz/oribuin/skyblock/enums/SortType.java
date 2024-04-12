@@ -4,7 +4,7 @@ import xyz.oribuin.skyblock.island.Island;
 
 import java.util.List;
 
-public enum  SortType() {
+public enum SortType() {
     NONE("None"),
 
     // Sort by warp names.
@@ -19,7 +19,7 @@ public enum  SortType() {
     VISITS_ASCENDING("Visits ↑"),
     VISITS_DESCENDING("Visits ↓");
 
-    private String display;
+    private final String display;
 
     SortType(String display) {
         this.display = display;
