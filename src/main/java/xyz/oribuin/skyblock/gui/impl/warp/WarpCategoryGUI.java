@@ -38,10 +38,10 @@ public class WarpCategoryGUI {
     //        skyblock.island.Warp.Category.Type.values().forEach {
     //
     //            val description = it.desc.toMutableList()
-    //            description.addAll(listOf(" &f|", " &f| &7Click to switch category"))
+    //            description.addAll(listOf(" <white>|", " <white>| <gray>Click to switch category"))
     //
     //            val item = skyblock.util.ItemBuilder(it.icon)
-    //                    .name("#a6b2fc&l${it.format()}".color())
+    //                    .name(<#a6b2fc><bold>${it.format()}".color())
     //                    .lore(description.color())
     //                    .glow(activeCategories.types.contains(it.name))
     //                    .build()
@@ -79,15 +79,15 @@ public class WarpCategoryGUI {
     //            "category-info.enabled" to true,
     //            "category-info.slot" to 10,
     //            "category-info.material" to Material.OAK_SIGN.toString(),
-    //            "category-info.name" to "#a6b2fc&lCategory Info",
+    //            "category-info.name" to <#a6b2fc><bold>Category Info",
     //            "category-info.lore" to listOf (
-    //            "&f | &7Click on icons to change",
-    //            "&f | &7your island warp category!",
-    //            "&f |",
-    //            "&f | &7This allows users to find",
-    //            "&f | &7your warp easier!",
-    //            "&f |",
-    //            "&f | #a6b2fcLeft-Click &7to go back."
+    //            "<white> | <gray>Click on icons to change",
+    //            "<white> | <gray>your island warp category!",
+    //            "<white> |",
+    //            "<white> | <gray>This allows users to find",
+    //            "<white> | <gray>your warp easier!",
+    //            "<white> |",
+    //            "<white> | #a6b2fcLeft-Click <gray>to go back."
     //            )
     //        )
 }

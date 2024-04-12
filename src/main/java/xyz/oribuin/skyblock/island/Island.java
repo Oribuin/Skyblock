@@ -12,7 +12,7 @@ import xyz.oribuin.skyblock.island.warp.Warp;
 import xyz.oribuin.skyblock.manager.ConfigurationManager.Setting;
 import xyz.oribuin.skyblock.manager.DataManager;
 import xyz.oribuin.skyblock.manager.WorldManager;
-import xyz.oribuin.skyblock.util.SkyblockUtil;
+import xyz.oribuin.skyblock.util.PluginUtil;
 import xyz.oribuin.skyblock.world.IslandSchematic;
 
 import java.util.ArrayList;
@@ -66,7 +66,7 @@ public class Island {
      * @param owner The island owner
      */
     public Island(int key, UUID owner) {
-        this(key, SkyblockUtil.getNextIslandLocation(key, SkyblockPlugin
+        this(key, PluginUtil.getNextIslandLocation(key, SkyblockPlugin
                 .get()
                 .getManager(WorldManager.class)
                 .getWorld(World.Environment.NORMAL)

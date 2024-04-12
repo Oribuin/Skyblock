@@ -1,8 +1,8 @@
 # Configure all the schematics available in /island create
 schematics:
   default:
-    display-name: '&#a6b2fc&lDefault Island'
+    display-name: '<#a6b2fc><bold>Default Island'
     icon: OAK_LOG
     lore:
-      - ' &f| &7This is the default option'
-      - ' &f| &7for creating an island.'
+      - ' <white>| <gray>This is the default option'
+      - ' <white>| <gray>for creating an island.'

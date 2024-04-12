@@ -2,7 +2,6 @@ package xyz.oribuin.skyblock.gui.impl;
 
 import dev.rosewood.rosegarden.RosePlugin;
 import dev.rosewood.rosegarden.config.CommentedConfigurationSection;
-import dev.rosewood.rosegarden.utils.HexUtils;
 import dev.rosewood.rosegarden.utils.StringPlaceholders;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
@@ -15,7 +14,7 @@ import xyz.oribuin.skyblock.island.member.BorderColor;
 import xyz.oribuin.skyblock.island.member.Member;
 import xyz.oribuin.skyblock.manager.DataManager;
 import xyz.oribuin.skyblock.util.ItemBuilder;
-import xyz.oribuin.skyblock.util.SkyblockUtil;
+import xyz.oribuin.skyblock.util.PluginUtil;
 import xyz.oribuin.skyblock.util.nms.NMSUtil;
 
 import java.util.HashMap;
@@ -77,7 +76,7 @@ public class BorderGUI extends PluginMenu {
         BorderColor active = this.activeColors.getOrDefault(player.getUniqueId(), BorderColor.BLUE);
 
         for (BorderColor color : BorderColor.values()) {
-            ItemStack itemStack = SkyblockUtil.deserialize(this.config, player, color.name().toLowerCase() + "-border");
+            ItemStack itemStack = PluginUtil.deserialize(this.config, player, color.name().toLowerCase() + "-border");
             if (itemStack == null) return;
 
             itemStack = new ItemBuilder(itemStack).glow(color == active).build();
@@ -91,7 +90,7 @@ public class BorderGUI extends PluginMenu {
         StringPlaceholders current = StringPlaceholders.of("border", active.name().toLowerCase());
 
         gui.update();
-        gui.updateTitle(HexUtils.colorify(current.apply(this.config.getString("gui-settings.title"))));
+        gui.updateTitle(current.apply(this.config.getString("gui-settings.title", "<missing-title>")));
     }
 
     /**

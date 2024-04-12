@@ -1,18 +1,18 @@
 # en_US translation by Oribuin
 # Plugin Command Prefix
-prefix: "#a6b2fc&lSkyblock &8| &f"
+prefix: <#a6b2fc><bold>Skyblock &8| <white>"
 
 # Generic Command Messages
 no-permission: "You do not have permission to do that."
 only-player: "This command can only be executed by a player."
-unknown-command: "Unknown command, use #a6b2fc&l%cmd% &fhelp for more info"
+unknown-command: "Unknown command, use #a6b2fc<bold>%cmd% <white>help for more info"
 no-money: "You do not have enough money to do that."
 
 # Help Command
 command-help-title: "Available Commands:"
 command-help-description: "Displays the help menu"
-command-help-list-description: " &8- #a6b2fc/%cmd% %subcmd% %args% &7- &f%desc%"
-command-help-list-description-no-args: " &8- #a6b2fc/%cmd% %subcmd% &7- &f%desc%"
+command-help-list-description: " &8- #a6b2fc/%cmd% %subcmd% %args% <gray>- <white>%desc%"
+command-help-list-description-no-args: " &8- #a6b2fc/%cmd% %subcmd% <gray>- <white>%desc%"
 
 # Reload Command
 command-reload-description: "Reloads the plugin."

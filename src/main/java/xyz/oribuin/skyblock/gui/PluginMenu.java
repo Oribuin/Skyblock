@@ -12,7 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import xyz.oribuin.skyblock.manager.LocaleManager;
-import xyz.oribuin.skyblock.util.SkyblockUtil;
+import xyz.oribuin.skyblock.util.PluginUtil;
 
 import java.io.File;
 
@@ -34,7 +34,7 @@ public abstract class PluginMenu {
      * Create the menu file if it doesn't exist and add the default values
      */
     public void load() {
-        File menuFile = SkyblockUtil.createFile(this.rosePlugin, "menus", this.getMenuName() + ".yml");
+        File menuFile = PluginUtil.createFile(this.rosePlugin, "menus", this.getMenuName() + ".yml");
         this.config = CommentedFileConfiguration.loadConfiguration(menuFile);
         this.config.save(menuFile);
     }
@@ -103,11 +103,8 @@ public abstract class PluginMenu {
      * @return The formatted string
      */
     protected final Component format(Player player, String text) {
-        return Component.text(
-                this.rosePlugin
-                        .getManager(LocaleManager.class)
-                        .format(player, text, StringPlaceholders.empty())
-        );
+        return this.rosePlugin.getManager(LocaleManager.class)
+                .format(player, text, StringPlaceholders.empty());
     }
 
     /**
@@ -119,11 +116,8 @@ public abstract class PluginMenu {
      * @return The formatted string
      */
     protected final Component format(Player player, String text, StringPlaceholders placeholders) {
-        return Component.text(
-                this.rosePlugin
-                        .getManager(LocaleManager.class)
-                        .format(player, text, placeholders)
-        );
+        return this.rosePlugin.getManager(LocaleManager.class)
+                .format(player, text, placeholders);
     }
 
     /**

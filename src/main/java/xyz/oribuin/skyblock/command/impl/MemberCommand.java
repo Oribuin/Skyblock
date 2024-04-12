@@ -38,7 +38,6 @@ public class MemberCommand extends BaseRoseCommand {
     @Override
     protected CommandInfo createCommandInfo() {
         return CommandInfo.builder("members")
-                .descriptionKey("command-member-description")
                 .permission("skyblock.member")
                 .playerOnly(false)
                 .build();

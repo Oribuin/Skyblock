@@ -32,7 +32,6 @@ public class WarpCategoryCommand extends BaseRoseCommand {
     @Override
     protected CommandInfo createCommandInfo() {
         return CommandInfo.builder("category")
-                .descriptionKey("command-warp-category-description")
                 .permission("skyblock.warp.category")
                 .playerOnly(false)
                 .build();

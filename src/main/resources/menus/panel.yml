@@ -7,28 +7,28 @@ gui-settings:
 home-item:
   enabled: true
   material: CYAN_BED
-  name: '#a6b2fc&lTeleport Home'
+  name: <#a6b2fc><bold>Teleport Home'
   lore:
-    - ' &f| &7Click to teleport back'
-    - ' &f| &7to your island home!'
+    - ' <white>| <gray>Click to teleport back'
+    - ' <white>| <gray>to your island home!'
   slot: 10
 
 # Settings Item
 settings-item:
   material: REDSTONE
-  name: '#a6b2fc&lSettings'
+  name: <#a6b2fc><bold>Settings'
   lore:
-    - ' &f| &7Click to view & manage your'
-    - ' &f| &7your island settings!'
+    - ' <white>| <gray>Click to view & manage your'
+    - ' <white>| <gray>your island settings!'
   slot: 12
 
 # Warps Item,
 warps-item:
   material: SPRUCE_SIGN
-  name: '#a6b2fc&lWarp'
+  name: <#a6b2fc><bold>Warp'
   lore:
-    - ' &f| &7Click to view & manage your'
-    - ' &f| &7your island warp!'
+    - ' <white>| <gray>Click to view & manage your'
+    - ' <white>| <gray>your island warp!'
   slot: 13
 
 # Extra Items

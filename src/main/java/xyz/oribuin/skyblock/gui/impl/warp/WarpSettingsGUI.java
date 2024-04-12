@@ -134,10 +134,10 @@ public class WarpSettingsGUI {
     //            "#2" to "Back Item",
     //            "back-item.enabled" to true,
     //            "back-item.material" to Material.OAK_SIGN.toString(),
-    //            "back-item.name" to "#a6b2fc&lGo Back",
+    //            "back-item.name" to <#a6b2fc><bold>Go Back",
     //            "back-item.lore" to listOf (
-    //            " &f| &7Click to go back",
-    //            " &f| &7to the main page"
+    //            " <white>| <gray>Click to go back",
+    //            " <white>| <gray>to the main page"
     //            ),
     //    "back-item.slot" to 10,
     //            "back-item.texture" to "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==",
@@ -145,51 +145,51 @@ public class WarpSettingsGUI {
     //            "#3" to "Warp Name",
     //            "warp-name.enabled" to true,
     //            "warp-name.material" to Material.ANVIL.toString(),
-    //            "warp-name.name" to "#a6b2fc&lWarp Name &f| #a6b2fc%name%",
+    //            "warp-name.name" to <#a6b2fc><bold>Warp Name <white>| #a6b2fc%name%",
     //            "warp-name.lore" to listOf (
-    //            " &f| &7Click to change your",
-    //            " &f| &7current island warp name",
-    //            " &f| ",
-    //            " &f| &7Requires #a6b2fcAdmin &7role!"
+    //            " <white>| <gray>Click to change your",
+    //            " <white>| <gray>current island warp name",
+    //            " <white>| ",
+    //            " <white>| <gray>Requires #a6b2fcAdmin <gray>role!"
     //            ),
     //    "warp-name.slot" to 13,
     //
     //            "#4" to "Warp Icon",
     //            "warp-icon.enabled" to true,
     //            "warp-icon.material" to Material.ITEM_FRAME.toString(),
-    //            "warp-icon.name" to "#a6b2fc&lWarp Icon &f| #a6b2fc%icon%",
+    //            "warp-icon.name" to <#a6b2fc><bold>Warp Icon <white>| #a6b2fc%icon%",
     //            "warp-icon.lore" to listOf (
-    //            " &f| &7Click to change your",
-    //            " &f| &7current island warp icon",
-    //            " &f|",
-    //            " &f| &7Hold the item you want",
-    //            " &f| &7to be the warp icon",
-    //            " &f| ",
-    //            " &f| &7Requires #a6b2fcAdmin &7role!"
+    //            " <white>| <gray>Click to change your",
+    //            " <white>| <gray>current island warp icon",
+    //            " <white>|",
+    //            " <white>| <gray>Hold the item you want",
+    //            " <white>| <gray>to be the warp icon",
+    //            " <white>| ",
+    //            " <white>| <gray>Requires #a6b2fcAdmin <gray>role!"
     //            ),
     //    "warp-icon.slot" to 14,
     //
     //            "#5" to "Warp Category",
     //            "warp-category.enabled" to true,
     //            "warp-category.material" to Material.NAME_TAG.toString(),
-    //            "warp-category.name" to "#a6b2fc&lWarp Category &f| #a6b2fc%category%",
+    //            "warp-category.name" to <#a6b2fc><bold>Warp Category <white>| #a6b2fc%category%",
     //            "warp-category.lore" to listOf (
-    //            " &f| &7Click to change your",
-    //            " &f| &7current island warp category",
-    //            " &f| ",
-    //            " &f| &7Requires #a6b2fcAdmin &7role!"
+    //            " <white>| <gray>Click to change your",
+    //            " <white>| <gray>current island warp category",
+    //            " <white>| ",
+    //            " <white>| <gray>Requires #a6b2fcAdmin <gray>role!"
     //            ),
     //    "warp-category.slot" to 15,
     //
     //            "#6" to "Warp Location",
     //            "warp-location.enabled" to true,
     //            "warp-location.material" to Material.COMPASS.toString(),
-    //            "warp-location.name" to "#a6b2fc&lWarp Location &f| #a6b2fc%location%",
+    //            "warp-location.name" to <#a6b2fc><bold>Warp Location <white>| #a6b2fc%location%",
     //            "warp-location.lore" to listOf (
-    //            " &f| &7Click to change your",
-    //            " &f| &7current island warp location",
-    //            " &f| ",
-    //            " &f| &7Requires #a6b2fcAdmin &7role!"
+    //            " <white>| <gray>Click to change your",
+    //            " <white>| <gray>current island warp location",
+    //            " <white>| ",
+    //            " <white>| <gray>Requires #a6b2fcAdmin <gray>role!"
     //            ),
     //    "warp-location.slot" to 16,
     //

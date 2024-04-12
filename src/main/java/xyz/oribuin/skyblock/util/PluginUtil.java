@@ -2,7 +2,11 @@ package xyz.oribuin.skyblock.util;
 
 import dev.rosewood.rosegarden.RosePlugin;
 import dev.rosewood.rosegarden.config.CommentedConfigurationSection;
+import dev.rosewood.rosegarden.hook.PAPI;
 import dev.rosewood.rosegarden.utils.StringPlaceholders;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,7 +37,21 @@ import java.util.Map;
 
 import static org.apache.commons.lang.math.NumberUtils.toInt;
 
-public final class SkyblockUtil {
+public final class PluginUtil {
+
+    private static final MiniMessage MSG = MiniMessage.miniMessage();
+
+    /**
+     * Parse a string through minimessage
+     *
+     * @param text The text to parse
+     * @return The parsed text
+     */
+    public static Component color(String text) {
+        if (text == null) return Component.empty();
+
+        return MSG.deserialize(text).decoration(TextDecoration.ITALIC, false);
+    }
 
     /**
      * Get an enum from a string value
@@ -160,7 +178,7 @@ public final class SkyblockUtil {
             @NotNull StringPlaceholders placeholders
     ) {
         LocaleManager locale = SkyblockPlugin.get().getManager(LocaleManager.class);
-        Material material = Material.getMaterial(locale.format(sender, section.getString(key + ".material"), placeholders), false);
+        Material material = Material.getMaterial(PAPI.apply((Player) sender, section.getString(key + ".material")), false);
         if (material == null) return null;
 
         // Load enchantments
@@ -198,9 +216,9 @@ public final class SkyblockUtil {
                 .flags(flags)
                 .glow(section.getBoolean(key + ".glow", false))
                 .unbreakable(section.getBoolean(key + ".unbreakable", false))
-                .model(toInt(locale.format(sender, section.getString(key + ".model-data", "0"), placeholders)))
+                .model(toInt(PAPI.apply((Player) sender, section.getString(key + ".model-data", "0"))))
                 .enchant(enchantments)
-                .texture(locale.format(sender, section.getString(key + ".texture"), placeholders))
+                .texture(PAPI.apply((Player) sender, section.getString(key + ".texture")))
                 .owner(offlinePlayer)
                 .build();
     }

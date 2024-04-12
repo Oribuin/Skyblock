@@ -35,7 +35,6 @@ public class BiomeCommand extends BaseRoseCommand {
     @Override
     protected CommandInfo createCommandInfo() {
         return CommandInfo.builder("biome")
-                .descriptionKey("command-biome-description")
                 .permission("skyblock.biome")
                 .playerOnly(false)
                 .build();

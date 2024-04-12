@@ -21,7 +21,6 @@ public class WarpCommand extends BaseRoseCommand {
     @Override
     protected CommandInfo createCommandInfo() {
         return CommandInfo.builder("warp")
-                .descriptionKey("command-warp-description")
                 .permission("skyblock.warp")
                 .playerOnly(false)
                 .build();

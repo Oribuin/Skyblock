@@ -44,7 +44,6 @@ public class WarpNameCommand extends BaseRoseCommand {
     @Override
     protected CommandInfo createCommandInfo() {
         return CommandInfo.builder("name")
-                .descriptionKey("command-warp-name-description")
                 .permission("skyblock.warp.name")
                 .playerOnly(false)
                 .build();

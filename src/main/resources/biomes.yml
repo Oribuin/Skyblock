@@ -2,30 +2,30 @@
 # /island biomes command.
 biomes:
   PLAINS:
-    display-name: '&#a6b2fc&lPlains Biome'
+    display-name: '<#a6b2fc><bold>Plains Biome'
     material: SHORT_GRASS
     cost: 1000.0
   DESERT:
-    display-name: '&#a6b2fc&lDesert Biome'
+    display-name: '<#a6b2fc><bold>Desert Biome'
     material: SAND
     cost: 1000.0
   JUNGLE:
-    display-name: '&#a6b2fc&lJungle Biome'
+    display-name: '<#a6b2fc><bold>Jungle Biome'
     material: JUNGLE_SAPLING
     cost: 1000.0
   TAIGA:
-    display-name: '&#a6b2fc&lTaiga Biome'
+    display-name: '<#a6b2fc><bold>Taiga Biome'
     material: SPRUCE_SAPLING
     cost: 1000.0
   SWAMP:
-    display-name: '&#a6b2fc&lSwamp Biome'
+    display-name: '<#a6b2fc><bold>Swamp Biome'
     material: LILY_PAD
     cost: 1000.0
   OCEAN:
-    display-name: '&#a6b2fc&lOcean Biome'
+    display-name: '<#a6b2fc><bold>Ocean Biome'
     material: TROPICAL_FISH
     cost: 1000.0
   MUSHROOM_FIELDS:
-    display-name: '&#a6b2fc&lMooshroom Biome'
+    display-name: '<#a6b2fc><bold>Mooshroom Biome'
     material: RED_MUSHROOM
     cost: 1000.0

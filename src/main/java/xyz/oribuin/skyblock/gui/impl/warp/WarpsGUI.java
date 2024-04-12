@@ -91,10 +91,10 @@ public class WarpsGUI {
     //                        .build()
     //
     //                var lore = listOf(
-    //                        " &f| &7Owner: #a6b2fc%owner%",
-    //                        " &f| &7Categories: #a6b2fc%category%",
-    //                        " &f| &7Visits: #a6b2fc%visits%",
-    //                        " &f| &7Votes: #a6b2fc%votes%",
+    //                        " <white>| <gray>Owner: #a6b2fc%owner%",
+    //                        " <white>| <gray>Categories: #a6b2fc%category%",
+    //                        " <white>| <gray>Visits: #a6b2fc%visits%",
+    //                        " <white>| <gray>Votes: #a6b2fc%votes%",
     //                        )
     //
     //                lore = lore.map {
@@ -102,7 +102,7 @@ public class WarpsGUI {
     //                }
     //
     //                val item = skyblock.util.ItemBuilder(warp.icon)
-    //                        .name(("#a6b2fc&l" + warp.name).color())
+    //                        .name((<#a6b2fc><bold>" + warp.name).color())
     //                        .lore(lore.color())
     //                        .amount(1)
     //                        .build()
@@ -132,10 +132,10 @@ public class WarpsGUI {
     //    "#2" to "Back Item",
     //            "back-item.enabled" to true,
     //            "back-item.material" to "PLAYER_HEAD",
-    //            "back-item.name" to "#a6b2fc&lGo Back",
+    //            "back-item.name" to <#a6b2fc><bold>Go Back",
     //            "back-item.lore" to listOf (
-    //            " &f| &7Click to go back",
-    //            " &f| &7to the main menu."
+    //            " <white>| <gray>Click to go back",
+    //            " <white>| <gray>to the main menu."
     //            ),
     //    "back-item.texture" to "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==",
     //            "back-item.slot" to 37,
@@ -143,30 +143,30 @@ public class WarpsGUI {
     //            "#3" to "Next Page Item",
     //            "next-page.enabled" to true,
     //            "next-page.material" to "PAPER",
-    //            "next-page.name" to "#a6b2fc&lNext Page",
+    //            "next-page.name" to <#a6b2fc><bold>Next Page",
     //            "next-page.lore" to listOf (
-    //            " &f| &7Click to go to the",
-    //            " &f| &7next page."
+    //            " <white>| <gray>Click to go to the",
+    //            " <white>| <gray>next page."
     //            ),
     //    "next-page.slot" to 41,
     //
     //            "#4" to "Previous Page Item",
     //            "previous-page.enabled" to true,
     //            "previous-page.material" to "PAPER",
-    //            "previous-page.name" to "#a6b2fc&lPrevious Page",
+    //            "previous-page.name" to <#a6b2fc><bold>Previous Page",
     //            "previous-page.lore" to listOf (
-    //            " &f| &7Click to go to the",
-    //            " &f| &7previous page."
+    //            " <white>| <gray>Click to go to the",
+    //            " <white>| <gray>previous page."
     //            ),
     //    "previous-page.slot" to 39,
     //
     //            "#5" to "Sort Item",
     //            "sort-item.enabled" to true,
     //            "sort-item.material" to "COMPARATOR",
-    //            "sort-item.name" to "#a6b2fc&lSort By: &7%value%",
+    //            "sort-item.name" to <#a6b2fc><bold>Sort By: <gray>%value%",
     //            "sort-item.lore" to listOf (
-    //            " &f| &7Click to change the",
-    //            " &f| &7sorting method."
+    //            " <white>| <gray>Click to change the",
+    //            " <white>| <gray>sorting method."
     //            ),
     //
     //    "sort-item.slot" to 3,
@@ -174,10 +174,10 @@ public class WarpsGUI {
     //            "#6" to "Filter Item",
     //            "filter-item.enabled" to true,
     //            "filter-item.material" to "HOPPER",
-    //            "filter-item.name" to "#a6b2fc&lFilter By: &7%value%",
+    //            "filter-item.name" to <#a6b2fc><bold>Filter By: <gray>%value%",
     //            "filter-item.lore" to listOf (
-    //            " &f| &7Click to change the",
-    //            " &f| &7filter method."
+    //            " <white>| <gray>Click to change the",
+    //            " <white>| <gray>filter method."
     //            ),
     //
     //    "filter-item.slot" to 5,
@@ -185,11 +185,11 @@ public class WarpsGUI {
     //            "#7" to "Info Item",
     //            "info-item.enabled" to true,
     //            "info-item.material" to "OAK_SIGN",
-    //            "info-item.name" to "#a6b2fc&lIsland Warps",
+    //            "info-item.name" to <#a6b2fc><bold>Island Warps",
     //            "info-item.lore" to listOf (
-    //            " &f| &7Here are all the public",
-    //            " &f| &7warps on the server which will",
-    //            " &f| &7take you to any island."
+    //            " <white>| <gray>Here are all the public",
+    //            " <white>| <gray>warps on the server which will",
+    //            " <white>| <gray>take you to any island."
     //            ),
     //    "info-item.slot" to 4,
     //
@@ -197,12 +197,12 @@ public class WarpsGUI {
     //            "#8" to "Warp Settings",
     //            "settings-item.enabled" to true,
     //            "settings-item.material" to "REDSTONE",
-    //            "settings-item.name" to "#a6b2fc&lWarp Settings",
+    //            "settings-item.name" to <#a6b2fc><bold>Warp Settings",
     //            "settings-item.lore" to listOf (
-    //            " &f| &7Click to change the",
-    //            " &f| &7island warp settings.",
-    //            " &f| ",
-    //            " &f| &7Requires #a6b2fcAdmin &7to view."
+    //            " <white>| <gray>Click to change the",
+    //            " <white>| <gray>island warp settings.",
+    //            " <white>| ",
+    //            " <white>| <gray>Requires #a6b2fcAdmin <gray>to view."
     //            ),
     //    "settings-item.slot" to 43,
     //        )

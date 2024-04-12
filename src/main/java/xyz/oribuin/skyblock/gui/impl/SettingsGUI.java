@@ -41,7 +41,7 @@ public class SettingsGUI {
     //                gui,
     //                "island-public",
     //                player,
-    //                this.getBooleanPlc(island.settings. public,"#77dd77&lPublic", "#dd7777&lPrivate")
+    //                this.getBooleanPlc(island.settings. public,"#77dd77<bold>Public", "#dd7777<bold>Private")
     //        ){
     //            this.setOption(gui, member, island) {
     //                island ->
@@ -60,7 +60,7 @@ public class SettingsGUI {
     //                gui,
     //                "island-animals",
     //                player,
-    //                this.getBooleanPlc(island.settings.animalSpawning, "#77dd77&lEnabled", "#dd7777&lDisabled")
+    //                this.getBooleanPlc(island.settings.animalSpawning, "#77dd77<bold>Enabled", "#dd7777<bold>Disabled")
     //        ) {
     //            this.setOption(gui, member, island) {
     //                island ->
@@ -79,7 +79,7 @@ public class SettingsGUI {
     //                gui,
     //                "island-mobs",
     //                player,
-    //                this.getBooleanPlc(island.settings.mobSpawning, "#77dd77&lEnabled", "#dd7777&lDisabled")
+    //                this.getBooleanPlc(island.settings.mobSpawning, "#77dd77<bold>Enabled", "#dd7777<bold>Disabled")
     //        ) {
     //            this.setOption(gui, member, island) {
     //                island ->
@@ -190,58 +190,58 @@ public class SettingsGUI {
     //            "island-name.enabled" to true,
     //            "island-name.slot" to 13,
     //            "island-name.material" to Material.NAME_TAG.toString(),
-    //            "island-name.name" to "#a6b2fc&lIsland Name &7| &f%island_name%",
+    //            "island-name.name" to <#a6b2fc><bold>Island Name <gray>| <white>%island_name%",
     //            "island-name.lore" to listOf (
-    //            " &f| &7Click to change your",
-    //            " &f| &7current island name.",
-    //            " &f| ",
-    //            " &f| &7Requires #a6b2fcAdmin &7role!"
+    //            " <white>| <gray>Click to change your",
+    //            " <white>| <gray>current island name.",
+    //            " <white>| ",
+    //            " <white>| <gray>Requires #a6b2fcAdmin <gray>role!"
     //            ),
     //
     //    "#3" to "Island Privacy",
     //            "island-public.enabled" to true,
     //            "island-public.slot" to 14,
     //            "island-public.material" to Material.OAK_FENCE_GATE.toString(),
-    //            "island-public.name" to "#a6b2fc&lIsland Privacy &7| &f%value%",
+    //            "island-public.name" to <#a6b2fc><bold>Island Privacy <gray>| <white>%value%",
     //            "island-public.lore" to listOf (
-    //            " &f| &7Click to change your",
-    //            " &f| &7current island privacy.",
-    //            " &f| ",
-    //            " &f| &7Requires #a6b2fcAdmin &7role!"
+    //            " <white>| <gray>Click to change your",
+    //            " <white>| <gray>current island privacy.",
+    //            " <white>| ",
+    //            " <white>| <gray>Requires #a6b2fcAdmin <gray>role!"
     //            ),
     //
     //    "#4" to "Animal Spawning",
     //            "island-animals.enabled" to true,
     //            "island-animals.slot" to 15,
     //            "island-animals.material" to Material.WHEAT.toString(),
-    //            "island-animals.name" to "#a6b2fc&lAnimal Spawning &7| &f%value%",
+    //            "island-animals.name" to <#a6b2fc><bold>Animal Spawning <gray>| <white>%value%",
     //            "island-animals.lore" to listOf (
-    //            " &f| &7Click to toggle animal",
-    //            " &f| &7spawning on your island.",
-    //            " &f| ",
-    //            " &f| &7Requires #a6b2fcAdmin &7role!"
+    //            " <white>| <gray>Click to toggle animal",
+    //            " <white>| <gray>spawning on your island.",
+    //            " <white>| ",
+    //            " <white>| <gray>Requires #a6b2fcAdmin <gray>role!"
     //            ),
     //
     //    "#5" to "Mob Spawning",
     //            "island-mobs.enabled" to true,
     //            "island-mobs.slot" to 16,
     //            "island-mobs.material" to Material.BLAZE_ROD.toString(),
-    //            "island-mobs.name" to "#a6b2fc&lMob Spawning &7| &f%value%",
+    //            "island-mobs.name" to <#a6b2fc><bold>Mob Spawning <gray>| <white>%value%",
     //            "island-mobs.lore" to listOf (
-    //            " &f| &7Click to toggle hostile mob",
-    //            " &f| &7spawning on your island.",
-    //            " &f| ",
-    //            " &f| &7Requires #a6b2fcAdmin &7role!"
+    //            " <white>| <gray>Click to toggle hostile mob",
+    //            " <white>| <gray>spawning on your island.",
+    //            " <white>| ",
+    //            " <white>| <gray>Requires #a6b2fcAdmin <gray>role!"
     //            ),
     //
     //    "#6" to "Go Back",
     //            "go-back.enabled" to true,
     //            "go-back.slot" to 10,
     //            "go-back.material" to Material.PLAYER_HEAD.toString(),
-    //            "go-back.name" to "#a6b2fc&lGo Back",
+    //            "go-back.name" to <#a6b2fc><bold>Go Back",
     //            "go-back.lore" to listOf (
-    //            " &f| &7Click to go back to",
-    //            " &f| &7the main page."
+    //            " <white>| <gray>Click to go back to",
+    //            " <white>| <gray>the main page."
     //            ),
     //    "go-back.texture" to "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ=="
     //

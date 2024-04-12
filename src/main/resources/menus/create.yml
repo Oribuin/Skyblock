@@ -16,10 +16,10 @@ extra-items:
     enabled: true
     slot: 10
     material: KNOWLEDGE_BOOK
-    name: '#a6b2fc&lIsland Creation'
+    name: <#a6b2fc><bold>Island Creation'
     lore:
-      - ' &f| &7Pick the style of island you want'
-      - ' &f| &7Your island will be created in the'
-      - ' &f| &7style you choose.'
-      - ' &f| &7'
-      - ' &f| &cYou cannot undo this action without a reset.'
+      - ' <white>| <gray>Pick the style of island you want'
+      - ' <white>| <gray>Your island will be created in the'
+      - ' <white>| <gray>style you choose.'
+      - ' <white>| <gray>'
+      - ' <white>| &cYou cannot undo this action without a reset.'

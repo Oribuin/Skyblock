@@ -9,7 +9,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import xyz.oribuin.skyblock.util.SkyblockUtil;
+import xyz.oribuin.skyblock.util.PluginUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +84,7 @@ public class MenuItem {
             return;
 
         if (this.clickSound == null && this.customItem == null) {
-            this.clickSound = SkyblockUtil.getEnum(Sound.class, this.config.getString(this.itemPath + ".sound", ""));
+            this.clickSound = PluginUtil.getEnum(Sound.class, this.config.getString(this.itemPath + ".sound", ""));
         }
 
         // Add any slots that were not added
@@ -98,13 +98,13 @@ public class MenuItem {
             // Then we check for the multiple slots
             boolean hasMultiSlots = this.config.get(this.itemPath + ".slots") != null;
             if (hasMultiSlots) {
-                this.slots(SkyblockUtil.parseList(this.config.getStringList(this.itemPath + ".slots")));
+                this.slots(PluginUtil.parseList(this.config.getStringList(this.itemPath + ".slots")));
             }
         }
 
         ItemStack item = this.customItem != null
                 ? this.customItem
-                : SkyblockUtil.deserialize(this.config, this.player, this.itemPath, this.placeholders);
+                : PluginUtil.deserialize(this.config, this.player, this.itemPath, this.placeholders);
 
         if (item == null) {
             Bukkit.getLogger().warning("Item [" + this.itemPath + "] in the [" + this.config.getName() + "] menu is invalid.");

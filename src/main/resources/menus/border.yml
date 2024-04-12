@@ -8,40 +8,40 @@ off-item:
   enabled: true
   slot: 12
   material: WHITE_DYE
-  name: '#a6b2fc&lOff'
+  name: <#a6b2fc><bold>Off'
   lore:
-    - ' &f| &7Left-Click to switch your'
-    - ' &f| &7personal island border off'
+    - ' <white>| <gray>Left-Click to switch your'
+    - ' <white>| <gray>personal island border off'
 
 # Red Border
 red-item:
   enabled: true
   material: RED_DYE
   slot: 13
-  name: '&#f71b1b&lRed'
+  name: '&#f71b1b<bold>Red'
   lore:
-    - ' &f| &7Left-Click to switch your'
-    - ' &f| &7personal island border to red'
+    - ' <white>| <gray>Left-Click to switch your'
+    - ' <white>| <gray>personal island border to red'
 
 # Green Border
 green-item:
   enabled: true
   material: GREEN_DYE
   slot: 14
-  name: '#38ff38&lGreen'
+  name: '#38ff38<bold>Green'
   lore:
-    - ' &f| &7Left-Click to switch your'
-    - ' &f| &7personal island border to green'
+    - ' <white>| <gray>Left-Click to switch your'
+    - ' <white>| <gray>personal island border to green'
 
 # Blue Border
 blue-item:
   enabled: true
   material: BLUE_DYE
   slot: 15
-  name: '#3b58ff&lBlue'
+  name: '#3b58ff<bold>Blue'
   lore:
-    - ' &f| &7Left-Click to switch your'
-    - ' &f| &7personal island border to blue'
+    - ' <white>| <gray>Left-Click to switch your'
+    - ' <white>| <gray>personal island border to blue'
 
 # Extra Items
 extra-items:
@@ -55,10 +55,10 @@ extra-items:
     enabled: true
     slot: 10
     material: KNOWLEDGE_BOOK
-    name: '#a6b2fc&lIsland Border'
+    name: <#a6b2fc><bold>Island Border'
     lore:
-      - ' &f| &7Change your island border to'
-      - ' &f| &7whichever color you choose.'
-      - ' &f| &7'
-      - ' &f| &7Yes, Being able to walk outside the'
-      - ' &f| &7border when it is off is intended. '
+      - ' <white>| <gray>Change your island border to'
+      - ' <white>| <gray>whichever color you choose.'
+      - ' <white>| <gray>'
+      - ' <white>| <gray>Yes, Being able to walk outside the'
+      - ' <white>| <gray>border when it is off is intended. '

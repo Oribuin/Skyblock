@@ -2,7 +2,6 @@ package xyz.oribuin.skyblock.gui.impl;
 
 import dev.rosewood.rosegarden.RosePlugin;
 import dev.rosewood.rosegarden.config.CommentedConfigurationSection;
-import dev.rosewood.rosegarden.utils.HexUtils;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import org.bukkit.entity.Player;
@@ -12,6 +11,7 @@ import xyz.oribuin.skyblock.gui.PluginMenu;
 import xyz.oribuin.skyblock.island.Island;
 import xyz.oribuin.skyblock.manager.WorldManager;
 import xyz.oribuin.skyblock.util.ItemBuilder;
+import xyz.oribuin.skyblock.util.PluginUtil;
 import xyz.oribuin.skyblock.world.IslandSchematic;
 
 public class CreateGUI extends PluginMenu {
@@ -36,8 +36,8 @@ public class CreateGUI extends PluginMenu {
 
         for (IslandSchematic schematic : this.manager.getSchematics().values()) {
             ItemStack stack = new ItemBuilder(schematic.getIcon())
-                    .name(HexUtils.colorify(schematic.getDisplayName()))
-                    .lore(schematic.getLore().stream().map(HexUtils::colorify).toList())
+                    .name(PluginUtil.color(schematic.getDisplayName()))
+                    .lore(schematic.getLore().stream().map(PluginUtil::color).toList())
                     .build();
 
             gui.addItem(new GuiItem(stack, event -> Island.create(

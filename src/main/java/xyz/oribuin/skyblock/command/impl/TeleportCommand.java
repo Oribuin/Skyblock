@@ -44,7 +44,6 @@ public class TeleportCommand extends BaseRoseCommand {
     protected CommandInfo createCommandInfo() {
         return CommandInfo.builder("teleport")
                 .aliases("home", "tp", "go")
-                .descriptionKey("command-teleport-description")
                 .permission("skyblock.teleport")
                 .playerOnly(false)
                 .build();

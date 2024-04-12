@@ -21,7 +21,7 @@ import xyz.oribuin.skyblock.island.member.Member;
 import xyz.oribuin.skyblock.island.member.Role;
 import xyz.oribuin.skyblock.island.warp.Category;
 import xyz.oribuin.skyblock.island.warp.Warp;
-import xyz.oribuin.skyblock.util.SkyblockUtil;
+import xyz.oribuin.skyblock.util.PluginUtil;
 import xyz.oribuin.skyblock.util.serializer.UUIDSerialized;
 
 import java.io.ByteArrayInputStream;
@@ -435,7 +435,7 @@ public class DataManager extends AbstractDataManager {
      */
     public Warp constructWarp(ResultSet resultSet) throws SQLException {
         int key = resultSet.getInt("key");
-        Category category = SkyblockUtil.getEnum(Category.class, resultSet.getString("category"), Category.GENERAL);
+        Category category = PluginUtil.getEnum(Category.class, resultSet.getString("category"), Category.GENERAL);
         Warp warp = new Warp(key, constructLocation(resultSet), resultSet.getString("name"));
         warp.setIcon(deserializeItem(resultSet.getBytes("icon")));
         warp.setCategory(category);
@@ -454,7 +454,7 @@ public class DataManager extends AbstractDataManager {
         settings.setPublicIsland(resultSet.getBoolean("public"));
         settings.setMobSpawning(resultSet.getBoolean("mobSpawning"));
         settings.setAnimalSpawning(resultSet.getBoolean("animalSpawning"));
-        settings.setBiome(SkyblockUtil.getEnum(Biome.class, resultSet.getString("biome"), Biome.PLAINS));
+        settings.setBiome(PluginUtil.getEnum(Biome.class, resultSet.getString("biome"), Biome.PLAINS));
         settings.setBanned(GSON.fromJson(resultSet.getString("bans"), UUIDSerialized.class).result());
         return settings;
     }

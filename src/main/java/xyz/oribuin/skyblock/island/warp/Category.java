@@ -6,11 +6,11 @@ import java.util.List;
 
 public enum Category {
 
-    GENERAL(Material.NAME_TAG, List.of(" &f| &7General islands with", " &f| &7multiple purposes."), 12),
-    FARMS(Material.DIAMOND_HOE, List.of(" &f| &7Islands with public farms", " &f| &7for anyone to use."), 13),
-    PARKOUR(Material.FEATHER, List.of(" &f| &7Islands with a focus", " &f| &7on their fun parkour"), 14),
-    SHOPS(Material.SPRUCE_SIGN, List.of(" &f| &7Islands with shops for", " &f| &7anyone to buy/sell at."), 15),
-    DESIGN(Material.PINK_TULIP, List.of(" &f| &7Islands that are focused", " &f| &7on their design aesthetic"), 16);
+    GENERAL(Material.NAME_TAG, List.of(" <white>| <gray>General islands with", " <white>| <gray>multiple purposes."), 12),
+    FARMS(Material.DIAMOND_HOE, List.of(" <white>| <gray>Islands with public farms", " <white>| <gray>for anyone to use."), 13),
+    PARKOUR(Material.FEATHER, List.of(" <white>| <gray>Islands with a focus", " <white>| <gray>on their fun parkour"), 14),
+    SHOPS(Material.SPRUCE_SIGN, List.of(" <white>| <gray>Islands with shops for", " <white>| <gray>anyone to buy/sell at."), 15),
+    DESIGN(Material.PINK_TULIP, List.of(" <white>| <gray>Islands that are focused", " <white>| <gray>on their design aesthetic"), 16);
 
     private final Material icon;
     private final List<String> desc;

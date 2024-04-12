@@ -2,10 +2,11 @@ package xyz.oribuin.skyblock.manager;
 
 import dev.rosewood.rosegarden.RosePlugin;
 import dev.rosewood.rosegarden.manager.AbstractLocaleManager;
-import dev.rosewood.rosegarden.utils.HexUtils;
 import dev.rosewood.rosegarden.utils.StringPlaceholders;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+import xyz.oribuin.skyblock.util.PluginUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +27,11 @@ public class LocaleManager extends AbstractLocaleManager {
      */
     public void sendMessages(CommandSender sender, String messageKey, StringPlaceholders placeholders) {
         String prefix = this.getLocaleMessage("prefix");
-        List<String> messages = this.getLocaleMessages(messageKey, placeholders);
+        List<Component> messages = this.getLocaleMessages(messageKey, placeholders);
 
-        if (messages.isEmpty() || messages.stream().allMatch(String::isEmpty))
-            return;
+        if (messages.isEmpty()) return;
 
-        for (String message : messages) {
+        for (Component message : messages) {
             this.sendParsedMessage(sender, prefix + message);
         }
     }
@@ -42,10 +42,10 @@ public class LocaleManager extends AbstractLocaleManager {
      * @param messageKey The key to get the message from
      * @return The message
      */
-    public List<String> getLocaleMessages(String messageKey, StringPlaceholders placeholders) {
+    public List<Component> getLocaleMessages(String messageKey, StringPlaceholders placeholders) {
         return this.getLocaleStringList(messageKey)
                 .stream()
-                .map(message -> HexUtils.colorify(placeholders.apply(message)))
+                .map(message -> PluginUtil.color(placeholders.apply(message)))
                 .collect(Collectors.toList());
     }
 
@@ -86,7 +86,7 @@ public class LocaleManager extends AbstractLocaleManager {
         if (placeholders == null)
             placeholders = StringPlaceholders.empty();
 
-        this.handleMessage(sender, HexUtils.colorify(this.parsePlaceholders(sender, placeholders.apply(message))));
+        this.handleMessage(sender, PluginUtil.color(this.parsePlaceholders(sender, placeholders.apply(message))));
     }
 
     /**
@@ -104,7 +104,7 @@ public class LocaleManager extends AbstractLocaleManager {
             placeholders = StringPlaceholders.empty();
 
         for (String message : messages) {
-            this.handleMessage(sender, HexUtils.colorify(this.parsePlaceholders(sender, placeholders.apply(message))));
+            this.handleMessage(sender, PluginUtil.color(this.parsePlaceholders(sender, placeholders.apply(message))));
         }
     }
 
@@ -117,14 +117,14 @@ public class LocaleManager extends AbstractLocaleManager {
      * @return The formatted string
      */
     @NotNull
-    public String format(CommandSender sender, String message, StringPlaceholders placeholders) {
+    public Component format(CommandSender sender, String message, StringPlaceholders placeholders) {
         if (message == null || message.isEmpty())
-            return "";
+            return Component.text("");
 
         if (placeholders == null)
             placeholders = StringPlaceholders.empty();
 
-        return HexUtils.colorify(this.parsePlaceholders(sender, placeholders.apply(message)));
+        return PluginUtil.color(this.parsePlaceholders(sender, placeholders.apply(message)));
     }
 
     /**
@@ -136,16 +136,16 @@ public class LocaleManager extends AbstractLocaleManager {
      * @return The formatted string
      */
     @NotNull
-    public List<String> format(CommandSender sender, List<String> messages, StringPlaceholders placeholders) {
+    public List<Component> format(CommandSender sender, List<String> messages, StringPlaceholders placeholders) {
         if (messages.isEmpty())
             return List.of();
 
         if (placeholders == null)
             placeholders = StringPlaceholders.empty();
 
-        List<String> formattedMessages = new ArrayList<>();
+        List<Component> formattedMessages = new ArrayList<>();
         for (String message : messages) {
-            formattedMessages.add(HexUtils.colorify(this.parsePlaceholders(sender, placeholders.apply(message))));
+            formattedMessages.add(PluginUtil.color(this.parsePlaceholders(sender, placeholders.apply(message))));
         }
         return formattedMessages;
     }

@@ -52,10 +52,12 @@ dependencies {
     }
 
     // Frameworks
-    api "dev.rosewood:rosegarden:${gardenVersion}" // https://github.com/Rosewood-Development/RoseGarden
+
+    api fileTree("libs") { include("*.jar") } // Implement all jars in the libs folder
     api "net.wesjd:anvilgui:1.9.3-SNAPSHOT"// https://github.com/WesJD/AnvilGUI
     api("dev.triumphteam:triumph-gui:3.1.7") {  // https://mf.mattstudios.me/triumph-gui/introduction
         exclude group: "com.google.code.gson", module: "gson" // Remove GSON, Already included in spigot api
+        exclude group: "net.kyori", module: "*"
     }
 }
 

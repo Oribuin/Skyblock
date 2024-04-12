@@ -12,7 +12,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.block.Biome;
 import xyz.oribuin.skyblock.island.IslandBiome;
-import xyz.oribuin.skyblock.util.SkyblockUtil;
+import xyz.oribuin.skyblock.util.PluginUtil;
 import xyz.oribuin.skyblock.world.IslandSchematic;
 import xyz.oribuin.skyblock.world.LayeredChunkGenerator;
 
@@ -48,27 +48,27 @@ public class WorldManager extends Manager {
             });
         }
 
-        this.biomeConfig = CommentedFileConfiguration.loadConfiguration(SkyblockUtil.createFile(this.rosePlugin, "biomes.yml"));
+        this.biomeConfig = CommentedFileConfiguration.loadConfiguration(PluginUtil.createFile(this.rosePlugin, "biomes.yml"));
         CommentedConfigurationSection biomeSection = this.biomeConfig.getConfigurationSection("biomes");
         if (biomeSection != null) {
             biomeSection.getKeys(false).forEach(key -> {
-                Biome biome = SkyblockUtil.getEnum(Biome.class, key);
+                Biome biome = PluginUtil.getEnum(Biome.class, key);
                 String displayName = biomeSection.getString(key + ".display-name", key);
-                Material icon = SkyblockUtil.getEnum(Material.class, biomeSection.getString(key + ".icon", "GRASS_BLOCK"));
+                Material icon = PluginUtil.getEnum(Material.class, biomeSection.getString(key + ".icon", "GRASS_BLOCK"));
                 double cost = biomeSection.getDouble(key + ".cost", 0.0);
 
-                this.biomes.put(SkyblockUtil.getEnum(Biome.class, key), new IslandBiome(biome, displayName, cost, icon));
+                this.biomes.put(PluginUtil.getEnum(Biome.class, key), new IslandBiome(biome, displayName, cost, icon));
             });
         }
 
         File schemFolder = new File(this.rosePlugin.getDataFolder(), "schematics");
         if (!schemFolder.exists()) {
-            SkyblockUtil.createFile(this.rosePlugin, "schematics", "default.schem");
+            PluginUtil.createFile(this.rosePlugin, "schematics", "default.schem");
         }
 
         File schemFile = new File(this.rosePlugin.getDataFolder(), "schematics.yml");
         if (!schemFile.exists()) {
-            SkyblockUtil.createFile(this.rosePlugin, "schematics.yml");
+            PluginUtil.createFile(this.rosePlugin, "schematics.yml");
         }
 
         this.schemConfig = CommentedFileConfiguration.loadConfiguration(schemFile);
@@ -82,7 +82,7 @@ public class WorldManager extends Manager {
                 }
 
                 String displayName = schemSection.getString(key + ".display-name", key);
-                Material icon = SkyblockUtil.getEnum(Material.class, schemSection.getString(key + ".icon", "GRASS_BLOCK"));
+                Material icon = PluginUtil.getEnum(Material.class, schemSection.getString(key + ".icon", "GRASS_BLOCK"));
                 List<String> lore = schemSection.getStringList(key + ".lore");
 
                 this.schematics.put(key, new IslandSchematic(file, key, displayName, icon, lore));

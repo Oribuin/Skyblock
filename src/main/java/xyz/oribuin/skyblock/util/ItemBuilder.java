@@ -1,5 +1,6 @@
 package xyz.oribuin.skyblock.util;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -43,12 +44,12 @@ public class ItemBuilder {
      * @param text The text.
      * @return Item.Builder.
      */
-    public ItemBuilder name(@Nullable String text) {
+    public ItemBuilder name(@Nullable Component text) {
         ItemMeta meta = this.item.getItemMeta();
         if (meta == null || text == null)
             return this;
 
-        meta.setDisplayName(text);
+        meta.displayName(text);
         this.item.setItemMeta(meta);
 
         return this;
@@ -60,12 +61,12 @@ public class ItemBuilder {
      * @param lore The lore
      * @return Item.Builder.
      */
-    public ItemBuilder lore(@Nullable List<String> lore) {
+    public ItemBuilder lore(@Nullable List<Component> lore) {
         ItemMeta meta = this.item.getItemMeta();
         if (meta == null || lore == null)
             return this;
 
-        meta.setLore(lore);
+        meta.lore(lore);
         this.item.setItemMeta(meta);
         return this;
     }
@@ -76,7 +77,7 @@ public class ItemBuilder {
      * @param lore The lore
      * @return Item.Builder.
      */
-    public ItemBuilder lore(@Nullable String... lore) {
+    public ItemBuilder lore(@Nullable Component... lore) {
         return this.lore(Arrays.asList(lore));
     }
 

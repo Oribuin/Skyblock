@@ -17,7 +17,6 @@ public class InviteCommand extends BaseRoseCommand {
     @Override
     protected CommandInfo createCommandInfo() {
         return CommandInfo.builder("invite")
-                .descriptionKey("command-invite-description")
                 .permission("skyblock.invite")
                 .playerOnly(false)
                 .build();

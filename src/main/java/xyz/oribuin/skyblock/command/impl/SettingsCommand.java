@@ -33,7 +33,6 @@ public class SettingsCommand extends BaseRoseCommand {
     @Override
     protected CommandInfo createCommandInfo() {
         return CommandInfo.builder("settings")
-                .descriptionKey("command-settings-description")
                 .permission("skyblock.warp.settings")
                 .playerOnly(false)
                 .build();

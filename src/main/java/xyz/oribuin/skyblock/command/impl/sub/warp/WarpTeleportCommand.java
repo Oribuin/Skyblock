@@ -35,7 +35,6 @@ public class WarpTeleportCommand extends BaseRoseCommand {
     @Override
     protected CommandInfo createCommandInfo() {
         return CommandInfo.builder("teleport")
-                .descriptionKey("command-warp-teleport-description")
                 .permission("skyblock.warp.teleport")
                 .playerOnly(false)
                 .build();
