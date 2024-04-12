@@ -18,9 +18,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 
-/**
- * @author Esophose
- */
 public class IslandSchematic {
 
     private final File file;
