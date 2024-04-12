@@ -43,6 +43,7 @@ public class WorldManager extends Manager {
             worldSection.getKeys(false).forEach(s -> {
                 World.Environment environment = World.Environment.valueOf(s.toUpperCase());
                 String name = worldSection.getString(s);
+
                 this.worlds.put(environment, name);
             });
         }
@@ -88,20 +89,20 @@ public class WorldManager extends Manager {
             });
         }
 
+        this.worlds.forEach(this::createWorld);
     }
 
     /**
      * Create a new world using the island generator and return the world
      *
-     * @param name        The name of the world
      * @param environment The environment of the world
-     * @return The world
+     * @param name        The name of the world
      */
-    public World createWorld(String name, World.Environment environment) {
+    public void createWorld(World.Environment environment, String name) {
         World world = Bukkit.getWorld(name);
-        if (world != null) return world;
+        if (world != null) return;
 
-        return WorldCreator.name(name)
+        WorldCreator.name(name)
                 .type(WorldType.FLAT)
                 .environment(environment)
                 .generateStructures(false)

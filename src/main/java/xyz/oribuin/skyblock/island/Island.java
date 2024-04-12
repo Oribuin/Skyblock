@@ -84,7 +84,10 @@ public class Island {
         DataManager manager = SkyblockPlugin.get().getManager(DataManager.class);
         WorldManager worldManager = SkyblockPlugin.get().getManager(WorldManager.class);
         World islandWorld = worldManager.getWorld(World.Environment.NORMAL);
-        if (islandWorld == null) return;
+        if (islandWorld == null) {
+            owner.sendMessage("Island world not found.");
+            return;
+        }
 
         // Create the island in the database and paste it in
         manager.createIsland(owner, island -> {
