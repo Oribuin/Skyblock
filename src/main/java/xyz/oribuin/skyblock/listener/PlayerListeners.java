@@ -1,6 +1,7 @@
 package xyz.oribuin.skyblock.listener;
 
 import dev.rosewood.rosegarden.RosePlugin;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -8,6 +9,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import xyz.oribuin.skyblock.SkyblockPlugin;
 import xyz.oribuin.skyblock.island.Island;
 import xyz.oribuin.skyblock.island.member.Member;
 import xyz.oribuin.skyblock.manager.DataManager;
@@ -42,13 +44,16 @@ public class PlayerListeners implements Listener {
             return;
         }
 
-        Member member = this.manager.getMember(event.getPlayer().getUniqueId());
-        NMSUtil.sendWorldBorder(
-                event.getPlayer(),
-                member.getBorder(),
-                island.getSize(),
-                island.getCenter().toCenterLocation()
-        );
+        Bukkit.getScheduler().runTaskLater(SkyblockPlugin.get(), () -> {
+            Member member = this.manager.getMember(event.getPlayer().getUniqueId());
+            NMSUtil.sendWorldBorder(
+                    event.getPlayer(),
+                    member.getBorder(),
+                    island.getSize(),
+                    island.getCenter().toCenterLocation()
+            );
+        }, 5);
+
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -57,7 +62,7 @@ public class PlayerListeners implements Listener {
                 .thenRun(() -> {
                     Island island = manager.getIsland(event.getPlayer().getLocation());
                     Member member = manager.getMember(event.getPlayer().getUniqueId());
-                    if (island == null || member == null) return;
+                    if (island == null) return;
 
                     NMSUtil.sendWorldBorder(
                             event.getPlayer(),

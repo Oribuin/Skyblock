@@ -172,7 +172,7 @@ public class DataManager extends AbstractDataManager {
                 .stream()
                 .filter(island -> island.getMembers().contains(member))
                 .findFirst()
-                .orElseThrow(null);
+                .orElse(null);
     }
 
     /**
@@ -187,7 +187,7 @@ public class DataManager extends AbstractDataManager {
                 .stream()
                 .filter(island -> island.isWithinBounds(location))
                 .findFirst()
-                .orElseThrow(null);
+                .orElse(null);
     }
 
     /**
@@ -217,9 +217,9 @@ public class DataManager extends AbstractDataManager {
      * @param owner The owner of the island
      */
     public void createIsland(Player owner, Consumer<Island> result) {
+
         this.async(() -> this.databaseConnector.connect(connection -> {
             String createIsland = "INSERT INTO " + this.getTablePrefix() + "islands (owner) VALUES (?)";
-
             try (PreparedStatement statement = connection.prepareStatement(createIsland, Statement.RETURN_GENERATED_KEYS)) {
 
                 statement.setString(1, owner.toString());
@@ -229,8 +229,14 @@ public class DataManager extends AbstractDataManager {
                 if (keys.next()) {
                     int key = keys.getInt(1);
                     Island island = new Island(key, owner.getUniqueId());
-
                     this.saveIsland(island, result);
+
+                    // Update the member's island
+                    Member member = this.getMember(owner.getUniqueId());
+                    member.setIsland(key);
+                    this.saveMember(member);
+
+                    // callback :-3
                     result.accept(island);
                 }
             }

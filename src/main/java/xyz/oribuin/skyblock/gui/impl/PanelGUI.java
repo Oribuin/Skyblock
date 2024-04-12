@@ -35,17 +35,13 @@ public class PanelGUI extends PluginMenu {
         MenuItem.create(this.config)
                 .path("settings-item")
                 .player(player)
-                .action(event -> {
-                    // Open the settings menu
-                })
+//                .action(event -> MenuProvider.get(SettingsGUI))
                 .place(gui);
 
         MenuItem.create(this.config)
                 .path("warps-item")
                 .player(player)
-                .action(event -> {
-                    // Open the warps menu
-                })
+//                .action(event -> MenuProvider.get(WarpsGUI))
                 .place(gui);
     }
 

@@ -40,7 +40,7 @@ public class MemberCommand extends BaseRoseCommand {
         return CommandInfo.builder("members")
                 .descriptionKey("command-member-description")
                 .permission("skyblock.member")
-                .playerOnly(true)
+                .playerOnly(false)
                 .build();
     }
 

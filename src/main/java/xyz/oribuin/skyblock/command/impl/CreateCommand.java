@@ -35,7 +35,7 @@ public class CreateCommand extends BaseRoseCommand {
         return CommandInfo.builder("create")
                 .descriptionKey("command-create-description")
                 .permission("skyblock.create")
-                .playerOnly(true)
+                .playerOnly(false)
                 .build();
     }
 

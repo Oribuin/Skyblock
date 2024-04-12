@@ -49,11 +49,11 @@ public abstract class PluginMenu {
     protected final @NotNull PaginatedGui createPagedGUI(Player player) {
 
         int rows = this.config.getInt("gui-settings.rows");
-        String preTitle = this.config.getString("gui-settings.pre-title", "PlayerWarps");
+        String title = this.config.getString("gui-settings.title", "<no-title>");
 
         return Gui.paginated()
                 .rows(rows == 0 ? 6 : rows)
-                .title(this.format(player, preTitle))
+                .title(this.format(player, title))
                 .disableAllInteractions()
                 .create();
     }
@@ -66,11 +66,11 @@ public abstract class PluginMenu {
      */
     protected final @NotNull Gui createGUI(Player player) {
         int rows = this.config.getInt("gui-settings.rows");
-        String preTitle = this.config.getString("gui-settings.pre-title", "PlayerWarps");
+        String title = this.config.getString("gui-settings.title", "<no-title>");
 
         return Gui.gui()
                 .rows(rows == 0 ? 6 : rows)
-                .title(this.format(player, preTitle))
+                .title(this.format(player, title))
                 .disableAllInteractions()
                 .create();
     }
@@ -84,13 +84,13 @@ public abstract class PluginMenu {
     protected final @NotNull ScrollingGui createScrollingGui(Player player, ScrollType scrollType) {
 
         int rows = this.config.getInt("gui-settings.rows");
-        String preTitle = this.config.getString("gui-settings.pre-title", "PlayerWarps");
+        String title = this.config.getString("gui-settings.title", "<no-title>");
 
         return Gui.scrolling()
                 .scrollType(scrollType)
                 .rows(rows == 0 ? 6 : rows)
                 .pageSize(0)
-                .title(this.format(player, preTitle))
+                .title(this.format(player, title))
                 .disableAllInteractions()
                 .create();
     }

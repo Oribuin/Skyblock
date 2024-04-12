@@ -22,7 +22,7 @@ public class WarpSettingsCommand extends BaseRoseCommand {
         return CommandInfo.builder("settings")
                 .descriptionKey("command-warp-settings-description")
                 .permission("skyblock.warp.settings")
-                .playerOnly(true)
+                .playerOnly(false)
                 .build();
     }
 

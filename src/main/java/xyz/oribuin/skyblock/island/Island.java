@@ -1,7 +1,6 @@
 package xyz.oribuin.skyblock.island;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -21,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class Island {
@@ -50,8 +50,8 @@ public class Island {
         this.key = key;
         this.owner = owner;
         this.center = center;
-        this.home = center;
-        this.settings = new Settings(key, Bukkit.getPlayer(owner).getName() + "'s Island");
+        this.home = center.clone().add(0, 1, 0);
+        this.settings = new Settings(key, Bukkit.getOfflinePlayer(owner).getName() + "'s Island");
         this.warp = new Warp(key, center, this.settings.getIslandName());
         this.members = new ArrayList<>(List.of(owner));
         this.trusted = new ArrayList<>();
@@ -90,10 +90,11 @@ public class Island {
         }
 
         // Create the island in the database and paste it in
-        manager.createIsland(owner, island -> {
-            schematic.paste(SkyblockPlugin.get(), island.getCenter(), () -> owner.teleportAsync(island.home));
+        manager.createIsland(owner, island -> schematic.paste(SkyblockPlugin.get(), island.getCenter(), () -> {
+            island.markChunks();
             consumer.accept(island);
-        });
+            owner.teleportAsync(island.home);
+        }));
     }
 
     /**
@@ -102,15 +103,15 @@ public class Island {
      * @param player The player to teleport
      * @return If the player was successfully teleported
      */
-    public boolean teleport(Player player, Location location) {
+    public CompletableFuture<Boolean> teleport(Player player, Location location) {
         // Player is banned from the isladn
-        if (this.isBanned(player)) return false;
+        if (this.isBanned(player)) return CompletableFuture.supplyAsync(() -> false);
 
         // Island is private
-        if (!this.settings.isPublicIsland() && !this.isMember(player) && !this.isTrusted(player)) return false;
+        if (!this.settings.isPublicIsland() && !this.isMember(player) && !this.isTrusted(player)) return CompletableFuture.supplyAsync(() -> false);
 
         // Teleport the player to island home
-        return player.teleportAsync(location, PlayerTeleportEvent.TeleportCause.PLUGIN).isDone();
+        return player.teleportAsync(location, PlayerTeleportEvent.TeleportCause.PLUGIN);
     }
 
     /**
@@ -119,7 +120,7 @@ public class Island {
      * @param player The player to teleport
      * @return If the player was successfully teleported
      */
-    public boolean teleport(Player player) {
+    public CompletableFuture<Boolean> teleport(Player player) {
         return this.teleport(player, this.home);
     }
 
@@ -256,14 +257,39 @@ public class Island {
     public List<ChunkPosition> getChunks() {
         List<ChunkPosition> positions = new ArrayList<>();
 
-        for (int x = -this.size; x <= this.size; x += 16) {
-            for (int z = -this.size; z <= this.size; z += 16) {
-                Chunk chunk = this.center.getWorld().getChunkAt(this.center.getBlockX() + x, this.center.getBlockZ() + z);
-                positions.add(new ChunkPosition(chunk));
+        Location min = this.getMin();
+        Location max = this.getMax();
+
+        int minX = min.getBlockX() >> 4;
+        int minZ = min.getBlockZ() >> 4;
+        int maxX = max.getBlockX() >> 4;
+        int maxZ = max.getBlockZ() >> 4;
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                positions.add(new ChunkPosition(this.center.getWorld(), x, z));
             }
         }
 
-        return positions.stream().distinct().toList();
+        return positions;
+    }
+
+    /**
+     * Get the minimum bounds of the island
+     *
+     * @return The minimum bounds
+     */
+    public Location getMin() {
+        return this.center.clone().add((double) -this.size / 2, 0, (double) -this.size / 2);
+    }
+
+    /**
+     * Get the maximum bounds of the island
+     *
+     * @return The maximum bounds
+     */
+    public Location getMax() {
+        return this.center.clone().add((double) this.size / 2, 0, (double) this.size / 2);
     }
 
     /**

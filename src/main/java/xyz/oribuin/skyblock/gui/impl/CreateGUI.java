@@ -43,7 +43,7 @@ public class CreateGUI extends PluginMenu {
             gui.addItem(new GuiItem(stack, event -> Island.create(
                     player,
                     schematic,
-                    x -> player.closeInventory()
+                    x -> this.sync(player::closeInventory)
             )));
         }
 

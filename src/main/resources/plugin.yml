@@ -4,11 +4,6 @@ version: '1.0'
 api-version: '1.20'
 authors: [ 'Oribuin' ]
 description: custom skyblock plugin :-)
-libraries:
-  - "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0"
-  - "net.kyori:adventure-api:4.11.0"
-  - "net.kyori:adventure-text-serializer-legacy:4.11.0"
-  - "net.kyori:adventure-text-serializer-gson:4.11.0"
 loadbefore:
   - Multiverse-Core
 softdepend:

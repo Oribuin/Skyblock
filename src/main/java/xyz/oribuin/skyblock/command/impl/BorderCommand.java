@@ -25,7 +25,7 @@ public class BorderCommand extends BaseRoseCommand {
         return CommandInfo.builder("border")
                 .descriptionKey("command-border-description")
                 .permission("skyblock.border")
-                .playerOnly(true)
+                .playerOnly(false)
                 .build();
     }
 

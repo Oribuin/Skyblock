@@ -41,7 +41,7 @@ public class SendCommand extends BaseRoseCommand {
         return CommandInfo.builder("send")
                 .descriptionKey("command-invite-send-description")
                 .permission("skyblock.invite.send")
-                .playerOnly(true)
+                .playerOnly(false)
                 .build();
     }
 

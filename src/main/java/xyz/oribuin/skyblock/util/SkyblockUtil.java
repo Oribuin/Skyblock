@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.oribuin.skyblock.SkyblockPlugin;
+import xyz.oribuin.skyblock.manager.ConfigurationManager.Setting;
 import xyz.oribuin.skyblock.manager.LocaleManager;
 
 import java.io.File;
@@ -138,7 +139,8 @@ public final class SkyblockUtil {
             }
         }
 
-        return new Location(islandWorld, x * 1200, 65, z * 1200);
+        double distance = (Setting.ISLAND_SIZE.getInt() * 2) + 50;
+        return new Location(islandWorld, x * distance, 65, z * distance);
     }
 
     /**

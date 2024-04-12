@@ -19,8 +19,6 @@ public class ConfigurationManager extends AbstractConfigurationManager {
 
     public enum Setting implements RoseSetting {
         WORLDNAMES_NORMAL("world-names.NORMAL", "islands_normal", "The name for the main island world"),
-        WORLDNAMES_NETHER("world-names.NETHER", "islands_nether", "The name for the nether island world"),
-        WORLDNAMES_END("world-names.THE_END", "islands_end", "The name for the end island world"),
 
         // Island Settings
         ISLAND_SIZE("island-size", 150, "The size of the island"),

@@ -38,7 +38,7 @@ public class AcceptCommand extends BaseRoseCommand {
         return CommandInfo.builder("accept")
                 .descriptionKey("command-invite-accept-description")
                 .permission("skyblock.invite.accept")
-                .playerOnly(true)
+                .playerOnly(false)
                 .build();
     }
 

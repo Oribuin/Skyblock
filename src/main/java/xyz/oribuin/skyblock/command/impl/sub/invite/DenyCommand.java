@@ -40,7 +40,7 @@ public class DenyCommand extends BaseRoseCommand {
         return CommandInfo.builder("deny")
                 .descriptionKey("command-invite-deny-description")
                 .permission("skyblock.invite.deny")
-                .playerOnly(true)
+                .playerOnly(false)
                 .build();
     }
 

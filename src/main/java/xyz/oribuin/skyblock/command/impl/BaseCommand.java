@@ -38,9 +38,10 @@ public class BaseCommand extends BaseRoseCommand {
     @Override
     protected CommandInfo createCommandInfo() {
         return CommandInfo.builder("island")
+                .aliases("is", "sb", "skyblock")
                 .descriptionKey("command-island-description")
                 .permission("skyblock.island")
-                .playerOnly(true)
+                .playerOnly(false)
                 .build();
     }
 

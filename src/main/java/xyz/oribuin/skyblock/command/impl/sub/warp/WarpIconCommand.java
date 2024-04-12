@@ -53,7 +53,7 @@ public class WarpIconCommand extends BaseRoseCommand {
         return CommandInfo.builder("icon")
                 .descriptionKey("command-warp-icon-description")
                 .permission("skyblock.warp.icon")
-                .playerOnly(true)
+                .playerOnly(false)
                 .build();
     }
 

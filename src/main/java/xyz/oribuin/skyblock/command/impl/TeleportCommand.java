@@ -30,14 +30,14 @@ public class TeleportCommand extends BaseRoseCommand {
             return;
         }
 
-        if (island.teleport((Player) context.getSender())) {
-            // TODO: Locale
-            context.getSender().sendMessage("Teleporting to Island");
-            return;
-        }
+        island.teleport((Player) context.getSender()).thenAccept(result -> {
+            if (result) {
+                context.getSender().sendMessage("Teleporting to Island");
+                return;
+            }
 
-        // TODO: Locale
-        context.getSender().sendMessage("Failed to teleport to Island");
+            context.getSender().sendMessage("Failed to teleport to Island");
+        });
     }
 
     @Override
@@ -46,7 +46,7 @@ public class TeleportCommand extends BaseRoseCommand {
                 .aliases("home", "tp", "go")
                 .descriptionKey("command-teleport-description")
                 .permission("skyblock.teleport")
-                .playerOnly(true)
+                .playerOnly(false)
                 .build();
     }
 
