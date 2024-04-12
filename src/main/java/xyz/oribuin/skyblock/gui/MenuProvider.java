@@ -5,10 +5,6 @@ import xyz.oribuin.skyblock.gui.impl.BiomeGUI;
 import xyz.oribuin.skyblock.gui.impl.BorderGUI;
 import xyz.oribuin.skyblock.gui.impl.CreateGUI;
 import xyz.oribuin.skyblock.gui.impl.PanelGUI;
-import xyz.oribuin.skyblock.gui.impl.SettingsGUI;
-import xyz.oribuin.skyblock.gui.impl.warp.WarpCategoryGUI;
-import xyz.oribuin.skyblock.gui.impl.warp.WarpSettingsGUI;
-import xyz.oribuin.skyblock.gui.impl.warp.WarpsGUI;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +13,8 @@ public final class MenuProvider {
 
     private final static Map<Class<? extends PluginMenu>, PluginMenu> menuCache = new HashMap<>();
 
-    static {
+    public static void reload() {
+        menuCache.clear();
         menuCache.put(BiomeGUI.class, new BiomeGUI(SkyblockPlugin.get()));
         menuCache.put(BorderGUI.class, new BorderGUI(SkyblockPlugin.get()));
         menuCache.put(CreateGUI.class, new CreateGUI(SkyblockPlugin.get()));
@@ -29,10 +26,6 @@ public final class MenuProvider {
 //        menuCache.put(WarpSettingsGUI.class, new WarpSettingsGUI(SkyblockPlugin.get()));
 //        menuCache.put(WarpsGUI.class, new WarpsGUI(SkyblockPlugin.get()));
 
-        menuCache.forEach((aClass, pluginMenu) -> pluginMenu.load());
-    }
-
-    public static void reload() {
         menuCache.forEach((aClass, pluginMenu) -> pluginMenu.load());
     }
 

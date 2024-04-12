@@ -1,11 +1,16 @@
 package xyz.oribuin.skyblock.command.impl;
 
 import dev.rosewood.rosegarden.RosePlugin;
+import dev.rosewood.rosegarden.command.framework.ArgumentsDefinition;
 import dev.rosewood.rosegarden.command.framework.BaseRoseCommand;
 import dev.rosewood.rosegarden.command.framework.CommandContext;
 import dev.rosewood.rosegarden.command.framework.CommandInfo;
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
 import org.bukkit.entity.Player;
+import xyz.oribuin.skyblock.gui.MenuProvider;
+import xyz.oribuin.skyblock.gui.impl.CreateGUI;
+import xyz.oribuin.skyblock.gui.impl.PanelGUI;
+import xyz.oribuin.skyblock.island.Island;
 import xyz.oribuin.skyblock.island.member.Member;
 import xyz.oribuin.skyblock.manager.DataManager;
 
@@ -20,15 +25,14 @@ public class BaseCommand extends BaseRoseCommand {
         DataManager manager = this.rosePlugin.getManager(DataManager.class);
         Player player = (Player) context.getSender();
         Member member = manager.getMember(player.getUniqueId());
+        Island island = manager.getIsland(member.getIsland());
 
-        if (!member.hasIsland()) {
-            // TODO: Create new island
-            player.sendMessage("create new island wooooooooo");
+        if (island == null) {
+            MenuProvider.get(CreateGUI.class).open(player);
             return;
         }
 
-        player.sendMessage("open the island menu");
-
+        MenuProvider.get(PanelGUI.class).open(player, island);
     }
 
     @Override
@@ -40,4 +44,18 @@ public class BaseCommand extends BaseRoseCommand {
                 .build();
     }
 
+    @Override
+    protected ArgumentsDefinition createArgumentsDefinition() {
+        return ArgumentsDefinition.builder()
+                .optionalSub("subcommand",
+                        new BiomeCommand(this.rosePlugin),
+                        new BorderCommand(this.rosePlugin),
+                        new CreateCommand(this.rosePlugin),
+                        new InviteCommand(this.rosePlugin),
+                        new MemberCommand(this.rosePlugin),
+                        new SettingsCommand(this.rosePlugin),
+                        new TeleportCommand(this.rosePlugin),
+                        new WarpCommand(this.rosePlugin)
+                );
+    }
 }

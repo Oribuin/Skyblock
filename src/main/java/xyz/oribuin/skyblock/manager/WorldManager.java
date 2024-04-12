@@ -61,7 +61,9 @@ public class WorldManager extends Manager {
         }
 
         File schemFolder = new File(this.rosePlugin.getDataFolder(), "schematics");
-        if (!schemFolder.exists()) schemFolder.mkdirs();
+        if (!schemFolder.exists()) {
+            SkyblockUtil.createFile(this.rosePlugin, "schematics", "default.schem");
+        }
 
         File schemFile = new File(this.rosePlugin.getDataFolder(), "schematics.yml");
         if (!schemFile.exists()) {

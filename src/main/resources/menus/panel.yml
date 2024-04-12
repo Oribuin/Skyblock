@@ -32,9 +32,8 @@ warps-item:
 
 # Extra Items
 extra-items:
-  1:
-    border:
-      enabled: true
-      material: BLACK_STAINED_GLASS_PANE
-      name: ' '
-      slots: 0-26
+  border:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+    slots: 0-26

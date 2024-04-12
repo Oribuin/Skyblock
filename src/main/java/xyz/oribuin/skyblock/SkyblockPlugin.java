@@ -2,8 +2,8 @@ package xyz.oribuin.skyblock;
 
 import dev.rosewood.rosegarden.RosePlugin;
 import dev.rosewood.rosegarden.manager.Manager;
-import org.bukkit.block.Biome;
 import org.bukkit.plugin.PluginManager;
+import xyz.oribuin.skyblock.gui.MenuProvider;
 import xyz.oribuin.skyblock.hook.PAPIProvider;
 import xyz.oribuin.skyblock.listener.BlockListeners;
 import xyz.oribuin.skyblock.listener.EntityListeners;
@@ -51,6 +51,13 @@ public class SkyblockPlugin extends RosePlugin {
 
         new PAPIProvider(this).register();
         new LayeredChunkGenerator();
+    }
+
+    @Override
+    public void reload() {
+        super.reload();
+
+        MenuProvider.reload();
     }
 
     @Override

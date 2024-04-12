@@ -23,10 +23,20 @@ next-page:
 
 # Extra Items
 extra-items:
-  1:
-    border:
+  border-item:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+    slots:
+      - 0-9
+      - 17-26
+    biome-info:
       enabled: true
-      material: BLACK_STAINED_GLASS_PANE
-      name: ' '
-      slots: 0-35
-
+      slot: 4
+      material: KNOWLEDGE_BOOK
+      name: '#a6b2fc&lBiome Info'
+      lore:
+        - ' &f| &7Pay to change your entire island'
+        - ' &f| &7to the biome of your choosing'
+        - ' &| &7'
+        - ' &f| &cYou must Shift Click to do this.'

@@ -1,0 +1,25 @@
+# GUI Settings,
+gui-settings:
+  title: Choose Your Island
+  rows: 3
+
+# Extra Items
+extra-items:
+  border:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+    slots:
+      - 0-11
+      - 13-26
+  island-info:
+    enabled: true
+    slot: 10
+    material: KNOWLEDGE_BOOK
+    name: '#a6b2fc&lIsland Creation'
+    lore:
+      - ' &f| &7Pick the style of island you want'
+      - ' &f| &7Your island will be created in the'
+      - ' &f| &7style you choose.'
+      - ' &f| &7'
+      - ' &f| &cYou cannot undo this action without a reset.'

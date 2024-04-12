@@ -6,6 +6,8 @@ import dev.rosewood.rosegarden.command.framework.CommandContext;
 import dev.rosewood.rosegarden.command.framework.CommandInfo;
 import dev.rosewood.rosegarden.command.framework.annotation.RoseExecutable;
 import org.bukkit.entity.Player;
+import xyz.oribuin.skyblock.gui.MenuProvider;
+import xyz.oribuin.skyblock.gui.impl.CreateGUI;
 import xyz.oribuin.skyblock.island.member.Member;
 import xyz.oribuin.skyblock.manager.DataManager;
 
@@ -27,7 +29,7 @@ public class BiomeCommand extends BaseRoseCommand {
             return;
         }
 
-        player.sendMessage("Open the GUI");
+        MenuProvider.get(CreateGUI.class).open(player);
     }
 
     @Override

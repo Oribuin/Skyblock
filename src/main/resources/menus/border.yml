@@ -1,0 +1,64 @@
+# GUI Settings,
+gui-settings:
+  title: Island Biomes
+  rows: 3
+
+# Border Item
+off-item:
+  enabled: true
+  slot: 12
+  material: WHITE_DYE
+  name: '#a6b2fc&lOff'
+  lore:
+    - ' &f| &7Left-Click to switch your'
+    - ' &f| &7personal island border off'
+
+# Red Border
+red-item:
+  enabled: true
+  material: RED_DYE
+  slot: 13
+  name: '&#f71b1b&lRed'
+  lore:
+    - ' &f| &7Left-Click to switch your'
+    - ' &f| &7personal island border to red'
+
+# Green Border
+green-item:
+  enabled: true
+  material: GREEN_DYE
+  slot: 14
+  name: '#38ff38&lGreen'
+  lore:
+    - ' &f| &7Left-Click to switch your'
+    - ' &f| &7personal island border to green'
+
+# Blue Border
+blue-item:
+  enabled: true
+  material: BLUE_DYE
+  slot: 15
+  name: '#3b58ff&lBlue'
+  lore:
+    - ' &f| &7Left-Click to switch your'
+    - ' &f| &7personal island border to blue'
+
+# Extra Items
+extra-items:
+  border:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+    slots:
+      - 0-26
+  border-info:
+    enabled: true
+    slot: 10
+    material: KNOWLEDGE_BOOK
+    name: '#a6b2fc&lIsland Border'
+    lore:
+      - ' &f| &7Change your island border to'
+      - ' &f| &7whichever color you choose.'
+      - ' &f| &7'
+      - ' &f| &7Yes, Being able to walk outside the'
+      - ' &f| &7border when it is off is intended. '
