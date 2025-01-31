@@ -1,9 +1,0 @@
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven { url = 'https://repo.rosewooddev.io/repository/public/' }
-        maven { url = 'https://repo.papermc.io/repository/maven-public/'}
-    }
-}
-
-rootProject.name = 'Skyblock'
